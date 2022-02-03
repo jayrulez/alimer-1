@@ -84,7 +84,7 @@ install (PROGRAMS ${CMAKE_SCRIPTS} DESTINATION ${DEST_SHARE_DIR}/scripts)
 # Setup package variables
 set (URHO3D_DESCRIPTION "Urho3D is a free lightweight, cross-platform 2D and 3D game engine implemented in C++ and released under the MIT license. Greatly inspired by OGRE (http://www.ogre3d.org) and Horde3D (http://www.horde3d.org).")
 set (CPACK_PACKAGE_DESCRIPTION_SUMMARY ${URHO3D_DESCRIPTION})
-set (URHO3D_URL "https://github.com/amerkoleci/alimer_urho")
+set (URHO3D_URL "https://github.com/amerkoleci/alimer")
 set (CPACK_PACKAGE_VENDOR ${URHO3D_URL})
 set (CPACK_PACKAGE_CONTACT ${URHO3D_URL})
 execute_process (COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/cmake/Modules/GetUrhoRevision.cmake WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_VARIABLE URHO3D_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
