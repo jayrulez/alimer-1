@@ -1,0 +1,95 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - 'main'
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+
+env:
+  # Indicates the CMake build directory where project files and binaries are being produced.
+  CMAKE_BUILD_DIR: ${{ github.workspace }}/build/
+  ALIMER_SAMPLES: ON
+  ALIMER_TESTING: OFF
+
+jobs:
+  windows:
+    runs-on: windows-2022
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - uses: lukka/get-cmake@latest
+
+    - uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Generate project files
+      run: cmake -B "${{ env.CMAKE_BUILD_DIR }}" -S "." -G "Visual Studio 17 2022" -A x64 -DCMAKE_INSTALL_PREFIX="SDK"
+     
+    - name: Build
+      run: cmake --build "${{ env.CMAKE_BUILD_DIR }}" --target install  --config Release
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: 'Windows SDK'
+        path: ${{ github.workspace }}/SDK
+
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: |
+          sudo apt-get update
+          sudo apt-get install wayland-protocols \
+            pkg-config \
+            ninja-build \
+            libasound2-dev \
+            libdbus-1-dev \
+            libegl1-mesa-dev \
+            libgl1-mesa-dev \
+            libgles2-mesa-dev \
+            libglu1-mesa-dev \
+            libibus-1.0-dev \
+            libpulse-dev \
+            libsdl2-2.0-0 \
+            libsndio-dev \
+            libudev-dev \
+            libwayland-dev \
+            libwayland-client++0 \
+            wayland-scanner++ \
+            libwayland-cursor++0 \
+            libx11-dev \
+            libxcursor-dev \
+            libxext-dev \
+            libxi-dev \
+            libxinerama-dev \
+            libxkbcommon-dev \
+            libxrandr-dev \
+            libxss-dev \
+            libxt-dev \
+            libxv-dev \
+            libxxf86vm-dev \
+            libdrm-dev \
+            libgbm-dev\
+            libpulse-dev \
+            libpango1.0-dev
+
+    - uses: lukka/get-cmake@latest
+
+    # Run CMake to generate Ninja project files
+    - name: Generate project files
+      run: cmake -B "${{ env.CMAKE_BUILD_DIR }}" -S "." -GNinja -DCMAKE_INSTALL_PREFIX="SDK"
+
+    # Build the whole project with Ninja (which is spawn by CMake).          
+    - name: Build
+      run: cmake --build "${{ env.CMAKE_BUILD_DIR }}" --target install  --config Release    
