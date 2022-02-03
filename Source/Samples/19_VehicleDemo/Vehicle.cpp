@@ -34,11 +34,11 @@
 
 #include "Vehicle.h"
 
-Vehicle::Vehicle(Context* context) :
-    LogicComponent(context)
+Vehicle::Vehicle(Context* context)
+    : LogicComponent(context)
 {
     // Only the physics update event is needed: unsubscribe from the rest for optimization
-    SetUpdateEventMask(USE_FIXEDUPDATE);
+    SetUpdateEventMask(UpdateEventFlags::FixedUpdate);
 }
 
 void Vehicle::RegisterObject(Context* context)

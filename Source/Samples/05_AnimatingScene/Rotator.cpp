@@ -26,12 +26,12 @@
 
 #include <Urho3D/DebugNew.h>
 
-Rotator::Rotator(Context* context) :
-    LogicComponent(context),
-    rotationSpeed_(Vector3::ZERO)
+Rotator::Rotator(Context* context)
+    : LogicComponent(context)
+    , rotationSpeed_(Vector3::ZERO)
 {
     // Only the scene update event is needed: unsubscribe from the rest for optimization
-    SetUpdateEventMask(USE_UPDATE);
+    SetUpdateEventMask(UpdateEventFlags::Update);
 }
 
 void Rotator::SetRotationSpeed(const Vector3& speed)

@@ -88,7 +88,7 @@ namespace Urho3D
     void AnimationController::Update(float timeStep)
     {
         // Loop through animations
-        for (unsigned i = 0; i < animations_.Size();)
+        for (size_t i = 0; i < animations_.size();)
         {
             AnimationControl& ctrl = animations_[i];
             AnimationState* state = GetAnimationState(ctrl.hash_);
@@ -144,7 +144,7 @@ namespace Urho3D
             {
                 if (state)
                     RemoveAnimationState(state);
-                animations_.Erase(i);
+                animations_.erase(animations_.begin() + i);
                 MarkNetworkUpdate();
             }
             else
@@ -165,7 +165,7 @@ namespace Urho3D
             return false;
 
         // Check if already exists
-        unsigned index;
+        size_t index;
         AnimationState* state;
         FindAnimation(newAnimation->GetName(), index, state);
 
@@ -181,8 +181,8 @@ namespace Urho3D
             AnimationControl newControl;
             newControl.name_ = newAnimation->GetName();
             newControl.hash_ = newAnimation->GetNameHash();
-            animations_.Push(newControl);
-            index = animations_.Size() - 1;
+            animations_.push_back(newControl);
+            index = animations_.size() - 1;
         }
 
         state->SetLayer(layer);
@@ -207,7 +207,7 @@ namespace Urho3D
 
     bool AnimationController::Stop(const String& name, float fadeOutTime)
     {
-        unsigned index;
+        size_t index;
         AnimationState* state;
         FindAnimation(name, index, state);
         if (index != M_MAX_UNSIGNED)
@@ -223,7 +223,7 @@ namespace Urho3D
     void AnimationController::StopLayer(unsigned char layer, float fadeOutTime)
     {
         bool needUpdate = false;
-        for (Vector<AnimationControl>::Iterator i = animations_.Begin(); i != animations_.End(); ++i)
+        for (std::vector<AnimationControl>::iterator i = animations_.begin(); i != animations_.end(); ++i)
         {
             AnimationState* state = GetAnimationState(i->hash_);
             if (state && state->GetLayer() == layer)
@@ -240,9 +240,9 @@ namespace Urho3D
 
     void AnimationController::StopAll(float fadeOutTime)
     {
-        if (animations_.Size())
+        if (animations_.size())
         {
-            for (Vector<AnimationControl>::Iterator i = animations_.Begin(); i != animations_.End(); ++i)
+            for (std::vector<AnimationControl>::iterator i = animations_.begin(); i != animations_.end(); ++i)
             {
                 i->targetWeight_ = 0.0f;
                 i->fadeTime_ = fadeOutTime;
@@ -254,7 +254,7 @@ namespace Urho3D
 
     bool AnimationController::Fade(const String& name, float targetWeight, float fadeTime)
     {
-        unsigned index;
+        size_t index;
         AnimationState* state;
         FindAnimation(name, index, state);
         if (index == M_MAX_UNSIGNED)
@@ -268,16 +268,16 @@ namespace Urho3D
 
     bool AnimationController::FadeOthers(const String& name, float targetWeight, float fadeTime)
     {
-        unsigned index;
+        size_t index;
         AnimationState* state;
         FindAnimation(name, index, state);
         if (index == M_MAX_UNSIGNED || !state)
             return false;
 
-        unsigned char layer = state->GetLayer();
+        uint8_t layer = state->GetLayer();
 
         bool needUpdate = false;
-        for (unsigned i = 0; i < animations_.Size(); ++i)
+        for (size_t i = 0; i < animations_.size(); ++i)
         {
             if (i != index)
             {
@@ -327,7 +327,7 @@ namespace Urho3D
 
     bool AnimationController::SetTime(const String& name, float time)
     {
-        unsigned index;
+        size_t index;
         AnimationState* state;
         FindAnimation(name, index, state);
         if (index == M_MAX_UNSIGNED || !state)
@@ -345,7 +345,7 @@ namespace Urho3D
 
     bool AnimationController::SetSpeed(const String& name, float speed)
     {
-        unsigned index;
+        size_t index;
         AnimationState* state;
         FindAnimation(name, index, state);
         if (index == M_MAX_UNSIGNED)
@@ -358,7 +358,7 @@ namespace Urho3D
 
     bool AnimationController::SetWeight(const String& name, float weight)
     {
-        unsigned index;
+        size_t index;
         AnimationState* state;
         FindAnimation(name, index, state);
         if (index == M_MAX_UNSIGNED || !state)
@@ -380,7 +380,7 @@ namespace Urho3D
 
     bool AnimationController::SetRemoveOnCompletion(const String& name, bool removeOnCompletion)
     {
-        unsigned index;
+        size_t index;
         AnimationState* state;
         FindAnimation(name, index, state);
         if (index == M_MAX_UNSIGNED || !state)
@@ -415,7 +415,7 @@ namespace Urho3D
 
     bool AnimationController::SetAutoFade(const String& name, float fadeOutTime)
     {
-        unsigned index;
+        size_t index;
         AnimationState* state;
         FindAnimation(name, index, state);
         if (index == M_MAX_UNSIGNED)
@@ -428,7 +428,7 @@ namespace Urho3D
 
     bool AnimationController::IsPlaying(const String& name) const
     {
-        unsigned index;
+        size_t index;
         AnimationState* state;
         FindAnimation(name, index, state);
         return index != M_MAX_UNSIGNED;
@@ -436,7 +436,7 @@ namespace Urho3D
 
     bool AnimationController::IsPlaying(unsigned char layer) const
     {
-        for (Vector<AnimationControl>::ConstIterator i = animations_.Begin(); i != animations_.End(); ++i)
+        for (std::vector<AnimationControl>::const_iterator i = animations_.begin(); i != animations_.end(); ++i)
         {
             AnimationState* state = GetAnimationState(i->hash_);
             if (state && state->GetLayer() == layer)
@@ -448,7 +448,7 @@ namespace Urho3D
 
     bool AnimationController::IsFadingIn(const String& name) const
     {
-        unsigned index;
+        size_t index;
         AnimationState* state;
         FindAnimation(name, index, state);
         if (index == M_MAX_UNSIGNED || !state)
@@ -459,7 +459,7 @@ namespace Urho3D
 
     bool AnimationController::IsFadingOut(const String& name) const
     {
-        unsigned index;
+        size_t index;
         AnimationState* state;
         FindAnimation(name, index, state);
         if (index == M_MAX_UNSIGNED || !state)
@@ -471,7 +471,7 @@ namespace Urho3D
 
     bool AnimationController::IsAtEnd(const String& name) const
     {
-        unsigned index;
+        size_t index;
         AnimationState* state;
         FindAnimation(name, index, state);
         if (index == M_MAX_UNSIGNED || !state)
@@ -530,7 +530,7 @@ namespace Urho3D
 
     float AnimationController::GetSpeed(const String& name) const
     {
-        unsigned index;
+        size_t index;
         AnimationState* state;
         FindAnimation(name, index, state);
         return index != M_MAX_UNSIGNED ? animations_[index].speed_ : 0.0f;
@@ -538,7 +538,7 @@ namespace Urho3D
 
     float AnimationController::GetFadeTarget(const String& name) const
     {
-        unsigned index;
+        size_t index;
         AnimationState* state;
         FindAnimation(name, index, state);
         return index != M_MAX_UNSIGNED ? animations_[index].targetWeight_ : 0.0f;
@@ -546,7 +546,7 @@ namespace Urho3D
 
     float AnimationController::GetFadeTime(const String& name) const
     {
-        unsigned index;
+        size_t index;
         AnimationState* state;
         FindAnimation(name, index, state);
         return index != M_MAX_UNSIGNED ? animations_[index].fadeTime_ : 0.0f;
@@ -554,7 +554,7 @@ namespace Urho3D
 
     float AnimationController::GetAutoFade(const String& name) const
     {
-        unsigned index;
+        size_t index;
         AnimationState* state;
         FindAnimation(name, index, state);
         return index != M_MAX_UNSIGNED ? animations_[index].autoFadeTime_ : 0.0f;
@@ -562,7 +562,7 @@ namespace Urho3D
 
     bool AnimationController::GetRemoveOnCompletion(const String& name) const
     {
-        unsigned index;
+        size_t index;
         AnimationState* state;
         FindAnimation(name, index, state);
         return index != M_MAX_UNSIGNED ? animations_[index].removeOnCompletion_ : false;
@@ -593,8 +593,8 @@ namespace Urho3D
 
     void AnimationController::SetAnimationsAttr(const VariantVector& value)
     {
-        animations_.Clear();
-        animations_.Reserve(value.size() / 5);  // Incomplete data is discarded
+        animations_.clear();
+        animations_.reserve(value.size() / 5);  // Incomplete data is discarded
         unsigned index = 0;
         while (index + 4 < value.size())    // Prevent out-of-bound index access
         {
@@ -605,7 +605,7 @@ namespace Urho3D
             newControl.targetWeight_ = value[index++].GetFloat();
             newControl.fadeTime_ = value[index++].GetFloat();
             newControl.autoFadeTime_ = value[index++].GetFloat();
-            animations_.Push(newControl);
+            animations_.push_back(newControl);
         }
     }
 
@@ -637,19 +637,20 @@ namespace Urho3D
                     return;
                 }
             }
+
             // Check if the internal control structure exists. If not, add new
-            unsigned index;
-            for (index = 0; index < animations_.Size(); ++index)
+            size_t index;
+            for (index = 0; index < animations_.size(); ++index)
             {
                 if (animations_[index].hash_ == animHash)
                     break;
             }
-            if (index == animations_.Size())
+            if (index == animations_.size())
             {
                 AnimationControl newControl;
                 newControl.name_ = animName;
                 newControl.hash_ = animHash;
-                animations_.Push(newControl);
+                animations_.push_back(newControl);
             }
 
             unsigned char ctrl = buf.ReadUByte();
@@ -699,7 +700,7 @@ namespace Urho3D
         }
 
         // Set any extra animations to fade out
-        for (Vector<AnimationControl>::Iterator i = animations_.Begin(); i != animations_.End(); ++i)
+        for (std::vector<AnimationControl>::iterator i = animations_.begin(); i != animations_.end(); ++i)
         {
             if (processedAnimations.find(i->hash_) == processedAnimations.end())
             {
@@ -746,8 +747,8 @@ namespace Urho3D
     VariantVector AnimationController::GetAnimationsAttr() const
     {
         VariantVector ret;
-        ret.reserve(animations_.Size() * 5);
-        for (Vector<AnimationControl>::ConstIterator i = animations_.Begin(); i != animations_.End(); ++i)
+        ret.reserve(animations_.size() * 5);
+        for (std::vector<AnimationControl>::const_iterator i = animations_.begin(); i != animations_.end(); ++i)
         {
             ret.push_back(i->name_);
             ret.push_back(i->speed_);
@@ -765,20 +766,20 @@ namespace Urho3D
         auto* model = GetComponent<AnimatedModel>();
 
         unsigned validAnimations = 0;
-        for (Vector<AnimationControl>::ConstIterator i = animations_.Begin(); i != animations_.End(); ++i)
+        for (std::vector<AnimationControl>::const_iterator i = animations_.begin(); i != animations_.end(); ++i)
         {
             if (GetAnimationState(i->hash_))
                 ++validAnimations;
         }
 
         attrBuffer_.WriteVLE(validAnimations);
-        for (Vector<AnimationControl>::ConstIterator i = animations_.Begin(); i != animations_.End(); ++i)
+        for (std::vector<AnimationControl>::const_iterator i = animations_.begin(); i != animations_.end(); ++i)
         {
             AnimationState* state = GetAnimationState(i->hash_);
             if (!state)
                 continue;
 
-            unsigned char ctrl = 0;
+            uint8_t ctrl = 0;
             Bone* startBone = state->GetStartBone();
             if (state->IsLooped())
                 ctrl |= CTRL_LOOPED;
@@ -884,7 +885,7 @@ namespace Urho3D
         }
     }
 
-    void AnimationController::FindAnimation(const String& name, unsigned& index, AnimationState*& state) const
+    void AnimationController::FindAnimation(const String& name, size_t& index, AnimationState*& state) const
     {
         StringHash nameHash(GetInternalPath(name));
 
@@ -898,7 +899,7 @@ namespace Urho3D
 
         // Find the internal control structure
         index = M_MAX_UNSIGNED;
-        for (unsigned i = 0; i < animations_.Size(); ++i)
+        for (size_t i = 0; i < animations_.size(); ++i)
         {
             if (animations_[i].hash_ == nameHash)
             {

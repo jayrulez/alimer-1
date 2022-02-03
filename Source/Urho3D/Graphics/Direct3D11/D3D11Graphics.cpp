@@ -307,7 +307,7 @@ namespace Urho3D
         UpdateSwapChain(width, height);
 
         // Clear the initial window contents to black
-        Clear(CLEAR_COLOR);
+        Clear(ClearTargetFlags::Color);
         impl_->swapChain_->Present(0, 0);
 
         OnScreenModeChanged();
@@ -502,15 +502,15 @@ namespace Urho3D
             SetDepthWrite(true);
             PrepareDraw();
 
-            if ((flags & CLEAR_COLOR) && impl_->renderTargetViews_[0])
+            if (((flags & ClearTargetFlags::Color) != 0) && impl_->renderTargetViews_[0])
                 impl_->deviceContext_->ClearRenderTargetView(impl_->renderTargetViews_[0], color.Data());
 
-            if ((flags & (CLEAR_DEPTH | CLEAR_STENCIL)) && impl_->depthStencilView_)
+            if ((flags & (ClearTargetFlags::DepthStencil)) != 0 && impl_->depthStencilView_)
             {
-                unsigned depthClearFlags = 0;
-                if (flags & CLEAR_DEPTH)
+                UINT depthClearFlags = 0;
+                if ((flags & ClearTargetFlags::Depth) != 0)
                     depthClearFlags |= D3D11_CLEAR_DEPTH;
-                if (flags & CLEAR_STENCIL)
+                if ((flags & ClearTargetFlags::Stencil) != 0)
                     depthClearFlags |= D3D11_CLEAR_STENCIL;
                 impl_->deviceContext_->ClearDepthStencilView(impl_->depthStencilView_, depthClearFlags, depth, (UINT8)stencil);
             }
@@ -528,13 +528,13 @@ namespace Urho3D
             model.m23_ = Clamp(depth, 0.0f, 1.0f);
 
             SetBlendMode(BLEND_REPLACE);
-            SetColorWrite(flags & CLEAR_COLOR);
+            SetColorWrite((flags & ClearTargetFlags::Color) != 0);
             SetCullMode(CullMode::None);
             SetDepthTest(CMP_ALWAYS);
-            SetDepthWrite(flags & CLEAR_DEPTH);
+            SetDepthWrite((flags & ClearTargetFlags::Depth) != 0);
             SetFillMode(FillMode::Solid);
             SetScissorTest(false);
-            SetStencilTest(flags & CLEAR_STENCIL, CMP_ALWAYS, OP_REF, OP_KEEP, OP_KEEP, stencil);
+            SetStencilTest((flags & ClearTargetFlags::Stencil) != 0, CMP_ALWAYS, OP_REF, OP_KEEP, OP_KEEP, stencil);
             SetShaders(GetShader(VS, "ClearFramebuffer"), GetShader(PS, "ClearFramebuffer"));
             SetShaderParameter(VSP_MODEL, model);
             SetShaderParameter(VSP_VIEWPROJ, projection);

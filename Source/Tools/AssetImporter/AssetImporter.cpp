@@ -1368,15 +1368,15 @@ void BuildAndSaveAnimations(OutModel* model)
             AnimationTrack* track = outAnim->CreateTrack(channelName);
 
             // Check which channels are used
-            track->channelMask_ = CHANNEL_NONE;
+            track->channelMask_ = AnimationChannelFlags::None;
             if (channel->mNumPositionKeys > 1 || !posEqual)
-                track->channelMask_ |= CHANNEL_POSITION;
+                track->channelMask_ |= AnimationChannelFlags::Position;
             if (channel->mNumRotationKeys > 1 || !rotEqual)
-                track->channelMask_ |= CHANNEL_ROTATION;
+                track->channelMask_ |= AnimationChannelFlags::Rotation;
             if (channel->mNumScalingKeys > 1 || !scaleEqual)
-                track->channelMask_ |= CHANNEL_SCALE;
+                track->channelMask_ |= AnimationChannelFlags::Scale;
             // Check for redundant identity scale in all keyframes and remove in that case
-            if (track->channelMask_ & CHANNEL_SCALE)
+            if ((track->channelMask_ & AnimationChannelFlags::Scale) != 0)
             {
                 bool redundantScale = true;
                 for (unsigned k = 0; k < channel->mNumScalingKeys; ++k)
@@ -1391,10 +1391,10 @@ void BuildAndSaveAnimations(OutModel* model)
                     }
                 }
                 if (redundantScale)
-                    track->channelMask_ &= ~CHANNEL_SCALE;
+                    track->channelMask_ &= ~AnimationChannelFlags::Scale;
             }
 
-            if (!track->channelMask_)
+            if (track->channelMask_ == AnimationChannelFlags::None)
             {
                 PrintLine("Warning: skipping animation track " + channelName + " with no keyframes");
                 outAnim->RemoveTrack(channelName);
@@ -1427,11 +1427,11 @@ void BuildAndSaveAnimations(OutModel* model)
                 kf.scale_ = Vector3::ONE;
 
                 // Get time for the keyframe. Adjust with animation's start time
-                if (track->channelMask_ & CHANNEL_POSITION && k < channel->mNumPositionKeys)
+                if ((track->channelMask_ & AnimationChannelFlags::Position) != 0 && k < channel->mNumPositionKeys)
                     kf.time_ = ((float)channel->mPositionKeys[k].mTime - startTime);
-                else if (track->channelMask_ & CHANNEL_ROTATION && k < channel->mNumRotationKeys)
+                else if ((track->channelMask_ & AnimationChannelFlags::Rotation) != 0 && k < channel->mNumRotationKeys)
                     kf.time_ = ((float)channel->mRotationKeys[k].mTime - startTime);
-                else if (track->channelMask_ & CHANNEL_SCALE && k < channel->mNumScalingKeys)
+                else if ((track->channelMask_ & AnimationChannelFlags::Scale) !=0 && k < channel->mNumScalingKeys)
                     kf.time_ = ((float)channel->mScalingKeys[k].mTime - startTime);
 
                 // Make sure time stays positive
@@ -1443,11 +1443,11 @@ void BuildAndSaveAnimations(OutModel* model)
                 aiQuaternion rot;
                 boneTransform.Decompose(scale, rot, pos);
                 // Then apply the active channels
-                if (track->channelMask_ & CHANNEL_POSITION && k < channel->mNumPositionKeys)
+                if ((track->channelMask_ & AnimationChannelFlags::Position) != 0 && k < channel->mNumPositionKeys)
                     pos = channel->mPositionKeys[k].mValue;
-                if (track->channelMask_ & CHANNEL_ROTATION && k < channel->mNumRotationKeys)
+                if ((track->channelMask_ & AnimationChannelFlags::Rotation) != 0 && k < channel->mNumRotationKeys)
                     rot = channel->mRotationKeys[k].mValue;
-                if (track->channelMask_ & CHANNEL_SCALE && k < channel->mNumScalingKeys)
+                if ((track->channelMask_ & AnimationChannelFlags::Scale) != 0 && k < channel->mNumScalingKeys)
                     scale = channel->mScalingKeys[k].mValue;
 
                 // If root bone, transform with nodes in between model root node (if any)
@@ -1465,11 +1465,11 @@ void BuildAndSaveAnimations(OutModel* model)
                         tform.Decompose(scale, rot, pos);
                 }
 
-                if (track->channelMask_ & CHANNEL_POSITION)
+                if ((track->channelMask_ & AnimationChannelFlags::Position) != 0)
                     kf.position_ = ToVector3(pos);
-                if (track->channelMask_ & CHANNEL_ROTATION)
+                if ((track->channelMask_ & AnimationChannelFlags::Rotation) != 0)
                     kf.rotation_ = ToQuaternion(rot);
-                if (track->channelMask_ & CHANNEL_SCALE)
+                if ((track->channelMask_ & AnimationChannelFlags::Scale) != 0)
                     kf.scale_ = ToVector3(scale);
                 if (kf.time_ >= thisImportStartTime && kf.time_ <= thisImportEndTime)
                 {

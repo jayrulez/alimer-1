@@ -51,10 +51,10 @@ void Vehicle::RegisterObject(Context* context)
 }
 
 Vehicle::Vehicle(Urho3D::Context* context)
-    : LogicComponent(context),
-      steering_(0.0f)
+    : LogicComponent(context)
+    , steering_(0.0f)
 {
-    SetUpdateEventMask(USE_FIXEDUPDATE | USE_POSTUPDATE);
+    SetUpdateEventMask(UpdateEventFlags::FixedUpdate | UpdateEventFlags::PostUpdate);
     engineForce_ = 0.0f;
     brakingForce_ = 50.0f;
     vehicleSteering_ = 0.0f;
@@ -241,8 +241,8 @@ void Vehicle::PostUpdate(float timeStep)
                 particleEmitter->SetEmitting(true);
             }
             URHO3D_LOGDEBUG("GetWheelSkidInfoCumulative() = " +
-                            String(vehicle->GetWheelSkidInfoCumulative(i)) + " " +
-                            String(vehicle->GetMaxSideSlipSpeed()));
+                String(vehicle->GetWheelSkidInfoCumulative(i)) + " " +
+                String(vehicle->GetMaxSideSlipSpeed()));
             /* TODO: Add skid marks here */
         }
         else if (particleEmitter->IsEmitting())

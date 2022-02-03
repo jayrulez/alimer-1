@@ -31,14 +31,14 @@
 
 #include "Character.h"
 
-Character::Character(Context* context) :
-    LogicComponent(context),
-    onGround_(false),
-    okToJump_(true),
-    inAirTimer_(0.0f)
+Character::Character(Context* context)
+    : LogicComponent(context)
+    , onGround_(false)
+    , okToJump_(true)
+    , inAirTimer_(0.0f)
 {
     // Only the physics update event is needed: unsubscribe from the rest for optimization
-    SetUpdateEventMask(USE_FIXEDUPDATE);
+    SetUpdateEventMask(UpdateEventFlags::FixedUpdate);
 }
 
 void Character::RegisterObject(Context* context)
@@ -117,7 +117,7 @@ void Character::FixedUpdate(float timeStep)
             okToJump_ = true;
     }
 
-    if ( !onGround_ )
+    if (!onGround_)
     {
         animCtrl->PlayExclusive("Models/Mutant/Mutant_Jump1.ani", 0, false, 0.2f);
     }

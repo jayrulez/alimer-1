@@ -31,16 +31,16 @@
 
 #include "Mover.h"
 
-Mover::Mover(Context* context) :
-    LogicComponent(context),
-    speed_(0.8f),
-    currentPathID_(1),
-    emitTime_(0.0f),
-    fightTimer_(0.0f),
-    flip_(0.0f)
+Mover::Mover(Context* context)
+    : LogicComponent(context)
+    , speed_(0.8f)
+    , currentPathID_(1)
+    , emitTime_(0.0f)
+    , fightTimer_(0.0f)
+    , flip_(0.0f)
 {
     // Only the scene update event is needed: unsubscribe from the rest for optimization
-    SetUpdateEventMask(USE_UPDATE);
+    SetUpdateEventMask(UpdateEventFlags::Update);
 }
 
 void Mover::RegisterObject(Context* context)

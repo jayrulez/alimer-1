@@ -1365,8 +1365,8 @@ namespace Urho3D
                 continue;
             }
 
-            bool dragSource = dragElement && (dragElement->GetDragDropMode() & DD_SOURCE);
-            bool dragTarget = element && (element->GetDragDropMode() & DD_TARGET);
+            bool dragSource = dragElement && ((dragElement->GetDragDropMode() & DragAndDropModeFlags::Source) != 0);
+            bool dragTarget = element && ((element->GetDragDropMode() & DragAndDropModeFlags::Target) != 0);
             bool dragDropTest = dragSource && dragTarget && element != dragElement;
             // If drag start event has not been posted yet, do not do drag handling here
             if (dragData->dragBeginPending)
@@ -1554,10 +1554,10 @@ namespace Urho3D
                         cursor);
                     SendDragOrHoverEvent(E_DRAGEND, dragElement, cursorPos, IntVector2::ZERO, dragData);
 
-                    bool dragSource = dragElement && (dragElement->GetDragDropMode() & DD_SOURCE);
+                    bool dragSource = dragElement && ((dragElement->GetDragDropMode() & DragAndDropModeFlags::Source) != 0);
                     if (dragSource)
                     {
-                        bool dragTarget = element && (element->GetDragDropMode() & DD_TARGET);
+                        bool dragTarget = element && ((element->GetDragDropMode() & DragAndDropModeFlags::Target) != 0);
                         bool dragDropFinish = dragSource && dragTarget && element != dragElement;
 
                         if (dragDropFinish)
