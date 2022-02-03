@@ -375,7 +375,7 @@ namespace Urho3D
 
     void WorkQueue::PurgePool()
     {
-        unsigned currentSize = poolItems_.size();
+        size_t currentSize = poolItems_.size();
         int difference = lastSize_ - currentSize;
 
         // Difference tolerance, should be fairly significant to reduce the pool size.

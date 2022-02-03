@@ -202,6 +202,13 @@ setup_library (${URHO3D_LIB_TYPE} ${EXCLUDE_FROM_ALL})
 
 # Until we cleanup CMake
 if (TARGET Urho3D)
+    # Compiler-specific setup
+    if(PLATFORM_WIN32 OR PLATFORM_UWP OR PLATFORM_XBOXONE)
+        # Enable full optimization in dev/release
+	    target_compile_options(${TARGET_NAME} PRIVATE $<$<CONFIG:DEBUG>:/Od> $<$<NOT:$<CONFIG:DEBUG>>:/Ox>)
+    elseif (PLATFORM_EMSCRIPTEN)
+    endif()
+
     if (WIN32)
         target_compile_definitions(${TARGET_NAME} PRIVATE _SCL_SECURE_NO_WARNINGS _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE)
         target_compile_definitions(${TARGET_NAME} PRIVATE _UNICODE UNICODE )

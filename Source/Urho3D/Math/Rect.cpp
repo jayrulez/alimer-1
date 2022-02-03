@@ -28,8 +28,7 @@
 
 #include "../DebugNew.h"
 
-namespace Urho3D
-{
+using namespace Urho3D;
 
 const Rect Rect::FULL(-1.0f, -1.0f, 1.0f, 1.0f);
 const Rect Rect::POSITIVE(0.0f, 0.0f, 1.0f, 1.0f);
@@ -101,6 +100,4 @@ void Rect::Clip(const Rect& rect)
         min_ = Vector2(M_INFINITY, M_INFINITY);
         max_ = Vector2(-M_INFINITY, -M_INFINITY);
     }
-}
-
 }

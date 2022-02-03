@@ -29,8 +29,12 @@
 #include "../IO/FileSystem.h"
 #include "../IO/Log.h"
 #include "../Math/AreaAllocator.h"
+#include "../Resource/PListFile.h"
 #include "../Resource/ResourceCache.h"
 #include "../Resource/XMLFile.h"
+#include "../Resource/JSONFile.h"
+#include "../Resource/XMLFile.h"
+#include "../Resource/JSONFile.h"
 #include "../Urho2D/AnimationSet2D.h"
 #include "../Urho2D/Sprite2D.h"
 #include "../Urho2D/SpriterData2D.h"
@@ -98,8 +102,7 @@ char* _spUtil_readFile(const char* path, int* length)
 }
 #endif
 
-namespace Urho3D
-{
+using namespace Urho3D;
 
 AnimationSet2D::AnimationSet2D(Context* context) :
     Resource(context),
@@ -380,8 +383,8 @@ bool AnimationSet2D::EndLoadSpriter()
                     float pivotY = file->height_ * (1.0f - hotSpot.y_);
 
                     const IntRect& rectangle = sprite->GetRectangle();
-                    hotSpot.x_ = (offset.x_ + pivotX) / rectangle.Width();
-                    hotSpot.y_ = 1.0f - (offset.y_ + pivotY) / rectangle.Height();
+                    hotSpot.x_ = (offset.x + pivotX) / rectangle.Width();
+                    hotSpot.y_ = 1.0f - (offset.y + pivotY) / rectangle.Height();
                 }
 
                 sprite->SetHotSpot(hotSpot);
@@ -526,6 +529,4 @@ void AnimationSet2D::Dispose()
     sprite_.Reset();
     spriteSheet_.Reset();
     spriterFileSprites_.Clear();
-}
-
 }

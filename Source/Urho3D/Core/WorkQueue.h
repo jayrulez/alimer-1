@@ -146,7 +146,7 @@ namespace Urho3D
         /// Tolerance for the shared pool before it begins to deallocate.
         int tolerance_;
         /// Last size of the shared pool.
-        unsigned lastSize_;
+        size_t lastSize_;
         /// Maximum milliseconds per frame to spend on low-priority work, when there are no worker threads.
         int maxNonThreadedWorkMs_;
     };

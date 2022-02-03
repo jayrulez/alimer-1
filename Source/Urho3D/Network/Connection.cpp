@@ -50,21 +50,23 @@
 
 #include <cstdio>
 
-namespace Urho3D
+using namespace Urho3D;
+
+namespace
 {
+    static const int STATS_INTERVAL_MSEC = 2000;
+}
 
-static const int STATS_INTERVAL_MSEC = 2000;
-
-PackageDownload::PackageDownload() :
-    totalFragments_(0),
-    checksum_(0),
-    initiated_(false)
+PackageDownload::PackageDownload()
+    : totalFragments_(0)
+    , checksum_(0)
+    , initiated_(false)
 {
 }
 
-PackageUpload::PackageUpload() :
-    fragment_(0),
-    totalFragments_(0)
+PackageUpload::PackageUpload()
+    : fragment_(0)
+    , totalFragments_(0)
 {
 }
 
@@ -134,7 +136,7 @@ void Connection::SendMessage(int msgID, bool reliable, bool inOrder, const unsig
         buffer.WriteUInt((unsigned int)MSG_PACKED_MESSAGE);
     }
 
-    buffer.WriteUInt((unsigned int) msgID);
+    buffer.WriteUInt((unsigned int)msgID);
     buffer.WriteUInt(numBytes);
     buffer.Write(data, numBytes);
 }
@@ -392,9 +394,9 @@ void Connection::SendBuffer(PacketType type)
         reliability = PacketReliability::RELIABLE;
 
     if (peer_) {
-        peer_->Send((const char *) buffer.GetData(), (int) buffer.GetSize(), HIGH_PRIORITY, reliability, (char) 0,
-                    *address_, false);
-        tempPacketCounter_.y_++;
+        peer_->Send((const char*)buffer.GetData(), (int)buffer.GetSize(), HIGH_PRIORITY, reliability, (char)0,
+            *address_, false);
+        tempPacketCounter_.y++;
     }
 
     buffer.Clear();
@@ -447,7 +449,7 @@ void Connection::ProcessPendingLatestData()
 
 bool Connection::ProcessMessage(int msgID, MemoryBuffer& buffer)
 {
-    tempPacketCounter_.x_++;
+    tempPacketCounter_.x++;
     if (buffer.GetSize() == 0)
         return false;
 
@@ -600,7 +602,7 @@ void Connection::ProcessSceneUpdate(int msgID, MemoryBuffer& msg)
 
     switch (msgID)
     {
-    case MSG_CREATENODE:
+        case MSG_CREATENODE:
         {
             unsigned nodeID = msg.ReadNetID();
             // In case of the root node (scene), it should already exist. Do not create in that case
@@ -660,7 +662,7 @@ void Connection::ProcessSceneUpdate(int msgID, MemoryBuffer& msg)
         }
         break;
 
-    case MSG_NODEDELTAUPDATE:
+        case MSG_NODEDELTAUPDATE:
         {
             unsigned nodeID = msg.ReadNetID();
             Node* node = scene_->GetNode(nodeID);
@@ -682,7 +684,7 @@ void Connection::ProcessSceneUpdate(int msgID, MemoryBuffer& msg)
         }
         break;
 
-    case MSG_NODELATESTDATA:
+        case MSG_NODELATESTDATA:
         {
             unsigned nodeID = msg.ReadNetID();
             Node* node = scene_->GetNode(nodeID);
@@ -702,7 +704,7 @@ void Connection::ProcessSceneUpdate(int msgID, MemoryBuffer& msg)
         }
         break;
 
-    case MSG_REMOVENODE:
+        case MSG_REMOVENODE:
         {
             unsigned nodeID = msg.ReadNetID();
             Node* node = scene_->GetNode(nodeID);
@@ -712,7 +714,7 @@ void Connection::ProcessSceneUpdate(int msgID, MemoryBuffer& msg)
         }
         break;
 
-    case MSG_CREATECOMPONENT:
+        case MSG_CREATECOMPONENT:
         {
             unsigned nodeID = msg.ReadNetID();
             Node* node = scene_->GetNode(nodeID);
@@ -746,7 +748,7 @@ void Connection::ProcessSceneUpdate(int msgID, MemoryBuffer& msg)
         }
         break;
 
-    case MSG_COMPONENTDELTAUPDATE:
+        case MSG_COMPONENTDELTAUPDATE:
         {
             unsigned componentID = msg.ReadNetID();
             Component* component = scene_->GetComponent(componentID);
@@ -760,7 +762,7 @@ void Connection::ProcessSceneUpdate(int msgID, MemoryBuffer& msg)
         }
         break;
 
-    case MSG_COMPONENTLATESTDATA:
+        case MSG_COMPONENTLATESTDATA:
         {
             unsigned componentID = msg.ReadNetID();
             Component* component = scene_->GetComponent(componentID);
@@ -779,7 +781,7 @@ void Connection::ProcessSceneUpdate(int msgID, MemoryBuffer& msg)
         }
         break;
 
-    case MSG_REMOVECOMPONENT:
+        case MSG_REMOVECOMPONENT:
         {
             unsigned componentID = msg.ReadNetID();
             Component* component = scene_->GetComponent(componentID);
@@ -789,7 +791,7 @@ void Connection::ProcessSceneUpdate(int msgID, MemoryBuffer& msg)
         }
         break;
 
-    default: break;
+        default: break;
     }
 }
 
@@ -797,140 +799,140 @@ void Connection::ProcessPackageDownload(int msgID, MemoryBuffer& msg)
 {
     switch (msgID)
     {
-    case MSG_REQUESTPACKAGE:
-        if (!IsClient())
-        {
-            URHO3D_LOGWARNING("Received unexpected RequestPackage message from server");
-            return;
-        }
-        else
-        {
-            String name = msg.ReadString();
-
-            if (!scene_)
+        case MSG_REQUESTPACKAGE:
+            if (!IsClient())
             {
-                URHO3D_LOGWARNING("Received a RequestPackage message without an assigned scene from client " + ToString());
+                URHO3D_LOGWARNING("Received unexpected RequestPackage message from server");
                 return;
             }
-
-            // The package must be one of those required by the scene
-            const Vector<SharedPtr<PackageFile> >& packages = scene_->GetRequiredPackageFiles();
-            for (unsigned i = 0; i < packages.Size(); ++i)
+            else
             {
-                PackageFile* package = packages[i];
-                const String& packageFullName = package->GetName();
-                if (!GetFileNameAndExtension(packageFullName).Compare(name, false))
+                String name = msg.ReadString();
+
+                if (!scene_)
                 {
-                    StringHash nameHash(name);
-
-                    // Do not restart upload if already exists
-                    if (uploads_.Contains(nameHash))
-                    {
-                        URHO3D_LOGWARNING("Received a request for package " + name + " already in transfer");
-                        return;
-                    }
-
-                    // Try to open the file now
-                    SharedPtr<File> file(new File(context_, packageFullName));
-                    if (!file->IsOpen())
-                    {
-                        URHO3D_LOGERROR("Failed to transmit package file " + name);
-                        SendPackageError(name);
-                        return;
-                    }
-
-                    URHO3D_LOGINFO("Transmitting package file " + name + " to client " + ToString());
-
-                    uploads_[nameHash].file_ = file;
-                    uploads_[nameHash].fragment_ = 0;
-                    uploads_[nameHash].totalFragments_ = (file->GetSize() + PACKAGE_FRAGMENT_SIZE - 1) / PACKAGE_FRAGMENT_SIZE;
+                    URHO3D_LOGWARNING("Received a RequestPackage message without an assigned scene from client " + ToString());
                     return;
                 }
-            }
 
-            URHO3D_LOGERROR("Client requested an unexpected package file " + name);
-            // Send the name hash only to indicate a failed download
-            SendPackageError(name);
-            return;
-        }
-        break;
+                // The package must be one of those required by the scene
+                const Vector<SharedPtr<PackageFile> >& packages = scene_->GetRequiredPackageFiles();
+                for (unsigned i = 0; i < packages.Size(); ++i)
+                {
+                    PackageFile* package = packages[i];
+                    const String& packageFullName = package->GetName();
+                    if (!GetFileNameAndExtension(packageFullName).Compare(name, false))
+                    {
+                        StringHash nameHash(name);
 
-    case MSG_PACKAGEDATA:
-        if (IsClient())
-        {
-            URHO3D_LOGWARNING("Received unexpected PackageData message from client");
-            return;
-        }
-        else
-        {
-            StringHash nameHash = msg.ReadStringHash();
+                        // Do not restart upload if already exists
+                        if (uploads_.Contains(nameHash))
+                        {
+                            URHO3D_LOGWARNING("Received a request for package " + name + " already in transfer");
+                            return;
+                        }
 
-            HashMap<StringHash, PackageDownload>::Iterator i = downloads_.Find(nameHash);
-            // In case of being unable to create the package file into the cache, we will still receive all data from the server.
-            // Simply disregard it
-            if (i == downloads_.End())
+                        // Try to open the file now
+                        SharedPtr<File> file(new File(context_, packageFullName));
+                        if (!file->IsOpen())
+                        {
+                            URHO3D_LOGERROR("Failed to transmit package file " + name);
+                            SendPackageError(name);
+                            return;
+                        }
+
+                        URHO3D_LOGINFO("Transmitting package file " + name + " to client " + ToString());
+
+                        uploads_[nameHash].file_ = file;
+                        uploads_[nameHash].fragment_ = 0;
+                        uploads_[nameHash].totalFragments_ = (file->GetSize() + PACKAGE_FRAGMENT_SIZE - 1) / PACKAGE_FRAGMENT_SIZE;
+                        return;
+                    }
+                }
+
+                URHO3D_LOGERROR("Client requested an unexpected package file " + name);
+                // Send the name hash only to indicate a failed download
+                SendPackageError(name);
                 return;
+            }
+            break;
 
-            PackageDownload& download = i->second_;
-
-            // If no further data, this is an error reply
-            if (msg.IsEof())
+        case MSG_PACKAGEDATA:
+            if (IsClient())
             {
-                OnPackageDownloadFailed(download.name_);
+                URHO3D_LOGWARNING("Received unexpected PackageData message from client");
                 return;
             }
-
-            // If file has not yet been opened, try to open now. Prepend the checksum to the filename to allow multiple versions
-            if (!download.file_)
+            else
             {
-                download.file_ = new File(context_,
-                    GetSubsystem<Network>()->GetPackageCacheDir() + ToStringHex(download.checksum_) + "_" + download.name_,
-                    FILE_WRITE);
-                if (!download.file_->IsOpen())
+                StringHash nameHash = msg.ReadStringHash();
+
+                HashMap<StringHash, PackageDownload>::Iterator i = downloads_.Find(nameHash);
+                // In case of being unable to create the package file into the cache, we will still receive all data from the server.
+                // Simply disregard it
+                if (i == downloads_.End())
+                    return;
+
+                PackageDownload& download = i->second_;
+
+                // If no further data, this is an error reply
+                if (msg.IsEof())
                 {
                     OnPackageDownloadFailed(download.name_);
                     return;
                 }
-            }
 
-            // Write the fragment data to the proper index
-            unsigned char buffer[PACKAGE_FRAGMENT_SIZE];
-            unsigned index = msg.ReadUInt();
-            unsigned fragmentSize = msg.GetSize() - msg.GetPosition();
-
-            msg.Read(buffer, fragmentSize);
-            download.file_->Seek(index * PACKAGE_FRAGMENT_SIZE);
-            download.file_->Write(buffer, fragmentSize);
-            download.receivedFragments_.insert(index);
-
-            // Check if all fragments received
-            if (download.receivedFragments_.size() == download.totalFragments_)
-            {
-                URHO3D_LOGINFO("Package " + download.name_ + " downloaded successfully");
-
-                // Instantiate the package and add to the resource system, as we will need it to load the scene
-                download.file_->Close();
-                GetSubsystem<ResourceCache>()->AddPackageFile(download.file_->GetName(), 0);
-
-                // Then start the next download if there are more
-                downloads_.Erase(i);
-                if (downloads_.Empty())
-                    OnPackagesReady();
-                else
+                // If file has not yet been opened, try to open now. Prepend the checksum to the filename to allow multiple versions
+                if (!download.file_)
                 {
-                    PackageDownload& nextDownload = downloads_.Begin()->second_;
+                    download.file_ = new File(context_,
+                        GetSubsystem<Network>()->GetPackageCacheDir() + ToStringHex(download.checksum_) + "_" + download.name_,
+                        FILE_WRITE);
+                    if (!download.file_->IsOpen())
+                    {
+                        OnPackageDownloadFailed(download.name_);
+                        return;
+                    }
+                }
 
-                    URHO3D_LOGINFO("Requesting package " + nextDownload.name_ + " from server");
-                    msg_.Clear();
-                    msg_.WriteString(nextDownload.name_);
-                    SendMessage(MSG_REQUESTPACKAGE, true, true, msg_);
-                    nextDownload.initiated_ = true;
+                // Write the fragment data to the proper index
+                unsigned char buffer[PACKAGE_FRAGMENT_SIZE];
+                unsigned index = msg.ReadUInt();
+                unsigned fragmentSize = msg.GetSize() - msg.GetPosition();
+
+                msg.Read(buffer, fragmentSize);
+                download.file_->Seek(index * PACKAGE_FRAGMENT_SIZE);
+                download.file_->Write(buffer, fragmentSize);
+                download.receivedFragments_.insert(index);
+
+                // Check if all fragments received
+                if (download.receivedFragments_.size() == download.totalFragments_)
+                {
+                    URHO3D_LOGINFO("Package " + download.name_ + " downloaded successfully");
+
+                    // Instantiate the package and add to the resource system, as we will need it to load the scene
+                    download.file_->Close();
+                    GetSubsystem<ResourceCache>()->AddPackageFile(download.file_->GetName(), 0);
+
+                    // Then start the next download if there are more
+                    downloads_.Erase(i);
+                    if (downloads_.Empty())
+                        OnPackagesReady();
+                    else
+                    {
+                        PackageDownload& nextDownload = downloads_.Begin()->second_;
+
+                        URHO3D_LOGINFO("Requesting package " + nextDownload.name_ + " from server");
+                        msg_.Clear();
+                        msg_.WriteString(nextDownload.name_);
+                        SendMessage(MSG_REQUESTPACKAGE, true, true, msg_);
+                        nextDownload.initiated_ = true;
+                    }
                 }
             }
-        }
-        break;
+            break;
 
-    default: break;
+        default: break;
     }
 }
 
@@ -1110,12 +1112,12 @@ float Connection::GetBytesOutPerSec() const
 
 int Connection::GetPacketsInPerSec() const
 {
-    return packetCounter_.x_;
+    return packetCounter_.x;
 }
 
 int Connection::GetPacketsOutPerSec() const
 {
-    return packetCounter_.y_;
+    return packetCounter_.y;
 }
 
 String Connection::ToString() const
@@ -1378,7 +1380,7 @@ void Connection::ProcessExistingNode(Node* node, NodeReplicationState& nodeState
 
     // Check for removed or changed components
     for (HashMap<unsigned, ComponentReplicationState>::Iterator i = nodeState.componentStates_.Begin();
-         i != nodeState.componentStates_.End();)
+        i != nodeState.componentStates_.End();)
     {
         HashMap<unsigned, ComponentReplicationState>::Iterator current = i++;
         ComponentReplicationState& componentState = current->second_;
@@ -1665,6 +1667,4 @@ void Connection::SetAddressOrGUID(const SLNet::AddressOrGUID& addr)
     delete address_;
     address_ = nullptr;
     address_ = new SLNet::AddressOrGUID(addr);
-}
-
 }

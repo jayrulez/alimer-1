@@ -259,8 +259,8 @@ namespace Urho3D
             return ret;
 
         auto* ptr = (char*)source;
-        ret.x_ = (int)strtol(ptr, &ptr, 10);
-        ret.y_ = (int)strtol(ptr, &ptr, 10);
+        ret.x = (int)strtol(ptr, &ptr, 10);
+        ret.y = (int)strtol(ptr, &ptr, 10);
 
         return ret;
     }

@@ -340,14 +340,14 @@ namespace Urho3D
             for (unsigned i = 0; i < numBones; ++i)
             {
                 Bone* bone = skeleton.GetBone(i);
-                if (!bone->node_ || !bone->collisionMask_)
+                if (!bone->node_ || (bone->collisionMask_ == BoneCollisionShapeFlags::None))
                     continue;
 
                 // Represent the decal as a sphere, try to find the biggest colliding bone
                 Sphere decalSphere
                 (bone->node_->GetWorldTransform().Inverse() * worldPosition, 0.5f * size / bone->node_->GetWorldScale().Length());
 
-                if (bone->collisionMask_ & BONECOLLISION_BOX)
+                if ((bone->collisionMask_ & BoneCollisionShapeFlags::Box) != 0)
                 {
                     float size = bone->boundingBox_.HalfSize().Length();
                     if (bone->boundingBox_.IsInside(decalSphere) && size > bestSize)
@@ -356,7 +356,7 @@ namespace Urho3D
                         bestSize = size;
                     }
                 }
-                else if (bone->collisionMask_ & BONECOLLISION_SPHERE)
+                else if ((bone->collisionMask_ & BoneCollisionShapeFlags::Sphere) != 0)
                 {
                     Sphere boneSphere(Vector3::ZERO, bone->radius_);
                     float size = bone->radius_;
@@ -578,9 +578,9 @@ namespace Urho3D
 
                 newBone.name_ = buffer.ReadString();
                 newBone.collisionMask_ = BoneCollisionShapeFlags(buffer.ReadUByte());
-                if (newBone.collisionMask_ & BONECOLLISION_SPHERE)
+                if ((newBone.collisionMask_ & BoneCollisionShapeFlags::Sphere) != 0)
                     newBone.radius_ = buffer.ReadFloat();
-                if (newBone.collisionMask_ & BONECOLLISION_BOX)
+                if ((newBone.collisionMask_ & BoneCollisionShapeFlags::Box) != 0)
                     newBone.boundingBox_ = buffer.ReadBoundingBox();
                 buffer.Read(&newBone.offsetMatrix_.m00_, sizeof(Matrix3x4));
             }
@@ -639,10 +639,10 @@ namespace Urho3D
             for (Vector<Bone>::ConstIterator i = bones_.Begin(); i != bones_.End(); ++i)
             {
                 ret.WriteString(i->name_);
-                ret.WriteUByte(i->collisionMask_);
-                if (i->collisionMask_ & BONECOLLISION_SPHERE)
+                ret.WriteUByte((uint8_t)i->collisionMask_);
+                if ((i->collisionMask_ & BoneCollisionShapeFlags::Sphere) != 0)
                     ret.WriteFloat(i->radius_);
-                if (i->collisionMask_ & BONECOLLISION_BOX)
+                if ((i->collisionMask_ & BoneCollisionShapeFlags::Box) != 0)
                     ret.WriteBoundingBox(i->boundingBox_);
                 ret.Write(i->offsetMatrix_.Data(), sizeof(Matrix3x4));
             }
@@ -684,9 +684,9 @@ namespace Urho3D
 
                 // Use hitbox if available. If not, use only half of the sphere radius
                 /// \todo The sphere radius should be multiplied with bone scale
-                if (i->collisionMask_ & BONECOLLISION_BOX)
+                if ((i->collisionMask_ & BoneCollisionShapeFlags::Box) != 0)
                     worldBox.Merge(i->boundingBox_.Transformed(boneNode->GetWorldTransform()));
-                else if (i->collisionMask_ & BONECOLLISION_SPHERE)
+                else if ((i->collisionMask_ & BoneCollisionShapeFlags::Sphere) != 0)
                     worldBox.Merge(Sphere(boneNode->GetWorldPosition(), i->radius_ * 0.5f));
             }
 

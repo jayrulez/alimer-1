@@ -242,8 +242,8 @@ void Navigation::MoveCamera(float timeStep)
     if (!ui->GetCursor()->IsVisible())
     {
         IntVector2 mouseMove = input->GetMouseMove();
-        yaw_ += MOUSE_SENSITIVITY * mouseMove.x_;
-        pitch_ += MOUSE_SENSITIVITY * mouseMove.y_;
+        yaw_ += MOUSE_SENSITIVITY * mouseMove.x;
+        pitch_ += MOUSE_SENSITIVITY * mouseMove.y;
         pitch_ = Clamp(pitch_, -90.0f, 90.0f);
 
         // Construct new orientation for the camera scene node from yaw and pitch. Roll is fixed to zero
@@ -360,7 +360,7 @@ bool Navigation::Raycast(float maxDistance, Vector3& hitPos, Drawable*& hitDrawa
 
     auto* graphics = GetSubsystem<Graphics>();
     auto* camera = cameraNode_->GetComponent<Camera>();
-    Ray cameraRay = camera->GetScreenRay((float)pos.x_ / graphics->GetWidth(), (float)pos.y_ / graphics->GetHeight());
+    Ray cameraRay = camera->GetScreenRay((float)pos.x / graphics->GetWidth(), (float)pos.y / graphics->GetHeight());
     // Pick only geometry objects, not eg. zones or lights, only get the first (closest) hit
     PODVector<RayQueryResult> results;
     RayOctreeQuery query(results, cameraRay, RAY_TRIANGLE, maxDistance, DRAWABLE_GEOMETRY);
@@ -424,7 +424,7 @@ void Navigation::UpdateStreaming()
     for (std::unordered_set<IntVector2>::iterator i = addedTiles.begin(); i != addedTiles.end();)
     {
         const IntVector2 tileIdx = *i;
-        if (beginTile.x_ <= tileIdx.x_ && tileIdx.x_ <= endTile.x_ && beginTile.y_ <= tileIdx.y_ && tileIdx.y_ <= endTile.y_)
+        if (beginTile.x <= tileIdx.x && tileIdx.x <= endTile.x && beginTile.y <= tileIdx.y && tileIdx.y <= endTile.y)
             ++i;
         else
         {
@@ -434,9 +434,9 @@ void Navigation::UpdateStreaming()
     }
 
     // Add tiles
-    for (int z = beginTile.y_; z <= endTile.y_; ++z)
+    for (int z = beginTile.y; z <= endTile.y; ++z)
     {
-        for (int x = beginTile.x_; x <= endTile.x_; ++x)
+        for (int x = beginTile.x; x <= endTile.x; ++x)
         {
             const IntVector2 tileIdx(x, z);
             if (!navMesh->HasTile(tileIdx) && tileData.find(tileIdx) != tileData.end())
@@ -454,8 +454,8 @@ void Navigation::SaveNavigationData()
     tileData.clear();
     addedTiles.clear();
     const IntVector2 numTiles = navMesh->GetNumTiles();
-    for (int z = 0; z < numTiles.y_; ++z)
-        for (int x = 0; x <= numTiles.x_; ++x)
+    for (int z = 0; z < numTiles.y; ++z)
+        for (int x = 0; x <= numTiles.x; ++x)
         {
             const IntVector2 tileIdx = IntVector2(x, z);
             tileData[tileIdx] = navMesh->GetTileData(tileIdx);

@@ -36,6 +36,8 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 set (CMAKE_CXX_EXTENSIONS OFF)
+set (CMAKE_INSTALL_MESSAGE LAZY)
+set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Set project name
 project (Urho3D)
@@ -191,3 +193,26 @@ add_subdirectory (Source)
 
 # Urho3D documentation
 add_subdirectory (Docs)
+
+# Print current build configuration
+message(STATUS "Alimer Engine version ${ALIMER_VERSION}")
+message(STATUS "GIT Revision ID: ${ALIMER_REVISION_ID}")
+message(STATUS "GIT Short ChangeSet: ${ALIMER_SHORT_CHANGE_SET}")
+message(STATUS "GIT ChangeSet: ${ALIMER_CHANGE_SET}")
+message(STATUS "GIT ChangeSet Date: ${ALIMER_CHANGE_SET_DATE}")
+
+if (ALIMER_BUILD_SHARED OR URHO3D_LIB_TYPE STREQUAL SHARED)
+  message(STATUS "  Library         SHARED")
+else ()
+  message(STATUS "  Library         STATIC")
+endif ()
+message(STATUS "  Docs            ${URHO3D_DOCS}")
+message(STATUS "  Logging         ${URHO3D_LOGGING}")
+message(STATUS "  Threading       ${URHO3D_THREADING}")
+message(STATUS "  Profiling       ${URHO3D_PROFILING}")
+message(STATUS "  Network         ${URHO3D_NETWORK}")
+#message(STATUS "  Audio           ${ALIMER_AUDIO}")
+message(STATUS "  Physics         ${URHO3D_PHYSICS}")
+message(STATUS "  Navigation      ${URHO3D_NAVIGATION}")
+message(STATUS "  2D              ${URHO3D_URHO2D}")
+message(STATUS "  Physics2D       ${URHO3D_PHYSICS2D}")

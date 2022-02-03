@@ -28,6 +28,7 @@
 #include "../Core/Context.h"
 #include "../Engine/DebugHud.h"
 #include "../Engine/Engine.h"
+#include "../Graphics/Texture2D.h"
 #include "../Graphics/Graphics.h"
 #include "../Graphics/Renderer.h"
 #include "../Resource/ResourceCache.h"
@@ -38,26 +39,29 @@
 
 #include "../DebugNew.h"
 
-namespace Urho3D
+using namespace Urho3D;
+
+namespace
 {
 
-static const char* qualityTexts[] =
-{
-    "Low",
-    "Med",
-    "High",
-    "High+"
-};
+    static const char* qualityTexts[] =
+    {
+        "Low",
+        "Med",
+        "High",
+        "High+"
+    };
 
-static const char* shadowQualityTexts[] =
-{
-    "16bit Simple",
-    "24bit Simple",
-    "16bit PCF",
-    "24bit PCF",
-    "VSM",
-    "Blurred VSM"
-};
+    static const char* shadowQualityTexts[] =
+    {
+        "16bit Simple",
+        "24bit Simple",
+        "16bit PCF",
+        "24bit PCF",
+        "VSM",
+        "Blurred VSM"
+    };
+}
 
 DebugHud::DebugHud(Context* context) :
     Object(context),
@@ -305,6 +309,4 @@ void DebugHud::HandlePostUpdate(StringHash eventType, VariantMap& eventData)
     using namespace PostUpdate;
 
     Update();
-}
-
 }

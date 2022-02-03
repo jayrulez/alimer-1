@@ -26,6 +26,7 @@
 #include "../Core/CoreEvents.h"
 #include "../Engine/Console.h"
 #include "../Engine/EngineEvents.h"
+#include "../Graphics/Texture2D.h"
 #include "../Graphics/Graphics.h"
 #include "../Input/Input.h"
 #include "../IO/IOEvents.h"

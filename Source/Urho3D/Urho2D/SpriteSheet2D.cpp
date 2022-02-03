@@ -36,15 +36,12 @@
 
 #include "../DebugNew.h"
 
-namespace Urho3D
-{
+using namespace Urho3D;
 
-SpriteSheet2D::SpriteSheet2D(Context* context) :
-    Resource(context)
+SpriteSheet2D::SpriteSheet2D(Context* context)
+    : Resource(context)
 {
 }
-
-SpriteSheet2D::~SpriteSheet2D() = default;
 
 void SpriteSheet2D::RegisterObject(Context* context)
 {
@@ -178,12 +175,12 @@ bool SpriteSheet2D::EndLoadFromPListFile()
         IntRect sourceColorRect = frameInfo["sourceColorRect"]->GetIntRect();
         if (sourceColorRect.left_ != 0 && sourceColorRect.top_ != 0)
         {
-            offset.x_ = -sourceColorRect.left_;
-            offset.y_ = -sourceColorRect.top_;
+            offset.x = -sourceColorRect.left_;
+            offset.y = -sourceColorRect.top_;
 
             IntVector2 sourceSize = frameInfo["sourceSize"]->GetIntVector2();
-            hotSpot.x_ = (offset.x_ + sourceSize.x_ / 2.f) / rectangle.Width();
-            hotSpot.y_ = 1.0f - (offset.y_ + sourceSize.y_ / 2.f) / rectangle.Height();
+            hotSpot.x_ = (offset.x + sourceSize.x / 2.f) / rectangle.Width();
+            hotSpot.y_ = 1.0f - (offset.y + sourceSize.y / 2.f) / rectangle.Height();
         }
 
         DefineSprite(name, rectangle, hotSpot, offset);
@@ -250,12 +247,12 @@ bool SpriteSheet2D::EndLoadFromXMLFile()
         IntVector2 offset(0, 0);
         if (subTextureElem.HasAttribute("frameWidth") && subTextureElem.HasAttribute("frameHeight"))
         {
-            offset.x_ = subTextureElem.GetInt("frameX");
-            offset.y_ = subTextureElem.GetInt("frameY");
+            offset.x = subTextureElem.GetInt("frameX");
+            offset.y = subTextureElem.GetInt("frameY");
             int frameWidth = subTextureElem.GetInt("frameWidth");
             int frameHeight = subTextureElem.GetInt("frameHeight");
-            hotSpot.x_ = (offset.x_ + frameWidth / 2.f) / width;
-            hotSpot.y_ = 1.0f - (offset.y_ + frameHeight / 2.f) / height;
+            hotSpot.x_ = (offset.x + frameWidth / 2.f) / width;
+            hotSpot.y_ = 1.0f - (offset.y + frameHeight / 2.f) / height;
         }
 
         DefineSprite(name, rectangle, hotSpot, offset);
@@ -329,12 +326,12 @@ bool SpriteSheet2D::EndLoadFromJSONFile()
 
         if (!frameWidthVal.IsNull() && !frameHeightVal.IsNull())
         {
-            offset.x_ = subTextureVal.Get("frameX").GetInt();
-            offset.y_ = subTextureVal.Get("frameY").GetInt();
+            offset.x = subTextureVal.Get("frameX").GetInt();
+            offset.y = subTextureVal.Get("frameY").GetInt();
             int frameWidth = frameWidthVal.GetInt();
             int frameHeight = frameHeightVal.GetInt();
-            hotSpot.x_ = (offset.x_ + frameWidth / 2.f) / width;
-            hotSpot.y_ = 1.0f - (offset.y_ + frameHeight / 2.f) / height;
+            hotSpot.x_ = (offset.x + frameWidth / 2.f) / width;
+            hotSpot.y_ = 1.0f - (offset.y + frameHeight / 2.f) / height;
         }
 
         DefineSprite(name, rectangle, hotSpot, offset);
@@ -344,6 +341,4 @@ bool SpriteSheet2D::EndLoadFromJSONFile()
     loadJSONFile_.Reset();
     loadTextureName_.Clear();
     return true;
-}
-
 }

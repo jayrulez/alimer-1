@@ -24,6 +24,7 @@
 
 #include "../Core/Context.h"
 #include "../Input/Input.h"
+#include "../Graphics/Texture2D.h"
 #include "../UI/LineEdit.h"
 #include "../UI/Text.h"
 #include "../UI/UI.h"
@@ -33,12 +34,13 @@
 
 #include <SDL/SDL.h>
 
+using namespace Urho3D;
+
 namespace Urho3D
 {
-
-StringHash VAR_DRAGDROPCONTENT("DragDropContent");
-
-extern const char* UI_CATEGORY;
+    StringHash VAR_DRAGDROPCONTENT("DragDropContent");
+    extern const char* UI_CATEGORY;
+}
 
 LineEdit::LineEdit(Context* context) :
     BorderImage(context),
@@ -71,7 +73,7 @@ LineEdit::LineEdit(Context* context) :
 
 LineEdit::~LineEdit() = default;
 
-void LineEdit::RegisterObject(Context* context)
+void LineEdit::RegisterObject(Context * context)
 {
     context->RegisterFactory<LineEdit>(UI_CATEGORY);
 
@@ -115,8 +117,8 @@ void LineEdit::Update(float timeStep)
     cursor_->SetVisible(cursorVisible);
 }
 
-void LineEdit::OnClickBegin(const IntVector2& position, const IntVector2& screenPosition, MouseButton button, MouseButtonFlags buttons, QualifierFlags qualifiers,
-    Cursor* cursor)
+void LineEdit::OnClickBegin(const IntVector2 & position, const IntVector2 & screenPosition, MouseButton button, MouseButtonFlags buttons, QualifierFlags qualifiers,
+    Cursor * cursor)
 {
     if (button == MOUSEB_LEFT && cursorMovable_)
     {
@@ -129,23 +131,23 @@ void LineEdit::OnClickBegin(const IntVector2& position, const IntVector2& screen
     }
 }
 
-void LineEdit::OnDoubleClick(const IntVector2& position, const IntVector2& screenPosition, MouseButton button, MouseButtonFlags buttons, QualifierFlags qualifiers,
-    Cursor* cursor)
+void LineEdit::OnDoubleClick(const IntVector2 & position, const IntVector2 & screenPosition, MouseButton button, MouseButtonFlags buttons, QualifierFlags qualifiers,
+    Cursor * cursor)
 {
     if (button == MOUSEB_LEFT)
         text_->SetSelection(0);
 }
 
-void LineEdit::OnDragBegin(const IntVector2& position, const IntVector2& screenPosition, MouseButtonFlags buttons, QualifierFlags qualifiers,
-    Cursor* cursor)
+void LineEdit::OnDragBegin(const IntVector2 & position, const IntVector2 & screenPosition, MouseButtonFlags buttons, QualifierFlags qualifiers,
+    Cursor * cursor)
 {
     UIElement::OnDragBegin(position, screenPosition, buttons, qualifiers, cursor);
 
     dragBeginCursor_ = GetCharIndex(position);
 }
 
-void LineEdit::OnDragMove(const IntVector2& position, const IntVector2& screenPosition, const IntVector2& deltaPos, MouseButtonFlags buttons,
-    QualifierFlags qualifiers, Cursor* cursor)
+void LineEdit::OnDragMove(const IntVector2 & position, const IntVector2 & screenPosition, const IntVector2 & deltaPos, MouseButtonFlags buttons,
+    QualifierFlags qualifiers, Cursor * cursor)
 {
     if (cursorMovable_ && textSelectable_)
     {
@@ -162,7 +164,7 @@ void LineEdit::OnDragMove(const IntVector2& position, const IntVector2& screenPo
     }
 }
 
-bool LineEdit::OnDragDropTest(UIElement* source)
+bool LineEdit::OnDragDropTest(UIElement * source)
 {
     if (source && editable_)
     {
@@ -175,7 +177,7 @@ bool LineEdit::OnDragDropTest(UIElement* source)
     return false;
 }
 
-bool LineEdit::OnDragDropFinish(UIElement* source)
+bool LineEdit::OnDragDropFinish(UIElement * source)
 {
     if (source && editable_)
     {
@@ -211,38 +213,135 @@ void LineEdit::OnKey(Key key, MouseButtonFlags buttons, QualifierFlags qualifier
 
     switch (key)
     {
-    case KEY_X:
-    case KEY_C:
-        if (textCopyable_ && qualifiers & QUAL_CTRL)
-        {
-            unsigned start = text_->GetSelectionStart();
-            unsigned length = text_->GetSelectionLength();
-
-            if (text_->GetSelectionLength())
-                GetSubsystem<UI>()->SetClipboardText(line_.SubstringUTF8(start, length));
-
-            if (key == KEY_X && editable_)
+        case KEY_X:
+        case KEY_C:
+            if (textCopyable_ && qualifiers & QUAL_CTRL)
             {
-                if (start + length < line_.LengthUTF8())
-                    line_ = line_.SubstringUTF8(0, start) + line_.SubstringUTF8(start + length);
-                else
-                    line_ = line_.SubstringUTF8(0, start);
-                text_->ClearSelection();
-                cursorPosition_ = start;
-                changed = true;
-            }
-        }
-        break;
+                unsigned start = text_->GetSelectionStart();
+                unsigned length = text_->GetSelectionLength();
 
-    case KEY_V:
-        if (editable_ && textCopyable_ && qualifiers & QUAL_CTRL)
-        {
-            const String& clipBoard = GetSubsystem<UI>()->GetClipboardText();
-            if (!clipBoard.Empty())
-            {
-                // Remove selected text first
-                if (text_->GetSelectionLength() > 0)
+                if (text_->GetSelectionLength())
+                    GetSubsystem<UI>()->SetClipboardText(line_.SubstringUTF8(start, length));
+
+                if (key == KEY_X && editable_)
                 {
+                    if (start + length < line_.LengthUTF8())
+                        line_ = line_.SubstringUTF8(0, start) + line_.SubstringUTF8(start + length);
+                    else
+                        line_ = line_.SubstringUTF8(0, start);
+                    text_->ClearSelection();
+                    cursorPosition_ = start;
+                    changed = true;
+                }
+            }
+            break;
+
+        case KEY_V:
+            if (editable_ && textCopyable_ && qualifiers & QUAL_CTRL)
+            {
+                const String& clipBoard = GetSubsystem<UI>()->GetClipboardText();
+                if (!clipBoard.Empty())
+                {
+                    // Remove selected text first
+                    if (text_->GetSelectionLength() > 0)
+                    {
+                        unsigned start = text_->GetSelectionStart();
+                        unsigned length = text_->GetSelectionLength();
+                        if (start + length < line_.LengthUTF8())
+                            line_ = line_.SubstringUTF8(0, start) + line_.SubstringUTF8(start + length);
+                        else
+                            line_ = line_.SubstringUTF8(0, start);
+                        text_->ClearSelection();
+                        cursorPosition_ = start;
+                    }
+                    if (cursorPosition_ < line_.LengthUTF8())
+                        line_ = line_.SubstringUTF8(0, cursorPosition_) + clipBoard + line_.SubstringUTF8(cursorPosition_);
+                    else
+                        line_ += clipBoard;
+                    cursorPosition_ += clipBoard.LengthUTF8();
+                    changed = true;
+                }
+            }
+            break;
+
+        case KEY_HOME:
+            qualifiers |= QUAL_CTRL;
+            // Fallthru
+
+        case KEY_LEFT:
+            if (cursorMovable_ && cursorPosition_ > 0)
+            {
+                if (textSelectable_ && qualifiers & QUAL_SHIFT && !text_->GetSelectionLength())
+                    dragBeginCursor_ = cursorPosition_;
+
+                if (qualifiers & QUAL_CTRL)
+                    cursorPosition_ = 0;
+                else if (text_->GetSelectionLength() && !(qualifiers & QUAL_SHIFT))
+                    cursorPosition_ = text_->GetSelectionStart();
+                else
+                    --cursorPosition_;
+                cursorMoved = true;
+
+                if (textSelectable_ && qualifiers & QUAL_SHIFT)
+                {
+                    unsigned start = dragBeginCursor_;
+                    unsigned current = cursorPosition_;
+                    if (start < current)
+                        text_->SetSelection(start, current - start);
+                    else
+                        text_->SetSelection(current, start - current);
+                }
+            }
+            if (!(qualifiers & QUAL_SHIFT))
+                text_->ClearSelection();
+            break;
+
+        case KEY_END:
+            qualifiers |= QUAL_CTRL;
+            // Fallthru
+
+        case KEY_RIGHT:
+            if (cursorMovable_ && cursorPosition_ < line_.LengthUTF8())
+            {
+                if (textSelectable_ && qualifiers & QUAL_SHIFT && !text_->GetSelectionLength())
+                    dragBeginCursor_ = cursorPosition_;
+
+                if (qualifiers & QUAL_CTRL)
+                    cursorPosition_ = line_.LengthUTF8();
+                else if (text_->GetSelectionLength() && !(qualifiers & QUAL_SHIFT))
+                    cursorPosition_ = text_->GetSelectionStart() + text_->GetSelectionLength();
+                else
+                    ++cursorPosition_;
+                cursorMoved = true;
+
+                if (textSelectable_ && qualifiers & QUAL_SHIFT)
+                {
+                    unsigned start = dragBeginCursor_;
+                    unsigned current = cursorPosition_;
+                    if (start < current)
+                        text_->SetSelection(start, current - start);
+                    else
+                        text_->SetSelection(current, start - current);
+                }
+            }
+            if (!(qualifiers & QUAL_SHIFT))
+                text_->ClearSelection();
+            break;
+
+        case KEY_DELETE:
+            if (editable_)
+            {
+                if (!text_->GetSelectionLength())
+                {
+                    if (cursorPosition_ < line_.LengthUTF8())
+                    {
+                        line_ = line_.SubstringUTF8(0, cursorPosition_) + line_.SubstringUTF8(cursorPosition_ + 1);
+                        changed = true;
+                    }
+                }
+                else
+                {
+                    // If a selection exists, erase it
                     unsigned start = text_->GetSelectionStart();
                     unsigned length = text_->GetSelectionLength();
                     if (start + length < line_.LengthUTF8())
@@ -251,112 +350,15 @@ void LineEdit::OnKey(Key key, MouseButtonFlags buttons, QualifierFlags qualifier
                         line_ = line_.SubstringUTF8(0, start);
                     text_->ClearSelection();
                     cursorPosition_ = start;
-                }
-                if (cursorPosition_ < line_.LengthUTF8())
-                    line_ = line_.SubstringUTF8(0, cursorPosition_) + clipBoard + line_.SubstringUTF8(cursorPosition_);
-                else
-                    line_ += clipBoard;
-                cursorPosition_ += clipBoard.LengthUTF8();
-                changed = true;
-            }
-        }
-        break;
-
-    case KEY_HOME:
-        qualifiers |= QUAL_CTRL;
-        // Fallthru
-
-    case KEY_LEFT:
-        if (cursorMovable_ && cursorPosition_ > 0)
-        {
-            if (textSelectable_ && qualifiers & QUAL_SHIFT && !text_->GetSelectionLength())
-                dragBeginCursor_ = cursorPosition_;
-
-            if (qualifiers & QUAL_CTRL)
-                cursorPosition_ = 0;
-            else if (text_->GetSelectionLength() && !(qualifiers & QUAL_SHIFT))
-                cursorPosition_ = text_->GetSelectionStart();
-            else
-                --cursorPosition_;
-            cursorMoved = true;
-
-            if (textSelectable_ && qualifiers & QUAL_SHIFT)
-            {
-                unsigned start = dragBeginCursor_;
-                unsigned current = cursorPosition_;
-                if (start < current)
-                    text_->SetSelection(start, current - start);
-                else
-                    text_->SetSelection(current, start - current);
-            }
-        }
-        if (!(qualifiers & QUAL_SHIFT))
-            text_->ClearSelection();
-        break;
-
-    case KEY_END:
-        qualifiers |= QUAL_CTRL;
-        // Fallthru
-
-    case KEY_RIGHT:
-        if (cursorMovable_ && cursorPosition_ < line_.LengthUTF8())
-        {
-            if (textSelectable_ && qualifiers & QUAL_SHIFT && !text_->GetSelectionLength())
-                dragBeginCursor_ = cursorPosition_;
-
-            if (qualifiers & QUAL_CTRL)
-                cursorPosition_ = line_.LengthUTF8();
-            else if (text_->GetSelectionLength() && !(qualifiers & QUAL_SHIFT))
-                cursorPosition_ = text_->GetSelectionStart() + text_->GetSelectionLength();
-            else
-                ++cursorPosition_;
-            cursorMoved = true;
-
-            if (textSelectable_ && qualifiers & QUAL_SHIFT)
-            {
-                unsigned start = dragBeginCursor_;
-                unsigned current = cursorPosition_;
-                if (start < current)
-                    text_->SetSelection(start, current - start);
-                else
-                    text_->SetSelection(current, start - current);
-            }
-        }
-        if (!(qualifiers & QUAL_SHIFT))
-            text_->ClearSelection();
-        break;
-
-    case KEY_DELETE:
-        if (editable_)
-        {
-            if (!text_->GetSelectionLength())
-            {
-                if (cursorPosition_ < line_.LengthUTF8())
-                {
-                    line_ = line_.SubstringUTF8(0, cursorPosition_) + line_.SubstringUTF8(cursorPosition_ + 1);
                     changed = true;
                 }
             }
-            else
-            {
-                // If a selection exists, erase it
-                unsigned start = text_->GetSelectionStart();
-                unsigned length = text_->GetSelectionLength();
-                if (start + length < line_.LengthUTF8())
-                    line_ = line_.SubstringUTF8(0, start) + line_.SubstringUTF8(start + length);
-                else
-                    line_ = line_.SubstringUTF8(0, start);
-                text_->ClearSelection();
-                cursorPosition_ = start;
-                changed = true;
-            }
-        }
-        break;
+            break;
 
-    case KEY_UP:
-    case KEY_DOWN:
-    case KEY_PAGEUP:
-    case KEY_PAGEDOWN:
+        case KEY_UP:
+        case KEY_DOWN:
+        case KEY_PAGEUP:
+        case KEY_PAGEDOWN:
         {
             using namespace UnhandledKey;
 
@@ -369,40 +371,40 @@ void LineEdit::OnKey(Key key, MouseButtonFlags buttons, QualifierFlags qualifier
         }
         return;
 
-    case KEY_BACKSPACE:
-        if (editable_)
-        {
-            if (!text_->GetSelectionLength())
+        case KEY_BACKSPACE:
+            if (editable_)
             {
-                if (line_.LengthUTF8() && cursorPosition_)
+                if (!text_->GetSelectionLength())
                 {
-                    if (cursorPosition_ < line_.LengthUTF8())
-                        line_ = line_.SubstringUTF8(0, cursorPosition_ - 1) + line_.SubstringUTF8(cursorPosition_);
+                    if (line_.LengthUTF8() && cursorPosition_)
+                    {
+                        if (cursorPosition_ < line_.LengthUTF8())
+                            line_ = line_.SubstringUTF8(0, cursorPosition_ - 1) + line_.SubstringUTF8(cursorPosition_);
+                        else
+                            line_ = line_.SubstringUTF8(0, cursorPosition_ - 1);
+                        --cursorPosition_;
+                        changed = true;
+                    }
+                }
+                else
+                {
+                    // If a selection exists, erase it
+                    unsigned start = text_->GetSelectionStart();
+                    unsigned length = text_->GetSelectionLength();
+                    if (start + length < line_.LengthUTF8())
+                        line_ = line_.SubstringUTF8(0, start) + line_.SubstringUTF8(start + length);
                     else
-                        line_ = line_.SubstringUTF8(0, cursorPosition_ - 1);
-                    --cursorPosition_;
+                        line_ = line_.SubstringUTF8(0, start);
+                    text_->ClearSelection();
+                    cursorPosition_ = start;
                     changed = true;
                 }
             }
-            else
-            {
-                // If a selection exists, erase it
-                unsigned start = text_->GetSelectionStart();
-                unsigned length = text_->GetSelectionLength();
-                if (start + length < line_.LengthUTF8())
-                    line_ = line_.SubstringUTF8(0, start) + line_.SubstringUTF8(start + length);
-                else
-                    line_ = line_.SubstringUTF8(0, start);
-                text_->ClearSelection();
-                cursorPosition_ = start;
-                changed = true;
-            }
-        }
-        break;
+            break;
 
-    case KEY_RETURN:
-    case KEY_RETURN2:
-    case KEY_KP_ENTER:
+        case KEY_RETURN:
+        case KEY_RETURN2:
+        case KEY_KP_ENTER:
         {
             // If using the on-screen keyboard, defocus this element to hide it now
             if (GetSubsystem<UI>()->GetUseScreenKeyboard() && HasFocus())
@@ -417,7 +419,7 @@ void LineEdit::OnKey(Key key, MouseButtonFlags buttons, QualifierFlags qualifier
             return;
         }
 
-    default: break;
+        default: break;
     }
 
     if (changed)
@@ -429,7 +431,7 @@ void LineEdit::OnKey(Key key, MouseButtonFlags buttons, QualifierFlags qualifier
         UpdateCursor();
 }
 
-void LineEdit::OnTextInput(const String& text)
+void LineEdit::OnTextInput(const String & text)
 {
     if (!editable_)
         return;
@@ -477,7 +479,7 @@ void LineEdit::OnTextInput(const String& text)
     }
 }
 
-void LineEdit::SetText(const String& text)
+void LineEdit::SetText(const String & text)
 {
     if (text != line_)
     {
@@ -534,7 +536,7 @@ void LineEdit::SetTextCopyable(bool enable)
     textCopyable_ = enable;
 }
 
-bool LineEdit::FilterImplicitAttributes(XMLElement& dest) const
+bool LineEdit::FilterImplicitAttributes(XMLElement & dest) const
 {
     if (!BorderImage::FilterImplicitAttributes(dest))
         return false;
@@ -608,11 +610,11 @@ void LineEdit::UpdateCursor()
     cursor_->SetSize(cursor_->GetWidth(), text_->GetRowHeight());
 
     IntVector2 screenPosition = ElementToScreen(cursor_->GetPosition());
-    SDL_Rect rect = {screenPosition.x_, screenPosition.y_, cursor_->GetSize().x_, cursor_->GetSize().y_};
+    SDL_Rect rect = { screenPosition.x, screenPosition.y, cursor_->GetSize().x, cursor_->GetSize().y };
     SDL_SetTextInputRect(&rect);
 
     // Scroll if necessary
-    int sx = -GetChildOffset().x_;
+    int sx = -GetChildOffset().x;
     int left = clipBorder_.left_;
     int right = GetWidth() - clipBorder_.left_ - clipBorder_.right_ - cursor_->GetWidth();
     if (x - sx > right)
@@ -627,24 +629,24 @@ void LineEdit::UpdateCursor()
     cursorBlinkTimer_ = 0.0f;
 }
 
-unsigned LineEdit::GetCharIndex(const IntVector2& position)
+unsigned LineEdit::GetCharIndex(const IntVector2 & position)
 {
     IntVector2 screenPosition = ElementToScreen(position);
     IntVector2 textPosition = text_->ScreenToElement(screenPosition);
 
-    if (textPosition.x_ < 0)
+    if (textPosition.x < 0)
         return 0;
 
     for (int i = text_->GetNumChars(); i >= 0; --i)
     {
-        if (textPosition.x_ >= text_->GetCharPosition((unsigned)i).x_)
+        if (textPosition.x >= text_->GetCharPosition((unsigned)i).x_)
             return (unsigned)i;
     }
 
     return M_MAX_UNSIGNED;
 }
 
-void LineEdit::HandleFocused(StringHash /*eventType*/, VariantMap& eventData)
+void LineEdit::HandleFocused(StringHash /*eventType*/, VariantMap & eventData)
 {
     if (eventData[Focused::P_BYKEY].GetBool())
     {
@@ -668,6 +670,4 @@ void LineEdit::HandleDefocused(StringHash /*eventType*/, VariantMap& /*eventData
 void LineEdit::HandleLayoutUpdated(StringHash /*eventType*/, VariantMap& /*eventData*/)
 {
     UpdateCursor();
-}
-
 }

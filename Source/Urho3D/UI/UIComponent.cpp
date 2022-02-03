@@ -43,123 +43,125 @@
 
 #include "../DebugNew.h"
 
+using namespace Urho3D;
+
 namespace Urho3D
 {
+    static int const UICOMPONENT_DEFAULT_TEXTURE_SIZE = 512;
+    static int const UICOMPONENT_MIN_TEXTURE_SIZE = 64;
+    static int const UICOMPONENT_MAX_TEXTURE_SIZE = 4096;
 
-static int const UICOMPONENT_DEFAULT_TEXTURE_SIZE = 512;
-static int const UICOMPONENT_MIN_TEXTURE_SIZE = 64;
-static int const UICOMPONENT_MAX_TEXTURE_SIZE = 4096;
-
-class UIElement3D : public UIElement
-{
-    URHO3D_OBJECT(UIElement3D, UIElement);
-public:
-    /// Construct.
-    explicit UIElement3D(Context* context) : UIElement(context) { }
-    /// Destruct.
-    ~UIElement3D() override = default;
-    /// Set UIComponent which is using this element as root element.
-    void SetNode(Node* node) { node_ = node; }
-    /// Set active viewport through which this element is rendered. If viewport is not set, it defaults to first viewport.
-    void SetViewport(Viewport* viewport) { viewport_ = viewport; }
-    /// Convert element coordinates to screen coordinates.
-    IntVector2 ElementToScreen(const IntVector2& position) override
+    class UIElement3D : public UIElement
     {
-        URHO3D_LOGERROR("UIElement3D::ElementToScreen is not implemented.");
-        return {-1, -1};
-    }
-    /// Convert screen coordinates to element coordinates.
-    IntVector2 ScreenToElement(const IntVector2& screenPos) override
-    {
-        IntVector2 result(-1, -1);
-
-        if (node_.Expired())
-            return result;
-
-        Scene* scene = node_->GetScene();
-        auto* model = node_->GetComponent<StaticModel>();
-        if (scene == nullptr || model == nullptr)
-            return result;
-
-        auto* renderer = GetSubsystem<Renderer>();
-        if (renderer == nullptr)
-            return result;
-
-        // \todo Always uses the first viewport, in case there are multiple
-        auto* octree = scene->GetComponent<Octree>();
-        if (viewport_ == nullptr)
-            viewport_ = renderer->GetViewportForScene(scene, 0);
-
-        if (viewport_.Expired() || octree == nullptr)
-            return result;
-
-        if (viewport_->GetScene() != scene)
+        URHO3D_OBJECT(UIElement3D, UIElement);
+    public:
+        /// Construct.
+        explicit UIElement3D(Context* context) : UIElement(context) { }
+        /// Destruct.
+        ~UIElement3D() override = default;
+        /// Set UIComponent which is using this element as root element.
+        void SetNode(Node* node) { node_ = node; }
+        /// Set active viewport through which this element is rendered. If viewport is not set, it defaults to first viewport.
+        void SetViewport(Viewport* viewport) { viewport_ = viewport; }
+        /// Convert element coordinates to screen coordinates.
+        IntVector2 ElementToScreen(const IntVector2& position) override
         {
-            URHO3D_LOGERROR("UIComponent and Viewport set to component's root element belong to different scenes.");
-            return result;
+            URHO3D_LOGERROR("UIElement3D::ElementToScreen is not implemented.");
+            return { -1, -1 };
         }
-
-        Camera* camera = viewport_->GetCamera();
-
-        if (camera == nullptr)
-            return result;
-
-        IntRect rect = viewport_->GetRect();
-        if (rect == IntRect::ZERO)
+        /// Convert screen coordinates to element coordinates.
+        IntVector2 ScreenToElement(const IntVector2& screenPos) override
         {
-            auto* graphics = GetSubsystem<Graphics>();
-            rect.right_ = graphics->GetWidth();
-            rect.bottom_ = graphics->GetHeight();
-        }
+            IntVector2 result(-1, -1);
 
-        auto* ui = GetSubsystem<UI>();
+            if (node_.Expired())
+                return result;
 
-        // Convert to system mouse position
-        IntVector2 pos;
-        pos = ui->ConvertUIToSystem(screenPos);
+            Scene* scene = node_->GetScene();
+            auto* model = node_->GetComponent<StaticModel>();
+            if (scene == nullptr || model == nullptr)
+                return result;
 
-        Ray ray(camera->GetScreenRay((float)pos.x_ / rect.Width(), (float)pos.y_ / rect.Height()));
-        PODVector<RayQueryResult> queryResultVector;
-        RayOctreeQuery query(queryResultVector, ray, RAY_TRIANGLE_UV, M_INFINITY, DRAWABLE_GEOMETRY, DEFAULT_VIEWMASK);
+            auto* renderer = GetSubsystem<Renderer>();
+            if (renderer == nullptr)
+                return result;
 
-        octree->Raycast(query);
+            // \todo Always uses the first viewport, in case there are multiple
+            auto* octree = scene->GetComponent<Octree>();
+            if (viewport_ == nullptr)
+                viewport_ = renderer->GetViewportForScene(scene, 0);
 
-        if (queryResultVector.Empty())
-            return result;
+            if (viewport_.Expired() || octree == nullptr)
+                return result;
 
-        for (unsigned i = 0; i < queryResultVector.Size(); i++)
-        {
-            RayQueryResult& queryResult = queryResultVector[i];
-            if (queryResult.drawable_ != model)
+            if (viewport_->GetScene() != scene)
             {
-                // ignore billboard sets by default
-                if (queryResult.drawable_->GetTypeInfo()->IsTypeOf(BillboardSet::GetTypeStatic()))
-                    continue;
+                URHO3D_LOGERROR("UIComponent and Viewport set to component's root element belong to different scenes.");
                 return result;
             }
 
-            Vector2& uv = queryResult.textureUV_;
-            result = IntVector2(static_cast<int>(uv.x_ * GetWidth()),
-                static_cast<int>(uv.y_ * GetHeight()));
+            Camera* camera = viewport_->GetCamera();
 
-            // Convert back to scaled UI position
-            result = ui->ConvertSystemToUI(result);
+            if (camera == nullptr)
+                return result;
 
+            IntRect rect = viewport_->GetRect();
+            if (rect == IntRect::ZERO)
+            {
+                auto* graphics = GetSubsystem<Graphics>();
+                rect.right_ = graphics->GetWidth();
+                rect.bottom_ = graphics->GetHeight();
+            }
+
+            auto* ui = GetSubsystem<UI>();
+
+            // Convert to system mouse position
+            IntVector2 pos;
+            pos = ui->ConvertUIToSystem(screenPos);
+
+            Ray ray(camera->GetScreenRay((float)pos.x / rect.Width(), (float)pos.y / rect.Height()));
+            PODVector<RayQueryResult> queryResultVector;
+            RayOctreeQuery query(queryResultVector, ray, RAY_TRIANGLE_UV, M_INFINITY, DRAWABLE_GEOMETRY, DEFAULT_VIEWMASK);
+
+            octree->Raycast(query);
+
+            if (queryResultVector.Empty())
+                return result;
+
+            for (unsigned i = 0; i < queryResultVector.Size(); i++)
+            {
+                RayQueryResult& queryResult = queryResultVector[i];
+                if (queryResult.drawable_ != model)
+                {
+                    // ignore billboard sets by default
+                    if (queryResult.drawable_->GetTypeInfo()->IsTypeOf(BillboardSet::GetTypeStatic()))
+                        continue;
+                    return result;
+                }
+
+                Vector2& uv = queryResult.textureUV_;
+                result = IntVector2(static_cast<int>(uv.x_ * GetWidth()),
+                    static_cast<int>(uv.y_ * GetHeight()));
+
+                // Convert back to scaled UI position
+                result = ui->ConvertSystemToUI(result);
+
+                return result;
+            }
             return result;
         }
-        return result;
-    }
 
-protected:
-    /// A UIComponent which owns this element.
-    WeakPtr<Node> node_;
-    /// Viewport which renders this element.
-    WeakPtr<Viewport> viewport_;
-};
+    protected:
+        /// A UIComponent which owns this element.
+        WeakPtr<Node> node_;
+        /// Viewport which renders this element.
+        WeakPtr<Viewport> viewport_;
+    };
+}
 
 UIComponent::UIComponent(Context* context)
-    : Component(context),
-    viewportIndex_(0)
+    : Component(context)
+    , viewportIndex_(0)
 {
     texture_ = context_->CreateObject<Texture2D>();
     texture_->SetFilterMode(FILTER_BILINEAR);
@@ -184,7 +186,7 @@ UIComponent::UIComponent(Context* context)
 
 UIComponent::~UIComponent() = default;
 
-void UIComponent::RegisterObject(Context* context)
+void UIComponent::RegisterObject(Context * context)
 {
     context->RegisterFactory<UIComponent>();
     context->RegisterFactory<UIElement3D>();
@@ -205,7 +207,7 @@ Texture2D* UIComponent::GetTexture() const
     return texture_;
 }
 
-void UIComponent::OnNodeSet(Node* node)
+void UIComponent::OnNodeSet(Node * node)
 {
     rootElement_->SetNode(node);
     if (node)
@@ -229,7 +231,7 @@ void UIComponent::OnNodeSet(Node* node)
     }
 }
 
-void UIComponent::OnElementResized(StringHash eventType, VariantMap& args)
+void UIComponent::OnElementResized(StringHash eventType, VariantMap & args)
 {
     int width = args[Resized::P_WIDTH].GetInt();
     int height = args[Resized::P_HEIGHT].GetInt();
@@ -238,7 +240,7 @@ void UIComponent::OnElementResized(StringHash eventType, VariantMap& args)
         height < UICOMPONENT_MIN_TEXTURE_SIZE || height > UICOMPONENT_MAX_TEXTURE_SIZE)
     {
         URHO3D_LOGERRORF("UIComponent: Texture size %dx%d is not valid. Width and height should be between %d and %d.",
-                         width, height, UICOMPONENT_MIN_TEXTURE_SIZE, UICOMPONENT_MAX_TEXTURE_SIZE);
+            width, height, UICOMPONENT_MIN_TEXTURE_SIZE, UICOMPONENT_MAX_TEXTURE_SIZE);
         return;
     }
 
@@ -257,6 +259,4 @@ void UIComponent::SetViewportIndex(unsigned int index)
         Viewport* viewport = renderer->GetViewportForScene(scene, index);
         rootElement_->SetViewport(viewport);
     }
-}
-
 }

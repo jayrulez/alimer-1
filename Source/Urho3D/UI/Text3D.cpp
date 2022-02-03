@@ -744,7 +744,7 @@ namespace Urho3D
 
         if (fixedScreenSize_)
         {
-            float textScaling = 2.0f / TEXT_SCALING / frame.viewSize_.y_;
+            float textScaling = 2.0f / TEXT_SCALING / frame.viewSize_.y;
             float halfViewWorldSize = frame.camera_->GetHalfViewSize();
 
             if (!frame.camera_->IsOrthographic())

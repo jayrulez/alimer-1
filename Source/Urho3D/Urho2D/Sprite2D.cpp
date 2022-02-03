@@ -25,15 +25,17 @@
 #include "../Core/Context.h"
 #include "../Graphics/Texture2D.h"
 #include "../IO/Deserializer.h"
+#include "../Resource/PListFile.h"
 #include "../Resource/ResourceCache.h"
+#include "../Resource/XMLFile.h"
+#include "../Resource/JSONFile.h"
 #include "../Urho2D/Drawable2D.h"
 #include "../Urho2D/Sprite2D.h"
 #include "../Urho2D/SpriteSheet2D.h"
 
 #include "../DebugNew.h"
 
-namespace Urho3D
-{
+using namespace Urho3D;
 
 Sprite2D::Sprite2D(Context* context) :
     Resource(context),
@@ -228,6 +230,4 @@ Sprite2D* Sprite2D::LoadFromResourceRef(Object* object, const ResourceRef& value
     }
 
     return nullptr;
-}
-
 }

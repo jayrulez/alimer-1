@@ -26,6 +26,7 @@
 #include "../IO/Log.h"
 #include "../Resource/ResourceCache.h"
 #include "../Resource/XMLFile.h"
+#include "../Graphics/Texture2D.h"
 #include "../UI/Button.h"
 #include "../UI/MessageBox.h"
 #include "../UI/Text.h"
@@ -33,8 +34,7 @@
 #include "../UI/UIEvents.h"
 #include "../UI/Window.h"
 
-namespace Urho3D
-{
+using namespace Urho3D;
 
 MessageBox::MessageBox(Context* context, const String& messageString, const String& titleString, XMLFile* layoutFile,
     XMLFile* styleFile) :
@@ -76,7 +76,7 @@ MessageBox::MessageBox(Context* context, const String& messageString, const Stri
     if (window)
     {
         const IntVector2& size = window->GetSize();
-        window->SetPosition((root->GetWidth() - size.x_) / 2, (root->GetHeight() - size.y_) / 2);
+        window->SetPosition((root->GetWidth() - size.x) / 2, (root->GetHeight() - size.y) / 2);
         window->SetModal(true);
         SubscribeToEvent(window, E_MODALCHANGED, URHO3D_HANDLER(MessageBox, HandleMessageAcknowledged));
     }
@@ -143,6 +143,4 @@ void MessageBox::HandleMessageAcknowledged(StringHash eventType, VariantMap& eve
 
     // Self destruct
     ReleaseRef();
-}
-
 }

@@ -32,6 +32,7 @@
 #include "../Engine/DebugHud.h"
 #include "../Engine/Engine.h"
 #include "../Engine/EngineDefs.h"
+#include "../Graphics/Texture2D.h"
 #include "../Graphics/Graphics.h"
 #include "../Graphics/Renderer.h"
 #include "../Input/Input.h"

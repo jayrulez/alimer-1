@@ -205,8 +205,8 @@ void InverseKinematics::UpdateCameraAndFloor(float /*timeStep*/)
     if (input->GetMouseButtonDown(MOUSEB_LEFT))
     {
         IntVector2 mouseMove = input->GetMouseMove();
-        yaw_ += MOUSE_SENSITIVITY * mouseMove.x_;
-        pitch_ += MOUSE_SENSITIVITY * mouseMove.y_;
+        yaw_ += MOUSE_SENSITIVITY * mouseMove.x;
+        pitch_ += MOUSE_SENSITIVITY * mouseMove.y;
         pitch_ = Clamp(pitch_, -90.0f, 90.0f);
     }
 
@@ -216,7 +216,7 @@ void InverseKinematics::UpdateCameraAndFloor(float /*timeStep*/)
         Vector2 mouseMove = Matrix2(
             -Cos(yaw_), Sin(yaw_),
             Sin(yaw_),  Cos(yaw_)
-        ) * Vector2(mouseMoveInt.y_, -mouseMoveInt.x_);
+        ) * Vector2(mouseMoveInt.y, -mouseMoveInt.x);
         floorPitch_ += MOUSE_SENSITIVITY * mouseMove.x_;
         floorPitch_ = Clamp(floorPitch_, -90.0f, 90.0f);
         floorRoll_ += MOUSE_SENSITIVITY * mouseMove.y_;

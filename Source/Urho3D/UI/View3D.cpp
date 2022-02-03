@@ -34,16 +34,18 @@
 #include "../UI/UI.h"
 #include "../UI/UIEvents.h"
 
+using namespace Urho3D;
+
 namespace Urho3D
 {
+    extern const char* UI_CATEGORY;
+}
 
-extern const char* UI_CATEGORY;
-
-View3D::View3D(Context* context) :
-    Window(context),
-    ownScene_(true),
-    rttFormat_(Graphics::GetRGBFormat()),
-    autoUpdate_(true)
+View3D::View3D(Context* context)
+    : Window(context)
+    , ownScene_(true)
+    , rttFormat_(Graphics::GetRGBFormat())
+    , autoUpdate_(true)
 {
     renderTexture_ = new Texture2D(context_);
     depthTexture_ = new Texture2D(context_);
@@ -74,8 +76,8 @@ void View3D::RegisterObject(Context* context)
 
 void View3D::OnResize(const IntVector2& newSize, const IntVector2& delta)
 {
-    int width = newSize.x_;
-    int height = newSize.y_;
+    int width = newSize.x;
+    int height = newSize.y;
 
     if (width > 0 && height > 0)
     {
@@ -173,6 +175,4 @@ void View3D::HandleRenderSurfaceUpdate(StringHash eventType, VariantMap& eventDa
 {
     if (autoUpdate_ && IsVisibleEffective())
         QueueUpdate();
-}
-
 }

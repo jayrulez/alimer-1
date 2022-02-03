@@ -463,11 +463,11 @@ namespace Urho3D
 
         /// Return width.
         /// @property
-        int GetWidth() const { return size_.x_; }
+        int GetWidth() const { return size_.x; }
 
         /// Return height.
         /// @property
-        int GetHeight() const { return size_.y_; }
+        int GetHeight() const { return size_.y; }
 
         /// Return minimum size.
         /// @property
@@ -475,11 +475,11 @@ namespace Urho3D
 
         /// Return minimum width.
         /// @property
-        int GetMinWidth() const { return minSize_.x_; }
+        int GetMinWidth() const { return minSize_.x; }
 
         /// Return minimum height.
         /// @property
-        int GetMinHeight() const { return minSize_.y_; }
+        int GetMinHeight() const { return minSize_.y; }
 
         /// Return maximum size.
         /// @property
@@ -487,11 +487,11 @@ namespace Urho3D
 
         /// Return minimum width.
         /// @property
-        int GetMaxWidth() const { return maxSize_.x_; }
+        int GetMaxWidth() const { return maxSize_.x; }
 
         /// Return minimum height.
         /// @property
-        int GetMaxHeight() const { return maxSize_.y_; }
+        int GetMaxHeight() const { return maxSize_.y; }
 
         /// Return true if size is fixed.
         /// @property
@@ -499,11 +499,11 @@ namespace Urho3D
 
         /// Return true if width is fixed.
         /// @property
-        bool IsFixedWidth() const { return minSize_.x_ == maxSize_.x_; }
+        bool IsFixedWidth() const { return minSize_.x == maxSize_.x; }
 
         /// Return true if height is fixed.
         /// @property
-        bool IsFixedHeight() const { return minSize_.y_ == maxSize_.y_; }
+        bool IsFixedHeight() const { return minSize_.y == maxSize_.y; }
 
         /// Return child element offset.
         /// @property

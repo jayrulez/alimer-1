@@ -26,6 +26,7 @@
 #include "../IO/File.h"
 #include "../IO/FileSystem.h"
 #include "../Input/InputEvents.h"
+#include "../Graphics/Texture2D.h"
 #include "../UI/DropDownList.h"
 #include "../UI/FileSelector.h"
 #include "../UI/LineEdit.h"
@@ -37,16 +38,18 @@
 
 #include "../DebugNew.h"
 
-namespace Urho3D
-{
+using namespace Urho3D;
 
-static bool CompareEntries(const FileSelectorEntry& lhs, const FileSelectorEntry& rhs)
+namespace
 {
-    if (lhs.directory_ && !rhs.directory_)
-        return true;
-    if (!lhs.directory_ && rhs.directory_)
-        return false;
-    return lhs.name_.Compare(rhs.name_, false) < 0;
+    static inline bool CompareEntries(const FileSelectorEntry& lhs, const FileSelectorEntry& rhs)
+    {
+        if (lhs.directory_ && !rhs.directory_)
+            return true;
+        if (!lhs.directory_ && rhs.directory_)
+            return false;
+        return lhs.name_.Compare(rhs.name_, false) < 0;
+    }
 }
 
 FileSelector::FileSelector(Context* context) :
@@ -486,6 +489,4 @@ void FileSelector::HandleCancelPressed(StringHash eventType, VariantMap& eventDa
     newEventData[P_FILTER] = GetFilter();
     newEventData[P_OK] = false;
     SendEvent(E_FILESELECTED, newEventData);
-}
-
 }

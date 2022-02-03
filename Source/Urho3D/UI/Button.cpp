@@ -24,16 +24,19 @@
 
 #include "../Core/Context.h"
 #include "../Input/InputEvents.h"
+#include "../Graphics/Texture2D.h"
 #include "../UI/Button.h"
 #include "../UI/UI.h"
 #include "../UI/UIEvents.h"
 
 #include "../DebugNew.h"
 
+using namespace Urho3D;
+
 namespace Urho3D
 {
-
-extern const char* UI_CATEGORY;
+    extern const char* UI_CATEGORY;
+}
 
 Button::Button(Context* context) :
     BorderImage(context),
@@ -194,6 +197,4 @@ void Button::SetPressed(bool enable)
 {
     pressed_ = enable;
     SetChildOffset(pressed_ ? pressedChildOffset_ : IntVector2::ZERO);
-}
-
 }

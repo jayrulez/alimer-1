@@ -25,6 +25,7 @@
 #include "../Core/Context.h"
 #include "../Input/InputEvents.h"
 #include "../IO/Log.h"
+#include "../Graphics/Texture2D.h"
 #include "../UI/LineEdit.h"
 #include "../UI/Menu.h"
 #include "../UI/UI.h"
@@ -33,13 +34,15 @@
 
 #include "../DebugNew.h"
 
+using namespace Urho3D;
+
 namespace Urho3D
 {
+    const StringHash VAR_SHOW_POPUP("ShowPopup");
+    extern StringHash VAR_ORIGIN;
 
-const StringHash VAR_SHOW_POPUP("ShowPopup");
-extern StringHash VAR_ORIGIN;
-
-extern const char* UI_CATEGORY;
+    extern const char* UI_CATEGORY;
+}
 
 Menu::Menu(Context* context) :
     Button(context),
@@ -439,6 +442,4 @@ void Menu::HandleKeyDown(StringHash eventType, VariantMap& eventData)
 
         HandlePressedReleased(eventType, eventData);
     }
-}
-
 }

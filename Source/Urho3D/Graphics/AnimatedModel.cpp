@@ -44,6 +44,8 @@
 
 #include "../DebugNew.h"
 
+using namespace std;
+
 namespace Urho3D
 {
     extern const char* GEOMETRY_CATEGORY;
@@ -171,10 +173,10 @@ namespace Urho3D
         if (query.ray_.HitDistance(GetWorldBoundingBox()) >= query.maxDistance_)
             return;
 
-        const Vector<Bone>& bones = skeleton_.GetBones();
+        const std::vector<Bone>& bones = skeleton_.GetBones();
         Sphere boneSphere;
 
-        for (unsigned i = 0; i < bones.Size(); ++i)
+        for (size_t i = 0; i < bones.size(); ++i)
         {
             const Bone& bone = bones[i];
             if (!bone.node_)
@@ -183,7 +185,7 @@ namespace Urho3D
             float distance;
 
             // Use hitbox if available
-            if (bone.collisionMask_ & BONECOLLISION_BOX)
+            if ((bone.collisionMask_ & BoneCollisionShapeFlags::Box) != 0)
             {
                 // Do an initial crude test using the bone's AABB
                 const BoundingBox& box = bone.boundingBox_;
@@ -201,7 +203,7 @@ namespace Urho3D
                         continue;
                 }
             }
-            else if (bone.collisionMask_ & BONECOLLISION_SPHERE)
+            else if ((bone.collisionMask_ & BoneCollisionShapeFlags::Sphere) != 0)
             {
                 boneSphere.center_ = bone.node_->GetWorldPosition();
                 boneSphere.radius_ = bone.radius_;
@@ -219,7 +221,7 @@ namespace Urho3D
             result.distance_ = distance;
             result.drawable_ = this;
             result.node_ = node_;
-            result.subObject_ = i;
+            result.subObject_ = (uint32_t)i;
             results.Push(result);
         }
     }
@@ -703,11 +705,11 @@ namespace Urho3D
             // Check if bone structure has stayed compatible (reloading the model). In that case retain the old bones and animations
             if (skeleton_.GetNumBones() == skeleton.GetNumBones())
             {
-                Vector<Bone>& destBones = skeleton_.GetModifiableBones();
-                const Vector<Bone>& srcBones = skeleton.GetBones();
+                vector<Bone>& destBones = skeleton_.GetModifiableBones();
+                const vector<Bone>& srcBones = skeleton.GetBones();
                 bool compatible = true;
 
-                for (unsigned i = 0; i < destBones.Size(); ++i)
+                for (size_t i = 0; i < destBones.size(); ++i)
                 {
                     if (destBones[i].node_ && destBones[i].name_ == srcBones[i].name_ && destBones[i].parentIndex_ ==
                         srcBones[i].parentIndex_)
@@ -740,11 +742,11 @@ namespace Urho3D
             // Merge bounding boxes from non-master models
             FinalizeBoneBoundingBoxes();
 
-            Vector<Bone>& bones = skeleton_.GetModifiableBones();
+            vector<Bone>& bones = skeleton_.GetModifiableBones();
             // Create scene nodes for the bones
             if (createBones)
             {
-                for (Vector<Bone>::Iterator i = bones.Begin(); i != bones.End(); ++i)
+                for (vector<Bone>::iterator i = bones.begin(); i != bones.end(); ++i)
                 {
                     // Create bones as local, as they are never to be directly synchronized over the network
                     Node* boneNode = node_->CreateChild(i->name_, LOCAL);
@@ -755,10 +757,10 @@ namespace Urho3D
                     i->node_ = boneNode;
                 }
 
-                for (unsigned i = 0; i < bones.Size(); ++i)
+                for (size_t i = 0; i < bones.size(); ++i)
                 {
                     unsigned parentIndex = bones[i].parentIndex_;
-                    if (parentIndex != i && parentIndex < bones.Size())
+                    if (parentIndex != i && parentIndex < bones.size())
                         bones[parentIndex].node_->AddChild(bones[i].node_);
                 }
             }
@@ -781,8 +783,8 @@ namespace Urho3D
 
             if (createBones)
             {
-                Vector<Bone>& bones = skeleton_.GetModifiableBones();
-                for (Vector<Bone>::Iterator i = bones.Begin(); i != bones.End(); ++i)
+                vector<Bone>& bones = skeleton_.GetModifiableBones();
+                for (vector<Bone>::iterator i = bones.begin(); i != bones.end(); ++i)
                 {
                     Node* boneNode = node_->GetChild(i->name_, true);
                     if (boneNode)
@@ -804,8 +806,8 @@ namespace Urho3D
 
     void AnimatedModel::SetBonesEnabledAttr(const VariantVector& value)
     {
-        Vector<Bone>& bones = skeleton_.GetModifiableBones();
-        for (unsigned i = 0; i < bones.Size() && i < value.size(); ++i)
+        vector<Bone>& bones = skeleton_.GetModifiableBones();
+        for (size_t i = 0; i < bones.size() && i < value.size(); ++i)
             bones[i].animated_ = value[i].GetBool();
     }
 
@@ -866,9 +868,9 @@ namespace Urho3D
     VariantVector AnimatedModel::GetBonesEnabledAttr() const
     {
         VariantVector ret;
-        const Vector<Bone>& bones = skeleton_.GetBones();
-        ret.reserve(bones.Size());
-        for (Vector<Bone>::ConstIterator i = bones.Begin(); i != bones.End(); ++i)
+        const vector<Bone>& bones = skeleton_.GetBones();
+        ret.reserve(bones.size());
+        for (vector<Bone>::const_iterator i = bones.begin(); i != bones.end(); ++i)
             ret.push_back(i->animated_);
         return ret;
     }
@@ -910,8 +912,8 @@ namespace Urho3D
             boneBoundingBox_.Clear();
             Matrix3x4 inverseNodeTransform = node_->GetWorldTransform().Inverse();
 
-            const Vector<Bone>& bones = skeleton_.GetBones();
-            for (Vector<Bone>::ConstIterator i = bones.Begin(); i != bones.End(); ++i)
+            const vector<Bone>& bones = skeleton_.GetBones();
+            for (vector<Bone>::const_iterator i = bones.begin(); i != bones.end(); ++i)
             {
                 Node* boneNode = i->node_;
                 if (!boneNode)
@@ -919,9 +921,9 @@ namespace Urho3D
 
                 // Use hitbox if available. If not, use only half of the sphere radius
                 /// \todo The sphere radius should be multiplied with bone scale
-                if (i->collisionMask_ & BONECOLLISION_BOX)
+                if ((i->collisionMask_ & BoneCollisionShapeFlags::Box) != 0)
                     boneBoundingBox_.Merge(i->boundingBox_.Transformed(inverseNodeTransform * boneNode->GetWorldTransform()));
-                else if (i->collisionMask_ & BONECOLLISION_SPHERE)
+                else if ((i->collisionMask_ & BoneCollisionShapeFlags::Sphere) != 0)
                     boneBoundingBox_.Merge(Sphere(inverseNodeTransform * boneNode->GetWorldPosition(), i->radius_ * 0.5f));
             }
         }
@@ -983,9 +985,9 @@ namespace Urho3D
             return;
 
         // Find the bone nodes from the node hierarchy and add listeners
-        Vector<Bone>& bones = skeleton_.GetModifiableBones();
+        vector<Bone>& bones = skeleton_.GetModifiableBones();
         bool boneFound = false;
-        for (Vector<Bone>::Iterator i = bones.Begin(); i != bones.End(); ++i)
+        for (vector<Bone>::iterator i = bones.begin(); i != bones.end(); ++i)
         {
             Node* boneNode = node_->GetChild(i->name_, true);
             if (boneNode)
@@ -1011,7 +1013,7 @@ namespace Urho3D
 
     void AnimatedModel::FinalizeBoneBoundingBoxes()
     {
-        Vector<Bone>& bones = skeleton_.GetModifiableBones();
+        vector<Bone>& bones = skeleton_.GetModifiableBones();
         PODVector<AnimatedModel*> models;
         GetComponents<AnimatedModel>(models);
 
@@ -1020,8 +1022,8 @@ namespace Urho3D
             // Reset first to the model resource's original bone bounding information if available (should be)
             if (model_)
             {
-                const Vector<Bone>& modelBones = model_->GetSkeleton().GetBones();
-                for (unsigned i = 0; i < bones.Size() && i < modelBones.Size(); ++i)
+                const vector<Bone>& modelBones = model_->GetSkeleton().GetBones();
+                for (size_t i = 0; i < bones.size() && i < modelBones.size(); ++i)
                 {
                     bones[i].collisionMask_ = modelBones[i].collisionMask_;
                     bones[i].radius_ = modelBones[i].radius_;
@@ -1037,19 +1039,19 @@ namespace Urho3D
                     continue;
 
                 Skeleton& otherSkeleton = (*i)->GetSkeleton();
-                for (Vector<Bone>::Iterator j = bones.Begin(); j != bones.End(); ++j)
+                for (vector<Bone>::iterator j = bones.begin(); j != bones.end(); ++j)
                 {
                     Bone* otherBone = otherSkeleton.GetBone(j->nameHash_);
                     if (otherBone)
                     {
-                        if (otherBone->collisionMask_ & BONECOLLISION_SPHERE)
+                        if ((otherBone->collisionMask_ & BoneCollisionShapeFlags::Sphere) != 0)
                         {
-                            j->collisionMask_ |= BONECOLLISION_SPHERE;
+                            j->collisionMask_ |= BoneCollisionShapeFlags::Sphere;
                             j->radius_ = Max(j->radius_, otherBone->radius_);
                         }
-                        if (otherBone->collisionMask_ & BONECOLLISION_BOX)
+                        if ((otherBone->collisionMask_ & BoneCollisionShapeFlags::Box) != 0)
                         {
-                            j->collisionMask_ |= BONECOLLISION_BOX;
+                            j->collisionMask_ |= BoneCollisionShapeFlags::Box;
                             if (j->boundingBox_.Defined())
                                 j->boundingBox_.Merge(otherBone->boundingBox_);
                             else
@@ -1062,12 +1064,12 @@ namespace Urho3D
 
         // Remove collision information from dummy bones that do not affect skinning, to prevent them from being merged
         // to the bounding box and making it artificially large
-        for (Vector<Bone>::Iterator i = bones.Begin(); i != bones.End(); ++i)
+        for (vector<Bone>::iterator i = bones.begin(); i != bones.end(); ++i)
         {
-            if (i->collisionMask_ & BONECOLLISION_BOX && i->boundingBox_.Size().Length() < M_EPSILON)
-                i->collisionMask_ &= ~BONECOLLISION_BOX;
-            if (i->collisionMask_ & BONECOLLISION_SPHERE && i->radius_ < M_EPSILON)
-                i->collisionMask_ &= ~BONECOLLISION_SPHERE;
+            if ((i->collisionMask_ & BoneCollisionShapeFlags::Box) != 0 && i->boundingBox_.Size().Length() < M_EPSILON)
+                i->collisionMask_ &= ~BoneCollisionShapeFlags::Box;
+            if ((i->collisionMask_ & BoneCollisionShapeFlags::Sphere) != 0 && i->radius_ < M_EPSILON)
+                i->collisionMask_ &= ~BoneCollisionShapeFlags::Sphere;
         }
     }
 
@@ -1302,14 +1304,14 @@ namespace Urho3D
     void AnimatedModel::UpdateSkinning()
     {
         // Note: the model's world transform will be baked in the skin matrices
-        const Vector<Bone>& bones = skeleton_.GetBones();
+        const vector<Bone>& bones = skeleton_.GetBones();
         // Use model's world transform in case a bone is missing
         const Matrix3x4& worldTransform = node_->GetWorldTransform();
 
         // Skinning with global matrices only
         if (!geometrySkinMatrices_.Size())
         {
-            for (unsigned i = 0; i < bones.Size(); ++i)
+            for (size_t i = 0; i < bones.size(); ++i)
             {
                 const Bone& bone = bones[i];
                 if (bone.node_)
@@ -1321,7 +1323,7 @@ namespace Urho3D
         // Skinning with per-geometry matrices
         else
         {
-            for (unsigned i = 0; i < bones.Size(); ++i)
+            for (size_t i = 0; i < bones.size(); ++i)
             {
                 const Bone& bone = bones[i];
                 if (bone.node_)

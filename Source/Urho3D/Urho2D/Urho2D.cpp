@@ -22,6 +22,10 @@
 #include "../Precompiled.h"
 
 #include "../Core/Context.h"
+#include "../Graphics/Texture2D.h"
+#include "../Resource/PListFile.h"
+#include "../Resource/XMLFile.h"
+#include "../Resource/JSONFile.h"
 #include "../Urho2D/StretchableSprite2D.h"
 #include "../Urho2D/AnimatedSprite2D.h"
 #include "../Urho2D/AnimationSet2D.h"
@@ -37,12 +41,14 @@
 
 #include "../DebugNew.h"
 
+using namespace Urho3D;
+
 namespace Urho3D
 {
+    const char* URHO2D_CATEGORY = "Urho2D";
+}
 
-const char* URHO2D_CATEGORY = "Urho2D";
-
-void RegisterUrho2DLibrary(Context* context)
+void Urho3D::RegisterUrho2DLibrary(Context* context)
 {
     Renderer2D::RegisterObject(context);
 
@@ -64,6 +70,4 @@ void RegisterUrho2DLibrary(Context* context)
     TmxFile2D::RegisterObject(context);
     TileMap2D::RegisterObject(context);
     TileMapLayer2D::RegisterObject(context);
-}
-
 }

@@ -23,13 +23,9 @@
 #include "../Precompiled.h"
 
 #include "../Math/Vector2.h"
-
 #include <cstdio>
 
-#include "../DebugNew.h"
-
-namespace Urho3D
-{
+using namespace Urho3D;
 
 const Vector2 Vector2::ZERO;
 const Vector2 Vector2::LEFT(-1.0f, 0.0f);
@@ -55,8 +51,6 @@ String Vector2::ToString() const
 String IntVector2::ToString() const
 {
     char tempBuffer[CONVERSION_BUFFER_LENGTH];
-    sprintf(tempBuffer, "%d %d", x_, y_);
+    sprintf(tempBuffer, "%d %d", x, y);
     return String(tempBuffer);
-}
-
 }

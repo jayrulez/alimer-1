@@ -59,8 +59,7 @@
 
 #include "../DebugNew.h"
 
-namespace Urho3D
-{
+using namespace Urho3D;
 
 void Graphics::SetExternalWindow(void* window)
 {
@@ -87,7 +86,7 @@ void Graphics::SetWindowIcon(Image* windowIcon)
 void Graphics::SetWindowPosition(const IntVector2& position)
 {
     if (window_)
-        SDL_SetWindowPosition(window_, position.x_, position.y_);
+        SDL_SetWindowPosition(window_, position.x, position.y);
     else
         position_ = position; // Sets as initial position for OpenWindow()
 }
@@ -176,48 +175,48 @@ void Graphics::SetShaderParameter(StringHash param, const Variant& value)
 {
     switch (value.GetType())
     {
-    case VAR_BOOL:
-        SetShaderParameter(param, value.GetBool());
-        break;
+        case VAR_BOOL:
+            SetShaderParameter(param, value.GetBool());
+            break;
 
-    case VAR_INT:
-        SetShaderParameter(param, value.GetInt());
-        break;
+        case VAR_INT:
+            SetShaderParameter(param, value.GetInt());
+            break;
 
-    case VAR_FLOAT:
-    case VAR_DOUBLE:
-        SetShaderParameter(param, value.GetFloat());
-        break;
+        case VAR_FLOAT:
+        case VAR_DOUBLE:
+            SetShaderParameter(param, value.GetFloat());
+            break;
 
-    case VAR_VECTOR2:
-        SetShaderParameter(param, value.GetVector2());
-        break;
+        case VAR_VECTOR2:
+            SetShaderParameter(param, value.GetVector2());
+            break;
 
-    case VAR_VECTOR3:
-        SetShaderParameter(param, value.GetVector3());
-        break;
+        case VAR_VECTOR3:
+            SetShaderParameter(param, value.GetVector3());
+            break;
 
-    case VAR_VECTOR4:
-        SetShaderParameter(param, value.GetVector4());
-        break;
+        case VAR_VECTOR4:
+            SetShaderParameter(param, value.GetVector4());
+            break;
 
-    case VAR_COLOR:
-        SetShaderParameter(param, value.GetColor());
-        break;
+        case VAR_COLOR:
+            SetShaderParameter(param, value.GetColor());
+            break;
 
-    case VAR_MATRIX3:
-        SetShaderParameter(param, value.GetMatrix3());
-        break;
+        case VAR_MATRIX3:
+            SetShaderParameter(param, value.GetMatrix3());
+            break;
 
-    case VAR_MATRIX3X4:
-        SetShaderParameter(param, value.GetMatrix3x4());
-        break;
+        case VAR_MATRIX3X4:
+            SetShaderParameter(param, value.GetMatrix3x4());
+            break;
 
-    case VAR_MATRIX4:
-        SetShaderParameter(param, value.GetMatrix4());
-        break;
+        case VAR_MATRIX4:
+            SetShaderParameter(param, value.GetMatrix4());
+            break;
 
-    case VAR_BUFFER:
+        case VAR_BUFFER:
         {
             const PODVector<unsigned char>& buffer = value.GetBuffer();
             if (buffer.Size() >= sizeof(float))
@@ -225,9 +224,9 @@ void Graphics::SetShaderParameter(StringHash param, const Variant& value)
         }
         break;
 
-    default:
-        // Unsupported parameter type, do nothing
-        break;
+        default:
+            // Unsupported parameter type, do nothing
+            break;
     }
 }
 
@@ -236,7 +235,7 @@ IntVector2 Graphics::GetWindowPosition() const
     if (window_)
     {
         IntVector2 position;
-        SDL_GetWindowPosition(window_, &position.x_, &position.y_);
+        SDL_GetWindowPosition(window_, &position.x, &position.y);
         return position;
     }
     return position_;
@@ -324,7 +323,7 @@ int Graphics::GetCurrentMonitor() const
 
 bool Graphics::GetMaximized() const
 {
-    return window_? static_cast<bool>(SDL_GetWindowFlags(window_) & SDL_WINDOW_MAXIMIZED) : false;
+    return window_ ? static_cast<bool>(SDL_GetWindowFlags(window_) & SDL_WINDOW_MAXIMIZED) : false;
 }
 
 Vector3 Graphics::GetDisplayDPI(int monitor) const
@@ -597,7 +596,7 @@ void Graphics::OnScreenModeChanged()
     SendEvent(E_SCREENMODE, eventData);
 }
 
-void RegisterGraphicsLibrary(Context* context)
+void Urho3D::RegisterGraphicsLibrary(Context* context)
 {
     Animation::RegisterObject(context);
     Material::RegisterObject(context);
@@ -627,6 +626,4 @@ void RegisterGraphicsLibrary(Context* context)
     DebugRenderer::RegisterObject(context);
     Octree::RegisterObject(context);
     Zone::RegisterObject(context);
-}
-
 }

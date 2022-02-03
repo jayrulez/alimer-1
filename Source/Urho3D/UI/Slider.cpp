@@ -30,25 +30,27 @@
 
 #include "../DebugNew.h"
 
+using namespace Urho3D;
+
 namespace Urho3D
 {
+    const char* orientations[] =
+    {
+        "Horizontal",
+        "Vertical",
+        nullptr
+    };
 
-const char* orientations[] =
-{
-    "Horizontal",
-    "Vertical",
-    nullptr
-};
+    extern const char* UI_CATEGORY;
+}
 
-extern const char* UI_CATEGORY;
-
-Slider::Slider(Context* context) :
-    BorderImage(context),
-    orientation_(O_HORIZONTAL),
-    range_(1.0f),
-    value_(0.0f),
-    dragSlider_(false),
-    repeatRate_(0.0f)
+Slider::Slider(Context* context)
+    : BorderImage(context)
+    , orientation_(O_HORIZONTAL)
+    , range_(1.0f)
+    , value_(0.0f)
+    , dragSlider_(false)
+    , repeatRate_(0.0f)
 {
     SetEnabled(true);
     knob_ = CreateChild<BorderImage>("S_Knob");
@@ -59,7 +61,7 @@ Slider::Slider(Context* context) :
 
 Slider::~Slider() = default;
 
-void Slider::RegisterObject(Context* context)
+void Slider::RegisterObject(Context * context)
 {
     context->RegisterFactory<Slider>(UI_CATEGORY);
 
@@ -81,7 +83,7 @@ void Slider::Update(float timeStep)
     knob_->SetSelected(hovering_);
 }
 
-void Slider::OnHover(const IntVector2& position, const IntVector2& screenPosition, MouseButtonFlags buttons, QualifierFlags qualifiers, Cursor* cursor)
+void Slider::OnHover(const IntVector2 & position, const IntVector2 & screenPosition, MouseButtonFlags buttons, QualifierFlags qualifiers, Cursor * cursor)
 {
     BorderImage::OnHover(position, screenPosition, buttons, qualifiers, cursor);
 
@@ -93,8 +95,8 @@ void Slider::OnHover(const IntVector2& position, const IntVector2& screenPositio
         Page(position, (bool)(buttons & MOUSEB_LEFT));
 }
 
-void Slider::OnClickBegin(const IntVector2& position, const IntVector2& screenPosition, MouseButton button, MouseButtonFlags buttons, QualifierFlags qualifiers,
-    Cursor* cursor)
+void Slider::OnClickBegin(const IntVector2 & position, const IntVector2 & screenPosition, MouseButton button, MouseButtonFlags buttons, QualifierFlags qualifiers,
+    Cursor * cursor)
 {
     selected_ = true;
     hovering_ = knob_->IsInside(screenPosition, true);
@@ -102,15 +104,15 @@ void Slider::OnClickBegin(const IntVector2& position, const IntVector2& screenPo
         Page(position, true);
 }
 
-void Slider::OnClickEnd(const IntVector2& position, const IntVector2& screenPosition, MouseButton button, MouseButtonFlags buttons, QualifierFlags qualifiers,
-    Cursor* cursor, UIElement* beginElement)
+void Slider::OnClickEnd(const IntVector2 & position, const IntVector2 & screenPosition, MouseButton button, MouseButtonFlags buttons, QualifierFlags qualifiers,
+    Cursor * cursor, UIElement * beginElement)
 {
     hovering_ = knob_->IsInside(screenPosition, true);
     if (!hovering_ && button == MOUSEB_LEFT)
         Page(position, false);
 }
 
-void Slider::OnDragBegin(const IntVector2& position, const IntVector2& screenPosition, MouseButtonFlags buttons, QualifierFlags qualifiers, Cursor* cursor)
+void Slider::OnDragBegin(const IntVector2 & position, const IntVector2 & screenPosition, MouseButtonFlags buttons, QualifierFlags qualifiers, Cursor * cursor)
 {
     UIElement::OnDragBegin(position, screenPosition, buttons, qualifiers, cursor);
 
@@ -122,8 +124,8 @@ void Slider::OnDragBegin(const IntVector2& position, const IntVector2& screenPos
     }
 }
 
-void Slider::OnDragMove(const IntVector2& position, const IntVector2& screenPosition, const IntVector2& deltaPos, MouseButtonFlags buttons,
-    QualifierFlags qualifiers, Cursor* cursor)
+void Slider::OnDragMove(const IntVector2 & position, const IntVector2 & screenPosition, const IntVector2 & deltaPos, MouseButtonFlags buttons,
+    QualifierFlags qualifiers, Cursor * cursor)
 {
     if (!editable_ || !dragSlider_ || GetSize() == knob_->GetSize())
         return;
@@ -133,13 +135,13 @@ void Slider::OnDragMove(const IntVector2& position, const IntVector2& screenPosi
 
     if (orientation_ == O_HORIZONTAL)
     {
-        int newX = Clamp(dragBeginPosition_.x_ + delta.x_, 0, GetWidth() - knob_->GetWidth());
+        int newX = Clamp(dragBeginPosition_.x + delta.x, 0, GetWidth() - knob_->GetWidth());
         knob_->SetPosition(newX, 0);
         newValue = (float)newX * range_ / (float)(GetWidth() - knob_->GetWidth());
     }
     else
     {
-        int newY = Clamp(dragBeginPosition_.y_ + delta.y_, 0, GetHeight() - knob_->GetHeight());
+        int newY = Clamp(dragBeginPosition_.y + delta.y, 0, GetHeight() - knob_->GetHeight());
         knob_->SetPosition(0, newY);
         newValue = (float)newY * range_ / (float)(GetHeight() - knob_->GetHeight());
     }
@@ -147,7 +149,7 @@ void Slider::OnDragMove(const IntVector2& position, const IntVector2& screenPosi
     SetValue(newValue);
 }
 
-void Slider::OnDragEnd(const IntVector2& position, const IntVector2& screenPosition, MouseButtonFlags dragButtons, MouseButtonFlags releaseButtons, Cursor* cursor)
+void Slider::OnDragEnd(const IntVector2 & position, const IntVector2 & screenPosition, MouseButtonFlags dragButtons, MouseButtonFlags releaseButtons, Cursor * cursor)
 {
     UIElement::OnDragEnd(position, screenPosition, dragButtons, releaseButtons, cursor);
 
@@ -158,7 +160,7 @@ void Slider::OnDragEnd(const IntVector2& position, const IntVector2& screenPosit
     }
 }
 
-void Slider::OnResize(const IntVector2& newSize, const IntVector2& delta)
+void Slider::OnResize(const IntVector2 & newSize, const IntVector2 & delta)
 {
     UpdateSlider();
 }
@@ -206,7 +208,7 @@ void Slider::SetRepeatRate(float rate)
     repeatRate_ = Max(rate, 0.0f);
 }
 
-bool Slider::FilterImplicitAttributes(XMLElement& dest) const
+bool Slider::FilterImplicitAttributes(XMLElement & dest) const
 {
     if (!BorderImage::FilterImplicitAttributes(dest))
         return false;
@@ -274,13 +276,13 @@ void Slider::UpdateSlider()
     }
 }
 
-void Slider::Page(const IntVector2& position, bool pressed)
+void Slider::Page(const IntVector2 & position, bool pressed)
 {
     if (!editable_)
         return;
 
     IntVector2 offsetXY = position - knob_->GetPosition() - knob_->GetSize() / 2;
-    int offset = orientation_ == O_HORIZONTAL ? offsetXY.x_ : offsetXY.y_;
+    int offset = orientation_ == O_HORIZONTAL ? offsetXY.x : offsetXY.y;
     auto length = (float)(orientation_ == O_HORIZONTAL ? GetWidth() : GetHeight());
 
     using namespace SliderPaged;
@@ -299,6 +301,4 @@ void Slider::Page(const IntVector2& position, bool pressed)
     eventData[P_PRESSED] = pressed;
 
     SendEvent(E_SLIDERPAGED, eventData);
-}
-
 }

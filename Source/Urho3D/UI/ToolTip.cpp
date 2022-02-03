@@ -23,13 +23,16 @@
 #include "../Precompiled.h"
 
 #include "../Core/Context.h"
+#include "../Graphics/Texture2D.h"
 #include "../UI/ToolTip.h"
 #include "../UI/UI.h"
 
+using namespace Urho3D;
+
 namespace Urho3D
 {
-
-extern const char* UI_CATEGORY;
+    extern const char* UI_CATEGORY;
+}
 
 ToolTip::ToolTip(Context* context) :
     UIElement(context),
@@ -133,6 +136,4 @@ void ToolTip::AddAltTarget(UIElement* target)
 void ToolTip::SetDelay(float delay)
 {
     delay_ = delay;
-}
-
 }

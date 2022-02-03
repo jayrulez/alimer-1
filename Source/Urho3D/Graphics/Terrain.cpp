@@ -41,44 +41,47 @@
 
 #include "../DebugNew.h"
 
+using namespace Urho3D;
+
 namespace Urho3D
 {
+    extern const char* GEOMETRY_CATEGORY;
 
-extern const char* GEOMETRY_CATEGORY;
+    static const Vector3 DEFAULT_SPACING(1.0f, 0.25f, 1.0f);
+    static const unsigned MIN_LOD_LEVELS = 1;
+    static const unsigned MAX_LOD_LEVELS = 4;
+    static const int DEFAULT_PATCH_SIZE = 32;
+    static const int MIN_PATCH_SIZE = 4;
+    static const int MAX_PATCH_SIZE = 128;
+    static const unsigned STITCH_NORTH = 1;
+    static const unsigned STITCH_SOUTH = 2;
+    static const unsigned STITCH_WEST = 4;
+    static const unsigned STITCH_EAST = 8;
 
-static const Vector3 DEFAULT_SPACING(1.0f, 0.25f, 1.0f);
-static const unsigned MIN_LOD_LEVELS = 1;
-static const unsigned MAX_LOD_LEVELS = 4;
-static const int DEFAULT_PATCH_SIZE = 32;
-static const int MIN_PATCH_SIZE = 4;
-static const int MAX_PATCH_SIZE = 128;
-static const unsigned STITCH_NORTH = 1;
-static const unsigned STITCH_SOUTH = 2;
-static const unsigned STITCH_WEST = 4;
-static const unsigned STITCH_EAST = 8;
-
-inline void GrowUpdateRegion(IntRect& updateRegion, int x, int y)
-{
-    if (updateRegion.left_ < 0)
+    inline void GrowUpdateRegion(IntRect& updateRegion, int x, int y)
     {
-        updateRegion.left_ = updateRegion.right_ = x;
-        updateRegion.top_ = updateRegion.bottom_ = y;
+        if (updateRegion.left_ < 0)
+        {
+            updateRegion.left_ = updateRegion.right_ = x;
+            updateRegion.top_ = updateRegion.bottom_ = y;
+        }
+        else
+        {
+            if (x < updateRegion.left_)
+                updateRegion.left_ = x;
+            if (x > updateRegion.right_)
+                updateRegion.right_ = x;
+            if (y < updateRegion.top_)
+                updateRegion.top_ = y;
+            if (y > updateRegion.bottom_)
+                updateRegion.bottom_ = y;
+        }
     }
-    else
-    {
-        if (x < updateRegion.left_)
-            updateRegion.left_ = x;
-        if (x > updateRegion.right_)
-            updateRegion.right_ = x;
-        if (y < updateRegion.top_)
-            updateRegion.top_ = y;
-        if (y > updateRegion.bottom_)
-            updateRegion.bottom_ = y;
-    }
+
 }
 
-Terrain::Terrain(Context* context) :
-    Component(context),
+Terrain::Terrain(Context* context)
+    : Component(context),
     indexBuffer_(new IndexBuffer(context)),
     spacing_(DEFAULT_SPACING),
     lastSpacing_(Vector3::ZERO),
@@ -117,7 +120,7 @@ Terrain::Terrain(Context* context) :
 
 Terrain::~Terrain() = default;
 
-void Terrain::RegisterObject(Context* context)
+void Terrain::RegisterObject(Context * context)
 {
     context->RegisterFactory<Terrain>(GEOMETRY_CATEGORY);
 
@@ -194,7 +197,7 @@ void Terrain::SetPatchSize(int size)
     }
 }
 
-void Terrain::SetSpacing(const Vector3& spacing)
+void Terrain::SetSpacing(const Vector3 & spacing)
 {
     if (spacing != spacing_)
     {
@@ -241,7 +244,7 @@ void Terrain::SetSmoothing(bool enable)
     }
 }
 
-bool Terrain::SetHeightMap(Image* image)
+bool Terrain::SetHeightMap(Image * image)
 {
     bool success = SetHeightMapInternal(image, true);
 
@@ -249,7 +252,7 @@ bool Terrain::SetHeightMap(Image* image)
     return success;
 }
 
-void Terrain::SetMaterial(Material* material)
+void Terrain::SetMaterial(Material * material)
 {
     material_ = material;
     for (unsigned i = 0; i < patches_.Size(); ++i)
@@ -261,7 +264,7 @@ void Terrain::SetMaterial(Material* material)
     MarkNetworkUpdate();
 }
 
-void Terrain::SetNorthNeighbor(Terrain* north)
+void Terrain::SetNorthNeighbor(Terrain * north)
 {
     if (north == north_)
         return;
@@ -280,7 +283,7 @@ void Terrain::SetNorthNeighbor(Terrain* north)
     MarkNetworkUpdate();
 }
 
-void Terrain::SetSouthNeighbor(Terrain* south)
+void Terrain::SetSouthNeighbor(Terrain * south)
 {
     if (south == south_)
         return;
@@ -299,7 +302,7 @@ void Terrain::SetSouthNeighbor(Terrain* south)
     MarkNetworkUpdate();
 }
 
-void Terrain::SetWestNeighbor(Terrain* west)
+void Terrain::SetWestNeighbor(Terrain * west)
 {
     if (west == west_)
         return;
@@ -318,7 +321,7 @@ void Terrain::SetWestNeighbor(Terrain* west)
     MarkNetworkUpdate();
 }
 
-void Terrain::SetEastNeighbor(Terrain* east)
+void Terrain::SetEastNeighbor(Terrain * east)
 {
     if (east == east_)
         return;
@@ -337,7 +340,7 @@ void Terrain::SetEastNeighbor(Terrain* east)
     MarkNetworkUpdate();
 }
 
-void Terrain::SetNeighbors(Terrain* north, Terrain* south, Terrain* west, Terrain* east)
+void Terrain::SetNeighbors(Terrain * north, Terrain * south, Terrain * west, Terrain * east)
 {
     if (north_ && north_->GetNode())
         UnsubscribeFromEvent(north_->GetNode(), E_TERRAINCREATED);
@@ -532,27 +535,27 @@ TerrainPatch* Terrain::GetPatch(unsigned index) const
 
 TerrainPatch* Terrain::GetPatch(int x, int z) const
 {
-    if (x < 0 || x >= numPatches_.x_ || z < 0 || z >= numPatches_.y_)
+    if (x < 0 || x >= numPatches_.x || z < 0 || z >= numPatches_.y)
         return nullptr;
     else
-        return GetPatch((unsigned)(z * numPatches_.x_ + x));
+        return GetPatch((unsigned)(z * numPatches_.x + x));
 }
 
 TerrainPatch* Terrain::GetNeighborPatch(int x, int z) const
 {
-    if (z >= numPatches_.y_ && north_)
-        return north_->GetPatch(x, z - numPatches_.y_);
+    if (z >= numPatches_.y && north_)
+        return north_->GetPatch(x, z - numPatches_.y);
     else if (z < 0 && south_)
-        return south_->GetPatch(x, z + south_->GetNumPatches().y_);
+        return south_->GetPatch(x, z + south_->GetNumPatches().y);
     else if (x < 0 && west_)
-        return west_->GetPatch(x + west_->GetNumPatches().x_, z);
-    else if (x >= numPatches_.x_ && east_)
-        return east_->GetPatch(x - numPatches_.x_, z);
+        return west_->GetPatch(x + west_->GetNumPatches().x, z);
+    else if (x >= numPatches_.x && east_)
+        return east_->GetPatch(x - numPatches_.x, z);
     else
         return GetPatch(x, z);
 }
 
-float Terrain::GetHeight(const Vector3& worldPosition) const
+float Terrain::GetHeight(const Vector3 & worldPosition) const
 {
     if (node_)
     {
@@ -586,7 +589,7 @@ float Terrain::GetHeight(const Vector3& worldPosition) const
         return 0.0f;
 }
 
-Vector3 Terrain::GetNormal(const Vector3& worldPosition) const
+Vector3 Terrain::GetNormal(const Vector3 & worldPosition) const
 {
     if (node_)
     {
@@ -619,7 +622,7 @@ Vector3 Terrain::GetNormal(const Vector3& worldPosition) const
         return Vector3::UP;
 }
 
-IntVector2 Terrain::WorldToHeightMap(const Vector3& worldPosition) const
+IntVector2 Terrain::WorldToHeightMap(const Vector3 & worldPosition) const
 {
     if (!node_)
         return IntVector2::ZERO;
@@ -627,20 +630,20 @@ IntVector2 Terrain::WorldToHeightMap(const Vector3& worldPosition) const
     Vector3 position = node_->GetWorldTransform().Inverse() * worldPosition;
     auto xPos = RoundToInt((position.x_ - patchWorldOrigin_.x_) / spacing_.x_);
     auto zPos = RoundToInt((position.z_ - patchWorldOrigin_.y_) / spacing_.z_);
-    xPos = Clamp(xPos, 0, numVertices_.x_ - 1);
-    zPos = Clamp(zPos, 0, numVertices_.y_ - 1);
+    xPos = Clamp(xPos, 0, numVertices_.x - 1);
+    zPos = Clamp(zPos, 0, numVertices_.y - 1);
 
-    return IntVector2(xPos, numVertices_.y_ - 1 - zPos);
+    return IntVector2(xPos, numVertices_.y - 1 - zPos);
 }
 
-Vector3 Terrain::HeightMapToWorld(const IntVector2& pixelPosition) const
+Vector3 Terrain::HeightMapToWorld(const IntVector2 & pixelPosition) const
 {
     if (!node_)
         return Vector3::ZERO;
 
-    IntVector2 pos(pixelPosition.x_, numVertices_.y_ - 1 - pixelPosition.y_);
-    auto xPos = pos.x_ * spacing_.x_ + patchWorldOrigin_.x_;
-    auto zPos = pos.y_ * spacing_.z_ + patchWorldOrigin_.y_;
+    IntVector2 pos(pixelPosition.x, numVertices_.y - 1 - pixelPosition.y);
+    auto xPos = pos.x * spacing_.x_ + patchWorldOrigin_.x_;
+    auto zPos = pos.y * spacing_.z_ + patchWorldOrigin_.y_;
     Vector3 lPos(xPos, 0.0f, zPos);
     Vector3 wPos = node_->GetWorldTransform() * lPos;
     wPos.y_ = GetHeight(wPos);
@@ -648,7 +651,7 @@ Vector3 Terrain::HeightMapToWorld(const IntVector2& pixelPosition) const
     return wPos;
 }
 
-void Terrain::CreatePatchGeometry(TerrainPatch* patch)
+void Terrain::CreatePatchGeometry(TerrainPatch * patch)
 {
     URHO3D_PROFILE(CreatePatchGeometry);
 
@@ -683,8 +686,8 @@ void Terrain::CreatePatchGeometry(TerrainPatch* patch)
         {
             for (unsigned x = 0; x <= patchSize_; ++x)
             {
-                int xPos = coords.x_ * patchSize_ + x;
-                int zPos = coords.y_ * patchSize_ + z;
+                int xPos = coords.x * patchSize_ + x;
+                int zPos = coords.y * patchSize_ + z;
 
                 // Position
                 Vector3 position((float)x * spacing_.x_, GetRawHeight(xPos, zPos), (float)z * spacing_.z_);
@@ -703,9 +706,9 @@ void Terrain::CreatePatchGeometry(TerrainPatch* patch)
                 if (halfLodExpand > 0 && (x & lodExpand) == 0 && (z & lodExpand) == 0)
                 {
                     int minX = Max(xPos - halfLodExpand, 0);
-                    int maxX = Min(xPos + halfLodExpand, numVertices_.x_ - 1);
+                    int maxX = Min(xPos + halfLodExpand, numVertices_.x - 1);
                     int minZ = Max(zPos - halfLodExpand, 0);
-                    int maxZ = Min(zPos + halfLodExpand, numVertices_.y_ - 1);
+                    int maxZ = Min(zPos + halfLodExpand, numVertices_.y - 1);
                     for (int nZ = minZ; nZ <= maxZ; ++nZ)
                     {
                         for (int nX = minX; nX <= maxX; ++nX)
@@ -723,7 +726,7 @@ void Terrain::CreatePatchGeometry(TerrainPatch* patch)
                 *vertexData++ = normal.z_;
 
                 // Texture coordinate
-                Vector2 texCoord((float)xPos / (float)(numVertices_.x_ - 1), 1.0f - (float)zPos / (float)(numVertices_.y_ - 1));
+                Vector2 texCoord((float)xPos / (float)(numVertices_.x - 1), 1.0f - (float)zPos / (float)(numVertices_.y - 1));
                 *vertexData++ = texCoord.x_;
                 *vertexData++ = texCoord.y_;
 
@@ -760,7 +763,7 @@ void Terrain::CreatePatchGeometry(TerrainPatch* patch)
     patch->ResetLod();
 }
 
-void Terrain::UpdatePatchLod(TerrainPatch* patch)
+void Terrain::UpdatePatchLod(TerrainPatch * patch)
 {
     Geometry* geometry = patch->GetGeometry();
 
@@ -788,13 +791,13 @@ void Terrain::UpdatePatchLod(TerrainPatch* patch)
         geometry->SetDrawRange(PrimitiveType::TriangleList, drawRanges_[drawRangeIndex].first_, drawRanges_[drawRangeIndex].second_, false);
 }
 
-void Terrain::SetMaterialAttr(const ResourceRef& value)
+void Terrain::SetMaterialAttr(const ResourceRef & value)
 {
     auto* cache = GetSubsystem<ResourceCache>();
     SetMaterial(cache->GetResource<Material>(value.name_));
 }
 
-void Terrain::SetHeightMapAttr(const ResourceRef& value)
+void Terrain::SetHeightMapAttr(const ResourceRef & value)
 {
     auto* cache = GetSubsystem<ResourceCache>();
     auto* image = cache->GetResource<Image>(value.name_);
@@ -872,12 +875,12 @@ void Terrain::CreateGeometry()
     if (heightMap_)
     {
         numPatches_ = IntVector2((heightMap_->GetWidth() - 1) / patchSize_, (heightMap_->GetHeight() - 1) / patchSize_);
-        numVertices_ = IntVector2(numPatches_.x_ * patchSize_ + 1, numPatches_.y_ * patchSize_ + 1);
+        numVertices_ = IntVector2(numPatches_.x * patchSize_ + 1, numPatches_.y * patchSize_ + 1);
         patchWorldOrigin_ =
-            Vector2(-0.5f * (float)numPatches_.x_ * patchWorldSize_.x_, -0.5f * (float)numPatches_.y_ * patchWorldSize_.y_);
+            Vector2(-0.5f * (float)numPatches_.x * patchWorldSize_.x_, -0.5f * (float)numPatches_.y * patchWorldSize_.y_);
         if (numVertices_ != lastNumVertices_ || lastSpacing_ != spacing_ || patchSize_ != lastPatchSize_)
             updateAll = true;
-        auto newDataSize = (unsigned)(numVertices_.x_ * numVertices_.y_);
+        auto newDataSize = (unsigned)(numVertices_.x * numVertices_.y);
 
         // Create new height data if terrain size changed
         if (!heightData_ || updateAll)
@@ -920,7 +923,7 @@ void Terrain::CreateGeometry()
             {
                 int x = ToInt(coords[0]);
                 int z = ToInt(coords[1]);
-                if (x < numPatches_.x_ && z < numPatches_.y_)
+                if (x < numPatches_.x && z < numPatches_.y)
                     nodeOk = true;
             }
 
@@ -930,7 +933,7 @@ void Terrain::CreateGeometry()
     }
 
     // Keep track of which patches actually need an update
-    PODVector<bool> dirtyPatches((unsigned)(numPatches_.x_ * numPatches_.y_));
+    PODVector<bool> dirtyPatches((unsigned)(numPatches_.x * numPatches_.y));
     for (unsigned i = 0; i < dirtyPatches.Size(); ++i)
         dirtyPatches[i] = updateAll;
 
@@ -939,7 +942,7 @@ void Terrain::CreateGeometry()
     if (heightMap_)
     {
         // Copy heightmap data
-        const unsigned char* src = heightMap_->GetData();
+        const uint8_t* src = heightMap_->GetData();
         float* dest = smoothing_ ? sourceHeightData_ : heightData_;
         unsigned imgComps = heightMap_->GetComponents();
         unsigned imgRow = heightMap_->GetWidth() * imgComps;
@@ -949,11 +952,11 @@ void Terrain::CreateGeometry()
         {
             URHO3D_PROFILE(CopyHeightData);
 
-            for (int z = 0; z < numVertices_.y_; ++z)
+            for (int z = 0; z < numVertices_.y; ++z)
             {
-                for (int x = 0; x < numVertices_.x_; ++x)
+                for (int x = 0; x < numVertices_.x; ++x)
                 {
-                    float newHeight = (float)src[imgRow * (numVertices_.y_ - 1 - z) + x] * spacing_.y_;
+                    float newHeight = (float)src[imgRow * (numVertices_.y - 1 - z) + x] * spacing_.y_;
 
                     if (updateAll)
                         *dest = newHeight;
@@ -975,15 +978,17 @@ void Terrain::CreateGeometry()
             URHO3D_PROFILE(CopyHeightData);
 
             // If more than 1 component, use the green channel for more accuracy
-            for (int z = 0; z < numVertices_.y_; ++z)
+            for (int z = 0; z < numVertices_.y; ++z)
             {
-                for (int x = 0; x < numVertices_.x_; ++x)
+                for (int x = 0; x < numVertices_.x; ++x)
                 {
-                    float newHeight = ((float)src[imgRow * (numVertices_.y_ - 1 - z) + imgComps * x] +
-                                       (float)src[imgRow * (numVertices_.y_ - 1 - z) + imgComps * x + 1] / 256.0f) * spacing_.y_;
+                    float newHeight = ((float)src[imgRow * (numVertices_.y - 1 - z) + imgComps * x] +
+                        (float)src[imgRow * (numVertices_.y - 1 - z) + imgComps * x + 1] / 256.0f) * spacing_.y_;
 
                     if (updateAll)
+                    {
                         *dest = newHeight;
+                    }
                     else
                     {
                         if (*dest != newHeight)
@@ -1009,17 +1014,17 @@ void Terrain::CreateGeometry()
             updateRegion.bottom_ += lodExpand + 1;
 
             int sX = Max(updateRegion.left_ / patchSize_, 0);
-            int eX = Min(updateRegion.right_ / patchSize_, numPatches_.x_ - 1);
+            int eX = Min(updateRegion.right_ / patchSize_, numPatches_.x - 1);
             int sY = Max(updateRegion.top_ / patchSize_, 0);
-            int eY = Min(updateRegion.bottom_ / patchSize_, numPatches_.y_ - 1);
+            int eY = Min(updateRegion.bottom_ / patchSize_, numPatches_.y - 1);
             for (int y = sY; y <= eY; ++y)
             {
                 for (int x = sX; x <= eX; ++x)
-                    dirtyPatches[y * numPatches_.x_ + x] = true;
+                    dirtyPatches[y * numPatches_.x + x] = true;
             }
         }
 
-        patches_.Reserve((unsigned)(numPatches_.x_ * numPatches_.y_));
+        patches_.Reserve((unsigned)(numPatches_.x * numPatches_.y));
 
         bool enabled = IsEnabledEffective();
 
@@ -1027,9 +1032,9 @@ void Terrain::CreateGeometry()
             URHO3D_PROFILE(CreatePatches);
 
             // Create patches and set node transforms
-            for (int z = 0; z < numPatches_.y_; ++z)
+            for (int z = 0; z < numPatches_.y; ++z)
             {
-                for (int x = 0; x < numPatches_.x_; ++x)
+                for (int x = 0; x < numPatches_.x; ++x)
                 {
                     String nodeName = "Patch_" + String(x) + "_" + String(z);
                     Node* patchNode = node_->GetChild(nodeName);
@@ -1087,9 +1092,9 @@ void Terrain::CreateGeometry()
                 {
                     TerrainPatch* patch = patches_[i];
                     const IntVector2& coords = patch->GetCoordinates();
-                    int startX = coords.x_ * patchSize_;
+                    int startX = coords.x * patchSize_;
                     int endX = startX + patchSize_;
-                    int startZ = coords.y_ * patchSize_;
+                    int startZ = coords.y * patchSize_;
                     int endZ = startZ + patchSize_;
 
                     for (int z = startZ; z <= endZ; ++z)
@@ -1100,9 +1105,9 @@ void Terrain::CreateGeometry()
                                 GetSourceHeight(x - 1, z - 1) + GetSourceHeight(x, z - 1) * 2.0f + GetSourceHeight(x + 1, z - 1) +
                                 GetSourceHeight(x - 1, z) * 2.0f + GetSourceHeight(x, z) * 4.0f + GetSourceHeight(x + 1, z) * 2.0f +
                                 GetSourceHeight(x - 1, z + 1) + GetSourceHeight(x, z + 1) * 2.0f + GetSourceHeight(x + 1, z + 1)
-                            ) / 16.0f;
+                                ) / 16.0f;
 
-                            heightData_[z * numVertices_.x_ + x] = smoothedHeight;
+                            heightData_[z * numVertices_.x + x] = smoothedHeight;
                         }
                     }
                 }
@@ -1299,9 +1304,9 @@ float Terrain::GetRawHeight(int x, int z) const
     if (!heightData_)
         return 0.0f;
 
-    x = Clamp(x, 0, numVertices_.x_ - 1);
-    z = Clamp(z, 0, numVertices_.y_ - 1);
-    return heightData_[z * numVertices_.x_ + x];
+    x = Clamp(x, 0, numVertices_.x - 1);
+    z = Clamp(z, 0, numVertices_.y - 1);
+    return heightData_[z * numVertices_.x + x];
 }
 
 float Terrain::GetSourceHeight(int x, int z) const
@@ -1309,9 +1314,9 @@ float Terrain::GetSourceHeight(int x, int z) const
     if (!sourceHeightData_)
         return 0.0f;
 
-    x = Clamp(x, 0, numVertices_.x_ - 1);
-    z = Clamp(z, 0, numVertices_.y_ - 1);
-    return sourceHeightData_[z * numVertices_.x_ + x];
+    x = Clamp(x, 0, numVertices_.x - 1);
+    z = Clamp(z, 0, numVertices_.y - 1);
+    return sourceHeightData_[z * numVertices_.x + x];
 }
 
 float Terrain::GetLodHeight(int x, int z, unsigned lodLevel) const
@@ -1353,16 +1358,16 @@ Vector3 Terrain::GetRawNormal(int x, int z) const
     float up = 0.5f * (spacing_.x_ + spacing_.z_);
 
     return (Vector3(0.0f, up, nSlope) +
-            Vector3(-neSlope, up, neSlope) +
-            Vector3(-eSlope, up, 0.0f) +
-            Vector3(-seSlope, up, -seSlope) +
-            Vector3(0.0f, up, -sSlope) +
-            Vector3(swSlope, up, -swSlope) +
-            Vector3(wSlope, up, 0.0f) +
-            Vector3(nwSlope, up, nwSlope)).Normalized();
+        Vector3(-neSlope, up, neSlope) +
+        Vector3(-eSlope, up, 0.0f) +
+        Vector3(-seSlope, up, -seSlope) +
+        Vector3(0.0f, up, -sSlope) +
+        Vector3(swSlope, up, -swSlope) +
+        Vector3(wSlope, up, 0.0f) +
+        Vector3(nwSlope, up, nwSlope)).Normalized();
 }
 
-void Terrain::CalculateLodErrors(TerrainPatch* patch)
+void Terrain::CalculateLodErrors(TerrainPatch * patch)
 {
     URHO3D_PROFILE(CalculateLodErrors);
 
@@ -1371,8 +1376,8 @@ void Terrain::CalculateLodErrors(TerrainPatch* patch)
     lodErrors.Clear();
     lodErrors.Reserve(numLodLevels_);
 
-    int xStart = coords.x_ * patchSize_;
-    int zStart = coords.y_ * patchSize_;
+    int xStart = coords.x * patchSize_;
+    int zStart = coords.y * patchSize_;
     int xEnd = xStart + patchSize_;
     int zEnd = zStart + patchSize_;
 
@@ -1403,17 +1408,17 @@ void Terrain::CalculateLodErrors(TerrainPatch* patch)
     }
 }
 
-void Terrain::SetPatchNeighbors(TerrainPatch* patch)
+void Terrain::SetPatchNeighbors(TerrainPatch * patch)
 {
     if (!patch)
         return;
 
     const IntVector2& coords = patch->GetCoordinates();
-    patch->SetNeighbors(GetNeighborPatch(coords.x_, coords.y_ + 1), GetNeighborPatch(coords.x_, coords.y_ - 1),
-        GetNeighborPatch(coords.x_ - 1, coords.y_), GetNeighborPatch(coords.x_ + 1, coords.y_));
+    patch->SetNeighbors(GetNeighborPatch(coords.x, coords.y + 1), GetNeighborPatch(coords.x, coords.y - 1),
+        GetNeighborPatch(coords.x - 1, coords.y), GetNeighborPatch(coords.x + 1, coords.y));
 }
 
-bool Terrain::SetHeightMapInternal(Image* image, bool recreateNow)
+bool Terrain::SetHeightMapInternal(Image * image, bool recreateNow)
 {
     if (image && image->IsCompressed())
     {
@@ -1437,33 +1442,31 @@ bool Terrain::SetHeightMapInternal(Image* image, bool recreateNow)
     return true;
 }
 
-void Terrain::HandleHeightMapReloadFinished(StringHash /*eventType*/, VariantMap& eventData)
+void Terrain::HandleHeightMapReloadFinished(StringHash /*eventType*/, VariantMap & eventData)
 {
     CreateGeometry();
 }
 
-void Terrain::HandleNeighborTerrainCreated(StringHash /*eventType*/, VariantMap& eventData)
+void Terrain::HandleNeighborTerrainCreated(StringHash /*eventType*/, VariantMap & eventData)
 {
     UpdateEdgePatchNeighbors();
 }
 
 void Terrain::UpdateEdgePatchNeighbors()
 {
-    for (int x = 1; x < numPatches_.x_ - 1; ++x)
+    for (int x = 1; x < numPatches_.x - 1; ++x)
     {
         SetPatchNeighbors(GetPatch(x, 0));
-        SetPatchNeighbors(GetPatch(x, numPatches_.y_ - 1));
+        SetPatchNeighbors(GetPatch(x, numPatches_.y - 1));
     }
-    for (int z = 1; z < numPatches_.y_ - 1; ++z)
+    for (int z = 1; z < numPatches_.y - 1; ++z)
     {
         SetPatchNeighbors(GetPatch(0, z));
-        SetPatchNeighbors(GetPatch(numPatches_.x_ - 1, z));
+        SetPatchNeighbors(GetPatch(numPatches_.x - 1, z));
     }
 
     SetPatchNeighbors(GetPatch(0, 0));
-    SetPatchNeighbors(GetPatch(numPatches_.x_ - 1, 0));
-    SetPatchNeighbors(GetPatch(0, numPatches_.y_ - 1));
-    SetPatchNeighbors(GetPatch(numPatches_.x_ - 1, numPatches_.y_ - 1));
-}
-
+    SetPatchNeighbors(GetPatch(numPatches_.x - 1, 0));
+    SetPatchNeighbors(GetPatch(0, numPatches_.y - 1));
+    SetPatchNeighbors(GetPatch(numPatches_.x - 1, numPatches_.y - 1));
 }

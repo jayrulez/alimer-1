@@ -353,13 +353,13 @@ namespace Urho3D
 
     void DebugRenderer::AddSkeleton(const Skeleton& skeleton, const Color& color, bool depthTest)
     {
-        const Vector<Bone>& bones = skeleton.GetBones();
-        if (!bones.Size())
+        const std::vector<Bone>& bones = skeleton.GetBones();
+        if (!bones.size())
             return;
 
         unsigned uintColor = color.ToUInt();
 
-        for (unsigned i = 0; i < bones.Size(); ++i)
+        for (size_t i = 0; i < bones.size(); ++i)
         {
             // Skip if bone contains no skinned geometry
             if (bones[i].radius_ < M_EPSILON && bones[i].boundingBox_.Size().LengthSquared() < M_EPSILON)

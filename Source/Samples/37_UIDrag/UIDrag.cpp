@@ -147,7 +147,7 @@ void UIDrag::HandleDragBegin(StringHash eventType, VariantMap& eventData)
 
     IntVector2 p = element->GetPosition();
     element->SetVar("START", p);
-    element->SetVar("DELTA", IntVector2(p.x_ - lx, p.y_ - ly));
+    element->SetVar("DELTA", IntVector2(p.x - lx, p.y - ly));
 
     int buttons = eventData[P_BUTTONS].GetInt();
     element->SetVar("BUTTONS", buttons);
@@ -165,8 +165,8 @@ void UIDrag::HandleDragMove(StringHash eventType, VariantMap& eventData)
     auto* element = (Button*)eventData[P_ELEMENT].GetVoidPtr();
     int buttons = eventData[P_BUTTONS].GetInt();
     IntVector2 d = element->GetVar("DELTA").GetIntVector2();
-    int X = eventData[P_X].GetInt() + d.x_;
-    int Y = eventData[P_Y].GetInt() + d.y_;
+    int X = eventData[P_X].GetInt() + d.x;
+    int Y = eventData[P_Y].GetInt() + d.y;
     int BUTTONS = element->GetVar("BUTTONS").GetInt();
 
     auto* t = element->GetChildStaticCast<Text>("Event Touch", false);
@@ -199,7 +199,7 @@ void UIDrag::HandleUpdate(StringHash eventType, VariantMap& eventData)
         t->SetText("Touch " + String(ts->touchID_));
 
         IntVector2 pos = ts->position_;
-        pos.y_ -= 30;
+        pos.y -= 30;
 
         t->SetPosition(pos);
         t->SetVisible(true);

@@ -230,12 +230,12 @@ void Batch::Prepare(View* view, Camera* camera, bool setModelTransform, bool all
     auto cameraHash = (unsigned)(size_t)camera;
     IntRect viewport = graphics->GetViewport();
     IntVector2 viewSize = IntVector2(viewport.Width(), viewport.Height());
-    auto viewportHash = (unsigned)viewSize.x_ | (unsigned)viewSize.y_ << 16u;
+    auto viewportHash = (unsigned)viewSize.x | (unsigned)viewSize.y << 16u;
     if (graphics->NeedParameterUpdate(SP_CAMERA, reinterpret_cast<const void*>(cameraHash + viewportHash)))
     {
         view->SetCameraShaderParameters(camera);
         // During renderpath commands the G-Buffer or viewport texture is assumed to always be viewport-sized
-        view->SetGBufferShaderParameters(viewSize, IntRect(0, 0, viewSize.x_, viewSize.y_));
+        view->SetGBufferShaderParameters(viewSize, IntRect(0, 0, viewSize.x, viewSize.y));
     }
 
     // Set model or skinning transforms

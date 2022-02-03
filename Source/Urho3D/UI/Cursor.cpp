@@ -113,7 +113,7 @@ namespace Urho3D
     {
         unsigned initialSize = vertexData.Size();
         const IntVector2& offset = shapeInfos_[shape_].hotSpot_;
-        Vector2 floatOffset(-(float)offset.x_, -(float)offset.y_);
+        Vector2 floatOffset(-(float)offset.x, -(float)offset.y);
 
         BorderImage::GetBatches(batches, vertexData, currentScissor);
         for (unsigned i = initialSize; i < vertexData.Size(); i += 6)
@@ -287,7 +287,7 @@ namespace Urho3D
 
                 if (surface)
                 {
-                    info.osCursor_ = SDL_CreateColorCursor(surface, info.hotSpot_.x_, info.hotSpot_.y_);
+                    info.osCursor_ = SDL_CreateColorCursor(surface, info.hotSpot_.x, info.hotSpot_.y);
                     info.systemDefined_ = false;
                     if (!info.osCursor_)
                         URHO3D_LOGERROR("Could not create cursor from image " + info.image_->GetName());

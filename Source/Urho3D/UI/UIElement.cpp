@@ -28,6 +28,7 @@
 #include "../IO/Log.h"
 #include "../Resource/ResourceCache.h"
 #include "../Scene/ObjectAnimation.h"
+#include "../Graphics/Texture2D.h"
 #include "../UI/Cursor.h"
 #include "../UI/UI.h"
 #include "../UI/UIElement.h"
@@ -38,7 +39,6 @@
 
 namespace Urho3D
 {
-
     const char* horizontalAlignments[] =
     {
         "Left",
@@ -371,13 +371,13 @@ namespace Urho3D
 
         batch.SetColor(Color::BLUE, true);
         // Left
-        batch.AddQuad(0, 0, horizontalThickness, size_.y_, 0, 0);
+        batch.AddQuad(0, 0, horizontalThickness, size_.y, 0, 0);
         // Top
-        batch.AddQuad(0, 0, size_.x_, verticalThickness, 0, 0);
+        batch.AddQuad(0, 0, size_.x, verticalThickness, 0, 0);
         // Right
-        batch.AddQuad(size_.x_ - horizontalThickness, 0, horizontalThickness, size_.y_, 0, 0);
+        batch.AddQuad(size_.x - horizontalThickness, 0, horizontalThickness, size_.y, 0, 0);
         // Bottom
-        batch.AddQuad(0, size_.y_ - verticalThickness, size_.x_, verticalThickness, 0, 0);
+        batch.AddQuad(0, size_.y - verticalThickness, size_.x, verticalThickness, 0, 0);
 
         UIBatch::AddOrMerge(batch, batches);
     }
@@ -388,8 +388,8 @@ namespace Urho3D
             return false;
 
         const IntVector2& screenPos = GetScreenPosition();
-        return screenPos.x_ < currentScissor.right_&& screenPos.x_ + GetWidth() > currentScissor.left_ &&
-            screenPos.y_ < currentScissor.bottom_&& screenPos.y_ + GetHeight() > currentScissor.top_;
+        return screenPos.x < currentScissor.right_&& screenPos.x + GetWidth() > currentScissor.left_ &&
+            screenPos.y < currentScissor.bottom_&& screenPos.y + GetHeight() > currentScissor.top_;
     }
 
     const IntVector2& UIElement::GetScreenPosition() const
@@ -403,10 +403,10 @@ namespace Urho3D
             {
                 const IntVector2& parentScreenPos = parent->GetScreenPosition();
 
-                pos.x_ += parentScreenPos.x_ + (int)Lerp(0.0f, (float)parent->size_.x_, anchorMin_.x_);
-                pos.y_ += parentScreenPos.y_ + (int)Lerp(0.0f, (float)parent->size_.y_, anchorMin_.y_);
-                pos.x_ -= (int)(size_.x_ * pivot_.x_);
-                pos.y_ -= (int)(size_.y_ * pivot_.y_);
+                pos.x += parentScreenPos.x + (int)Lerp(0.0f, (float)parent->size_.x, anchorMin_.x_);
+                pos.y += parentScreenPos.y + (int)Lerp(0.0f, (float)parent->size_.y, anchorMin_.y_);
+                pos.x -= (int)(size_.x * pivot_.x_);
+                pos.y -= (int)(size_.y * pivot_.y_);
 
                 pos += parent_->childOffset_;
             }
@@ -534,8 +534,8 @@ namespace Urho3D
 
             VariantMap& eventData = GetEventDataMap();
             eventData[P_ELEMENT] = this;
-            eventData[P_X] = position.x_;
-            eventData[P_Y] = position.y_;
+            eventData[P_X] = position.x;
+            eventData[P_Y] = position.y;
             SendEvent(E_POSITIONED, eventData);
         }
     }
@@ -552,8 +552,8 @@ namespace Urho3D
         IntVector2 oldSize = size_;
         IntVector2 validatedSize;
         IntVector2 effectiveMinSize = GetEffectiveMinSize();
-        validatedSize.x_ = Clamp(size.x_, effectiveMinSize.x_, maxSize_.x_);
-        validatedSize.y_ = Clamp(size.y_, effectiveMinSize.y_, maxSize_.y_);
+        validatedSize.x = Clamp(size.x, effectiveMinSize.x, maxSize_.x);
+        validatedSize.y = Clamp(size.y, effectiveMinSize.y, maxSize_.y);
 
         if (validatedSize != size_)
         {
@@ -574,10 +574,10 @@ namespace Urho3D
 
                 VariantMap& eventData = GetEventDataMap();
                 eventData[P_ELEMENT] = this;
-                eventData[P_WIDTH] = size_.x_;
-                eventData[P_HEIGHT] = size_.y_;
-                eventData[P_DX] = delta.x_;
-                eventData[P_DY] = delta.y_;
+                eventData[P_WIDTH] = size_.x;
+                eventData[P_HEIGHT] = size_.y;
+                eventData[P_DX] = delta.x;
+                eventData[P_DY] = delta.y;
                 SendEvent(E_RESIZED, eventData);
             }
         }
@@ -592,18 +592,18 @@ namespace Urho3D
 
     void UIElement::SetWidth(int width)
     {
-        SetSize(IntVector2(width, size_.y_));
+        SetSize(IntVector2(width, size_.y));
     }
 
     void UIElement::SetHeight(int height)
     {
-        SetSize(IntVector2(size_.x_, height));
+        SetSize(IntVector2(size_.x, height));
     }
 
     void UIElement::SetMinSize(const IntVector2& minSize)
     {
-        minSize_.x_ = Max(minSize.x_, 0);
-        minSize_.y_ = Max(minSize.y_, 0);
+        minSize_.x = Max(minSize.x, 0);
+        minSize_.y = Max(minSize.y, 0);
         SetSize(size_);
     }
 
@@ -614,18 +614,18 @@ namespace Urho3D
 
     void UIElement::SetMinWidth(int width)
     {
-        SetMinSize(IntVector2(width, minSize_.y_));
+        SetMinSize(IntVector2(width, minSize_.y));
     }
 
     void UIElement::SetMinHeight(int height)
     {
-        SetMinSize(IntVector2(minSize_.x_, height));
+        SetMinSize(IntVector2(minSize_.x, height));
     }
 
     void UIElement::SetMaxSize(const IntVector2& maxSize)
     {
-        maxSize_.x_ = Max(maxSize.x_, 0);
-        maxSize_.y_ = Max(maxSize.y_, 0);
+        maxSize_.x = Max(maxSize.x, 0);
+        maxSize_.y = Max(maxSize.y, 0);
         SetSize(size_);
     }
 
@@ -636,17 +636,17 @@ namespace Urho3D
 
     void UIElement::SetMaxWidth(int width)
     {
-        SetMaxSize(IntVector2(width, maxSize_.y_));
+        SetMaxSize(IntVector2(width, maxSize_.y));
     }
 
     void UIElement::SetMaxHeight(int height)
     {
-        SetMaxSize(IntVector2(maxSize_.x_, height));
+        SetMaxSize(IntVector2(maxSize_.x, height));
     }
 
     void UIElement::SetFixedSize(const IntVector2& size)
     {
-        minSize_ = maxSize_ = IntVector2(Max(size.x_, 0), Max(size.y_, 0));
+        minSize_ = maxSize_ = IntVector2(Max(size.x, 0), Max(size.y, 0));
         SetSize(size);
     }
 
@@ -657,13 +657,13 @@ namespace Urho3D
 
     void UIElement::SetFixedWidth(int width)
     {
-        minSize_.x_ = maxSize_.x_ = Max(width, 0);
+        minSize_.x = maxSize_.x = Max(width, 0);
         SetWidth(width);
     }
 
     void UIElement::SetFixedHeight(int height)
     {
-        minSize_.y_ = maxSize_.y_ = Max(height, 0);
+        minSize_.y = maxSize_.y = Max(height, 0);
         SetHeight(height);
     }
 
@@ -1119,10 +1119,10 @@ namespace Urho3D
                 positions.Push(baseIndentWidth);
                 auto indent = (unsigned)children_[i]->GetIndentWidth();
                 sizes.Push(children_[i]->GetWidth() + indent);
-                minSizes.Push(children_[i]->GetEffectiveMinSize().x_ + indent);
+                minSizes.Push(children_[i]->GetEffectiveMinSize().x + indent);
                 maxSizes.Push(children_[i]->GetMaxWidth() + indent);
                 flexScales.Push(children_[i]->GetLayoutFlexScale().x_);
-                minChildHeight = Max(minChildHeight, children_[i]->GetEffectiveMinSize().y_);
+                minChildHeight = Max(minChildHeight, children_[i]->GetEffectiveMinSize().y);
             }
 
             CalculateLayout(positions, sizes, minSizes, maxSizes, flexScales, GetWidth(), layoutBorder_.left_, layoutBorder_.right_,
@@ -1135,15 +1135,15 @@ namespace Urho3D
             layoutMinSize_ = IntVector2(minWidth, minHeight);
             SetSize(width, height);
             // Validate the size before resizing child elements, in case of min/max limits
-            width = size_.x_;
-            height = size_.y_;
+            width = size_.x;
+            height = size_.y;
 
             unsigned j = 0;
             for (unsigned i = 0; i < children_.Size(); ++i)
             {
                 if (!children_[i]->IsVisible())
                     continue;
-                children_[i]->SetPosition(positions[j], GetLayoutChildPosition(children_[i]).y_);
+                children_[i]->SetPosition(positions[j], GetLayoutChildPosition(children_[i]).y);
                 children_[i]->SetSize(sizes[j], height - layoutBorder_.top_ - layoutBorder_.bottom_);
                 ++j;
             }
@@ -1158,10 +1158,10 @@ namespace Urho3D
                     continue;
                 positions.Push(0);
                 sizes.Push(children_[i]->GetHeight());
-                minSizes.Push(children_[i]->GetEffectiveMinSize().y_);
+                minSizes.Push(children_[i]->GetEffectiveMinSize().y);
                 maxSizes.Push(children_[i]->GetMaxHeight());
                 flexScales.Push(children_[i]->GetLayoutFlexScale().y_);
-                minChildWidth = Max(minChildWidth, children_[i]->GetEffectiveMinSize().x_ + children_[i]->GetIndentWidth());
+                minChildWidth = Max(minChildWidth, children_[i]->GetEffectiveMinSize().x + children_[i]->GetIndentWidth());
             }
 
             CalculateLayout(positions, sizes, minSizes, maxSizes, flexScales, GetHeight(), layoutBorder_.top_, layoutBorder_.bottom_,
@@ -1173,15 +1173,16 @@ namespace Urho3D
             int minWidth = minChildWidth + layoutBorder_.left_ + layoutBorder_.right_;
             layoutMinSize_ = IntVector2(minWidth, minHeight);
             SetSize(width, height);
-            width = size_.x_;
-            height = size_.y_;
+            width = size_.x;
+            height = size_.y;
 
-            unsigned j = 0;
-            for (unsigned i = 0; i < children_.Size(); ++i)
+            uint32_t j = 0;
+            for (uint32_t i = 0; i < children_.Size(); ++i)
             {
                 if (!children_[i]->IsVisible())
                     continue;
-                children_[i]->SetPosition(GetLayoutChildPosition(children_[i]).x_ + baseIndentWidth, positions[j]);
+
+                children_[i]->SetPosition(GetLayoutChildPosition(children_[i]).x + baseIndentWidth, positions[j]);
                 children_[i]->SetSize(width - layoutBorder_.left_ - layoutBorder_.right_, sizes[j]);
                 ++j;
             }
@@ -1743,7 +1744,7 @@ namespace Urho3D
     {
         if (isScreen)
             position = ScreenToElement(position);
-        return position.x_ >= 0 && position.y_ >= 0 && position.x_ < size_.x_&& position.y_ < size_.y_;
+        return position.x >= 0 && position.y >= 0 && position.x < size_.x && position.y < size_.y;
     }
 
     bool UIElement::IsInsideCombined(IntVector2 position, bool isScreen)
@@ -1756,14 +1757,17 @@ namespace Urho3D
             position = ElementToScreen(position);
 
         IntRect combined = GetCombinedScreenRect();
-        return position.x_ >= combined.left_ && position.y_ >= combined.top_ && position.x_ < combined.right_&&
-            position.y_ < combined.bottom_;
+        return
+            position.x >= combined.left_
+            && position.y >= combined.top_
+            && position.x < combined.right_
+            && position.y < combined.bottom_;
     }
 
     IntRect UIElement::GetCombinedScreenRect()
     {
         IntVector2 screenPosition(GetScreenPosition());
-        IntRect combined(screenPosition.x_, screenPosition.y_, screenPosition.x_ + size_.x_, screenPosition.y_ + size_.y_);
+        IntRect combined(screenPosition.x, screenPosition.y, screenPosition.x + size_.x, screenPosition.y + size_.y);
 
         if (!clipChildren_)
         {
@@ -1816,10 +1820,10 @@ namespace Urho3D
         if (clipChildren_)
         {
             IntVector2 screenPos = GetScreenPosition();
-            currentScissor.left_ = Max(currentScissor.left_, screenPos.x_ + clipBorder_.left_);
-            currentScissor.top_ = Max(currentScissor.top_, screenPos.y_ + clipBorder_.top_);
-            currentScissor.right_ = Min(currentScissor.right_, screenPos.x_ + size_.x_ - clipBorder_.right_);
-            currentScissor.bottom_ = Min(currentScissor.bottom_, screenPos.y_ + size_.y_ - clipBorder_.bottom_);
+            currentScissor.left_ = Max(currentScissor.left_, screenPos.x + clipBorder_.left_);
+            currentScissor.top_ = Max(currentScissor.top_, screenPos.y + clipBorder_.top_);
+            currentScissor.right_ = Min(currentScissor.right_, screenPos.x + size_.x - clipBorder_.right_);
+            currentScissor.bottom_ = Min(currentScissor.bottom_, screenPos.y + size_.y - clipBorder_.bottom_);
 
             if (currentScissor.right_ < currentScissor.left_)
                 currentScissor.right_ = currentScissor.left_;
@@ -1831,7 +1835,7 @@ namespace Urho3D
     void UIElement::GetBatchesWithOffset(IntVector2& offset, PODVector<UIBatch>& batches, PODVector<float>& vertexData,
         IntRect currentScissor)
     {
-        Vector2 floatOffset((float)offset.x_, (float)offset.y_);
+        Vector2 floatOffset((float)offset.x, (float)offset.y);
         unsigned initialSize = vertexData.Size();
 
         GetBatches(batches, vertexData, currentScissor);
@@ -1871,7 +1875,7 @@ namespace Urho3D
         if (IsFixedSize() || layoutMode_ == LM_FREE || layoutMinSize_ == IntVector2::ZERO)
             return minSize_;
         else
-            return IntVector2(Max(minSize_.x_, layoutMinSize_.x_), Max(minSize_.y_, layoutMinSize_.y_));
+            return IntVector2(Max(minSize_.x, layoutMinSize_.x), Max(minSize_.y, layoutMinSize_.y));
     }
 
     void UIElement::OnAttributeAnimationAdded()
@@ -2041,8 +2045,8 @@ namespace Urho3D
         if (parent_ && enableAnchor_)
         {
             IntVector2 newSize;
-            newSize.x_ = (int)(parent_->size_.x_ * Clamp(anchorMax_.x_ - anchorMin_.x_, 0.0f, 1.0f)) + maxOffset_.x_ - minOffset_.x_;
-            newSize.y_ = (int)(parent_->size_.y_ * Clamp(anchorMax_.y_ - anchorMin_.y_, 0.0f, 1.0f)) + maxOffset_.y_ - minOffset_.y_;
+            newSize.x = (int)(parent_->size_.x * Clamp(anchorMax_.x_ - anchorMin_.x_, 0.0f, 1.0f)) + maxOffset_.x - minOffset_.x;
+            newSize.y = (int)(parent_->size_.y * Clamp(anchorMax_.y_ - anchorMin_.y_, 0.0f, 1.0f)) + maxOffset_.y - minOffset_.y;
 
             if (position_ != minOffset_)
                 SetPosition(minOffset_);
@@ -2189,11 +2193,11 @@ namespace Urho3D
         switch (ha)
         {
             case HA_LEFT:
-                ret.x_ = layoutBorder_.left_;
+                ret.x = layoutBorder_.left_;
                 break;
 
             case HA_RIGHT:
-                ret.x_ = -layoutBorder_.right_;
+                ret.x = -layoutBorder_.right_;
                 break;
 
             default:
@@ -2204,11 +2208,11 @@ namespace Urho3D
         switch (va)
         {
             case VA_TOP:
-                ret.y_ = layoutBorder_.top_;
+                ret.y = layoutBorder_.top_;
                 break;
 
             case VA_BOTTOM:
-                ret.y_ = -layoutBorder_.bottom_;
+                ret.y = -layoutBorder_.bottom_;
                 break;
 
             default:

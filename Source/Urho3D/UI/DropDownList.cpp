@@ -25,6 +25,7 @@
 #include "../Core/Context.h"
 #include "../Input/InputEvents.h"
 #include "../IO/Log.h"
+#include "../Graphics/Texture2D.h"
 #include "../UI/DropDownList.h"
 #include "../UI/ListView.h"
 #include "../UI/Text.h"
@@ -34,15 +35,17 @@
 
 #include "../DebugNew.h"
 
+using namespace Urho3D;
+
 namespace Urho3D
 {
+    extern const char* UI_CATEGORY;
+}
 
-extern const char* UI_CATEGORY;
-
-DropDownList::DropDownList(Context* context) :
-    Menu(context),
-    resizePopup_(false),
-    selectionAttr_(0)
+DropDownList::DropDownList(Context* context)
+    : Menu(context)
+    , resizePopup_(false)
+    , selectionAttr_(0)
 {
     focusMode_ = FM_FOCUSABLE_DEFOCUSABLE;
 
@@ -68,7 +71,7 @@ DropDownList::DropDownList(Context* context) :
 
 DropDownList::~DropDownList() = default;
 
-void DropDownList::RegisterObject(Context* context)
+void DropDownList::RegisterObject(Context * context)
 {
     context->RegisterFactory<DropDownList>(UI_CATEGORY);
 
@@ -84,7 +87,7 @@ void DropDownList::ApplyAttributes()
     SetSelection(selectionAttr_);
 }
 
-void DropDownList::GetBatches(PODVector<UIBatch>& batches, PODVector<float>& vertexData, const IntRect& currentScissor)
+void DropDownList::GetBatches(PODVector<UIBatch>&batches, PODVector<float>&vertexData, const IntRect & currentScissor)
 {
     Menu::GetBatches(batches, vertexData, currentScissor);
 
@@ -117,8 +120,8 @@ void DropDownList::OnShowPopup()
     content->UpdateLayout();
     const IntVector2& contentSize = content->GetSize();
     const IntRect& border = popup_->GetLayoutBorder();
-    popup_->SetSize(resizePopup_ ? GetWidth() : contentSize.x_ + border.left_ + border.right_,
-        contentSize.y_ + border.top_ + border.bottom_);
+    popup_->SetSize(resizePopup_ ? GetWidth() : contentSize.x + border.left_ + border.right_,
+        contentSize.y + border.top_ + border.bottom_);
 
     // Check if popup fits below the button. If not, show above instead
     bool showAbove = false;
@@ -126,7 +129,7 @@ void DropDownList::OnShowPopup()
     if (root)
     {
         const IntVector2& screenPos = GetScreenPosition();
-        if (screenPos.y_ + GetHeight() + popup_->GetHeight() > root->GetHeight() && screenPos.y_ - popup_->GetHeight() >= 0)
+        if (screenPos.y + GetHeight() + popup_->GetHeight() > root->GetHeight() && screenPos.y - popup_->GetHeight() >= 0)
             showAbove = true;
     }
     SetPopupOffset(0, showAbove ? -popup_->GetHeight() : GetHeight());
@@ -151,12 +154,12 @@ void DropDownList::OnSetEditable()
     listView_->SetEditable(editable_);
 }
 
-void DropDownList::AddItem(UIElement* item)
+void DropDownList::AddItem(UIElement * item)
 {
     InsertItem(M_MAX_UNSIGNED, item);
 }
 
-void DropDownList::InsertItem(unsigned index, UIElement* item)
+void DropDownList::InsertItem(unsigned index, UIElement * item)
 {
     listView_->InsertItem(index, item);
 
@@ -165,7 +168,7 @@ void DropDownList::InsertItem(unsigned index, UIElement* item)
         SetSelection(0);
 }
 
-void DropDownList::RemoveItem(UIElement* item)
+void DropDownList::RemoveItem(UIElement * item)
 {
     listView_->RemoveItem(item);
 }
@@ -185,7 +188,7 @@ void DropDownList::SetSelection(unsigned index)
     listView_->SetSelection(index);
 }
 
-void DropDownList::SetPlaceholderText(const String& text)
+void DropDownList::SetPlaceholderText(const String & text)
 {
     placeholder_->GetChildStaticCast<Text>(0)->SetText(text);
 }
@@ -233,7 +236,7 @@ void DropDownList::SetSelectionAttr(unsigned index)
     SetSelection(index);
 }
 
-bool DropDownList::FilterImplicitAttributes(XMLElement& dest) const
+bool DropDownList::FilterImplicitAttributes(XMLElement & dest) const
 {
     if (!Menu::FilterImplicitAttributes(dest))
         return false;
@@ -260,7 +263,7 @@ bool DropDownList::FilterImplicitAttributes(XMLElement& dest) const
     return true;
 }
 
-bool DropDownList::FilterPopupImplicitAttributes(XMLElement& dest) const
+bool DropDownList::FilterPopupImplicitAttributes(XMLElement & dest) const
 {
     if (!Menu::FilterPopupImplicitAttributes(dest))
         return false;
@@ -314,7 +317,7 @@ bool DropDownList::FilterPopupImplicitAttributes(XMLElement& dest) const
     return true;
 }
 
-void DropDownList::HandleItemClicked(StringHash eventType, VariantMap& eventData)
+void DropDownList::HandleItemClicked(StringHash eventType, VariantMap & eventData)
 {
     // Resize the selection placeholder to match the selected item
     UIElement* selectedItem = GetSelectedItem();
@@ -327,7 +330,7 @@ void DropDownList::HandleItemClicked(StringHash eventType, VariantMap& eventData
     ShowPopup(false);
 }
 
-void DropDownList::HandleListViewKey(StringHash eventType, VariantMap& eventData)
+void DropDownList::HandleListViewKey(StringHash eventType, VariantMap & eventData)
 {
     using namespace UnhandledKey;
 
@@ -337,10 +340,8 @@ void DropDownList::HandleListViewKey(StringHash eventType, VariantMap& eventData
         HandleItemClicked(eventType, eventData);
 }
 
-void DropDownList::HandleSelectionChanged(StringHash eventType, VariantMap& eventData)
+void DropDownList::HandleSelectionChanged(StringHash eventType, VariantMap & eventData)
 {
     // Display the place holder text when there is no selection, however, the place holder text is only visible when the place holder itself is set to visible
     placeholder_->GetChild(0)->SetVisible(GetSelection() == M_MAX_UNSIGNED);
-}
-
 }

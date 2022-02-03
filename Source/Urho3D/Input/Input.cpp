@@ -29,6 +29,7 @@
 #include "../Core/Profiler.h"
 #include "../Core/StringUtils.h"
 #include "../Graphics/Graphics.h"
+#include "../Graphics/Texture2D.h"
 #include "../Graphics/GraphicsEvents.h"
 #include "../Input/Input.h"
 #include "../IO/FileSystem.h"
@@ -453,7 +454,7 @@ namespace Urho3D
         {
             IntVector2 windowPos = graphics_->GetWindowPosition();
             IntVector2 mpos;
-            SDL_GetGlobalMouseState(&mpos.x_, &mpos.y_);
+            SDL_GetGlobalMouseState(&mpos.x, &mpos.y);
             mpos -= windowPos;
 
             const int buffer = 5;
@@ -461,32 +462,32 @@ namespace Urho3D
             const int height = graphics_->GetHeight() - buffer * 2;
 
             // SetMousePosition utilizes backbuffer coordinate system, scale now from window coordinates
-            mpos.x_ = (int)(mpos.x_ * inputScale_.x_);
-            mpos.y_ = (int)(mpos.y_ * inputScale_.y_);
+            mpos.x = (int)(mpos.x * inputScale_.x_);
+            mpos.y = (int)(mpos.y * inputScale_.y_);
 
             bool warp = false;
-            if (mpos.x_ < buffer)
+            if (mpos.x < buffer)
             {
                 warp = true;
-                mpos.x_ += width;
+                mpos.x += width;
             }
 
-            if (mpos.x_ > buffer + width)
+            if (mpos.x > buffer + width)
             {
                 warp = true;
-                mpos.x_ -= width;
+                mpos.x -= width;
             }
 
-            if (mpos.y_ < buffer)
+            if (mpos.y < buffer)
             {
                 warp = true;
-                mpos.y_ += height;
+                mpos.y += height;
             }
 
-            if (mpos.y_ > buffer + height)
+            if (mpos.y > buffer + height)
             {
                 warp = true;
-                mpos.y_ -= height;
+                mpos.y -= height;
             }
 
             if (warp)
@@ -534,10 +535,10 @@ namespace Urho3D
 
                     VariantMap& eventData = GetEventDataMap();
 
-                    eventData[P_X] = mousePosition.x_;
-                    eventData[P_Y] = mousePosition.y_;
-                    eventData[P_DX] = mouseMove_.x_;
-                    eventData[P_DY] = mouseMove_.y_;
+                    eventData[P_X] = mousePosition.x;
+                    eventData[P_Y] = mousePosition.y;
+                    eventData[P_DX] = mouseMove_.x;
+                    eventData[P_DY] = mouseMove_.y;
                     eventData[P_BUTTONS] = (unsigned)mouseButtonDown_;
                     eventData[P_QUALIFIERS] = (unsigned)GetQualifiers();
                     SendEvent(E_MOUSEMOVE, eventData);
@@ -1403,9 +1404,9 @@ namespace Urho3D
         if (!initialized_)
             return ret;
 
-        SDL_GetMouseState(&ret.x_, &ret.y_);
-        ret.x_ = (int)(ret.x_ * inputScale_.x_);
-        ret.y_ = (int)(ret.y_ * inputScale_.y_);
+        SDL_GetMouseState(&ret.x, &ret.y);
+        ret.x = (int)(ret.x * inputScale_.x_);
+        ret.y = (int)(ret.y * inputScale_.y_);
 
         return ret;
     }
@@ -1413,7 +1414,7 @@ namespace Urho3D
     IntVector2 Input::GetMouseMove() const
     {
         if (!suppressNextMouseMove_)
-            return mouseMoveScaled_ ? mouseMove_ : IntVector2((int)(mouseMove_.x_ * inputScale_.x_), (int)(mouseMove_.y_ * inputScale_.y_));
+            return mouseMoveScaled_ ? mouseMove_ : IntVector2((int)(mouseMove_.x * inputScale_.x_), (int)(mouseMove_.y * inputScale_.y_));
         else
             return IntVector2::ZERO;
     }
@@ -1421,7 +1422,7 @@ namespace Urho3D
     int32_t Input::GetMouseMoveX() const
     {
         if (!suppressNextMouseMove_)
-            return mouseMoveScaled_ ? mouseMove_.x_ : (int32_t)(mouseMove_.x_ * inputScale_.x_);
+            return mouseMoveScaled_ ? mouseMove_.x : (int32_t)(mouseMove_.x * inputScale_.x_);
 
         return 0;
     }
@@ -1429,7 +1430,7 @@ namespace Urho3D
     int32_t Input::GetMouseMoveY() const
     {
         if (!suppressNextMouseMove_)
-            return mouseMoveScaled_ ? mouseMove_.y_ : (int32_t)(mouseMove_.y_ * inputScale_.y_);
+            return mouseMoveScaled_ ? mouseMove_.y : (int32_t)(mouseMove_.y * inputScale_.y_);
 
         return 0;
     }
@@ -1663,8 +1664,8 @@ namespace Urho3D
 
             VariantMap& eventData = GetEventDataMap();
             eventData[P_TOUCHID] = state.touchID_;
-            eventData[P_X] = state.position_.x_;
-            eventData[P_Y] = state.position_.y_;
+            eventData[P_X] = state.position_.x;
+            eventData[P_Y] = state.position_.y;
             SendEvent(E_TOUCHEND, eventData);
         }
 
@@ -1833,7 +1834,7 @@ namespace Urho3D
         if (!graphics_)
             return;
 
-        SDL_WarpMouseInWindow(graphics_->GetWindow(), (int)(position.x_ / inputScale_.x_), (int)(position.y_ / inputScale_.y_));
+        SDL_WarpMouseInWindow(graphics_->GetWindow(), (int)(position.x / inputScale_.x_), (int)(position.y / inputScale_.y_));
     }
 
     void Input::CenterMousePosition()
@@ -1999,8 +2000,8 @@ namespace Urho3D
 #endif
 
                     // Accumulate without scaling for accuracy, needs to be scaled to backbuffer coordinates when asked
-                    mouseMove_.x_ += evt.motion.xrel;
-                    mouseMove_.y_ += evt.motion.yrel;
+                    mouseMove_.x += evt.motion.xrel;
+                    mouseMove_.y += evt.motion.yrel;
                     mouseMoveScaled_ = false;
 
                     if (!suppressNextMouseMove_)
@@ -2059,8 +2060,8 @@ namespace Urho3D
 
                     VariantMap& eventData = GetEventDataMap();
                     eventData[P_TOUCHID] = touchID;
-                    eventData[P_X] = state.position_.x_;
-                    eventData[P_Y] = state.position_.y_;
+                    eventData[P_X] = state.position_.x;
+                    eventData[P_Y] = state.position_.y;
                     eventData[P_PRESSURE] = state.pressure_;
                     SendEvent(E_TOUCHBEGIN, eventData);
 
@@ -2082,8 +2083,8 @@ namespace Urho3D
                     // Do not trust the position in the finger up event. Instead use the last position stored in the
                     // touch structure
                     eventData[P_TOUCHID] = touchID;
-                    eventData[P_X] = state.position_.x_;
-                    eventData[P_Y] = state.position_.y_;
+                    eventData[P_X] = state.position_.x;
+                    eventData[P_Y] = state.position_.y;
                     SendEvent(E_TOUCHEND, eventData);
 
                     // Add touch index back to list of available touch Ids
@@ -2111,8 +2112,8 @@ namespace Urho3D
 
                     VariantMap& eventData = GetEventDataMap();
                     eventData[P_TOUCHID] = touchID;
-                    eventData[P_X] = state.position_.x_;
-                    eventData[P_Y] = state.position_.y_;
+                    eventData[P_X] = state.position_.x;
+                    eventData[P_Y] = state.position_.y;
                     eventData[P_DX] = (int)(evt.tfinger.dx * graphics_->GetWidth());
                     eventData[P_DY] = (int)(evt.tfinger.dy * graphics_->GetHeight());
                     eventData[P_PRESSURE] = state.pressure_;
@@ -2456,7 +2457,7 @@ namespace Urho3D
 
         // Only interested in events from screen joystick(s)
         TouchState& state = touches_[eventData[P_TOUCHID].GetInt()];
-        IntVector2 position(int(state.position_.x_ / GetSubsystem<UI>()->GetScale()), int(state.position_.y_ / GetSubsystem<UI>()->GetScale()));
+        IntVector2 position(int(state.position_.x / GetSubsystem<UI>()->GetScale()), int(state.position_.y / GetSubsystem<UI>()->GetScale()));
         UIElement* element = eventType == E_TOUCHBEGIN ? GetSubsystem<UI>()->GetElementAt(position) : state.touchedElement_;
         if (!element)
             return;
@@ -2524,13 +2525,13 @@ namespace Urho3D
                 if (eventType != E_TOUCHEND)
                 {
                     IntVector2 relPosition = position - element->GetScreenPosition() - element->GetSize() / 2;
-                    if (relPosition.y_ < 0 && Abs(relPosition.x_ * 3 / 2) < Abs(relPosition.y_))
+                    if (relPosition.y < 0 && Abs(relPosition.x * 3 / 2) < Abs(relPosition.y))
                         evt.jhat.value |= HAT_UP;
-                    if (relPosition.y_ > 0 && Abs(relPosition.x_ * 3 / 2) < Abs(relPosition.y_))
+                    if (relPosition.y > 0 && Abs(relPosition.x * 3 / 2) < Abs(relPosition.y))
                         evt.jhat.value |= HAT_DOWN;
-                    if (relPosition.x_ < 0 && Abs(relPosition.y_ * 3 / 2) < Abs(relPosition.x_))
+                    if (relPosition.x < 0 && Abs(relPosition.y * 3 / 2) < Abs(relPosition.x))
                         evt.jhat.value |= HAT_LEFT;
-                    if (relPosition.x_ > 0 && Abs(relPosition.y_ * 3 / 2) < Abs(relPosition.x_))
+                    if (relPosition.x > 0 && Abs(relPosition.y * 3 / 2) < Abs(relPosition.x))
                         evt.jhat.value |= HAT_RIGHT;
                 }
             }
@@ -2552,13 +2553,13 @@ namespace Urho3D
                 {
                     evt.type = SDL_KEYDOWN;
                     IntVector2 relPosition = position - element->GetScreenPosition() - element->GetSize() / 2;
-                    if (relPosition.y_ < 0 && Abs(relPosition.x_ * 3 / 2) < Abs(relPosition.y_))
+                    if (relPosition.y < 0 && Abs(relPosition.x * 3 / 2) < Abs(relPosition.y))
                         evt.key.keysym.sym = keyBinding.left_;      // The integers are encoded in WSAD order to l-t-r-b
-                    else if (relPosition.y_ > 0 && Abs(relPosition.x_ * 3 / 2) < Abs(relPosition.y_))
+                    else if (relPosition.y > 0 && Abs(relPosition.x * 3 / 2) < Abs(relPosition.y))
                         evt.key.keysym.sym = keyBinding.top_;
-                    else if (relPosition.x_ < 0 && Abs(relPosition.y_ * 3 / 2) < Abs(relPosition.x_))
+                    else if (relPosition.x < 0 && Abs(relPosition.y * 3 / 2) < Abs(relPosition.x))
                         evt.key.keysym.sym = keyBinding.right_;
-                    else if (relPosition.x_ > 0 && Abs(relPosition.y_ * 3 / 2) < Abs(relPosition.x_))
+                    else if (relPosition.x > 0 && Abs(relPosition.y * 3 / 2) < Abs(relPosition.x))
                         evt.key.keysym.sym = keyBinding.bottom_;
                     else
                         return;

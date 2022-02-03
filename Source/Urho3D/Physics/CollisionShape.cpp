@@ -334,21 +334,21 @@ HeightfieldData::HeightfieldData(Terrain* terrain, unsigned lodLevel) :
                 skip *= 2;
                 lodSpacing.x_ *= 2.0f;
                 lodSpacing.z_ *= 2.0f;
-                int rX = lodSize.x_ & 1u;
-                int rY = lodSize.y_ & 1u;
-                lodSize.x_ >>= 1;
-                lodSize.y_ >>= 1;
-                lodSize.x_ += rX;
-                lodSize.y_ += rY;
-                if (lodSize.x_ <= 2 || lodSize.y_ <= 2)
+                int rX = lodSize.x & 1u;
+                int rY = lodSize.y & 1u;
+                lodSize.x >>= 1;
+                lodSize.y >>= 1;
+                lodSize.x += rX;
+                lodSize.y += rY;
+                if (lodSize.x <= 2 || lodSize.y <= 2)
                     break;
             }
 
-            SharedArrayPtr<float> lodHeightData(new float[lodSize.x_ * lodSize.y_]);
-            for (int y = 0, dY = 0; y < size_.y_ && dY < lodSize.y_; y += skip, ++dY)
+            SharedArrayPtr<float> lodHeightData(new float[lodSize.x * lodSize.y]);
+            for (int y = 0, dY = 0; y < size_.y && dY < lodSize.y; y += skip, ++dY)
             {
-                for (int x = 0, dX = 0; x < size_.x_ && dX < lodSize.x_; x += skip, ++dX)
-                    lodHeightData[dY * lodSize.x_ + dX] = heightData_[y * size_.x_ + x];
+                for (int x = 0, dX = 0; x < size_.x && dX < lodSize.x; x += skip, ++dX)
+                    lodHeightData[dY * lodSize.x + dX] = heightData_[y * size_.x + x];
             }
 
             size_ = lodSize;
@@ -356,11 +356,11 @@ HeightfieldData::HeightfieldData(Terrain* terrain, unsigned lodLevel) :
             heightData_ = lodHeightData;
         }
 
-        auto points = (unsigned)(size_.x_ * size_.y_);
+        auto points = (uint32_t)(size_.x * size_.y);
         float* data = heightData_.Get();
 
         minHeight_ = maxHeight_ = data[0];
-        for (unsigned i = 1; i < points; ++i)
+        for (uint32_t i = 1; i < points; ++i)
         {
             minHeight_ = Min(minHeight_, data[i]);
             maxHeight_ = Max(maxHeight_, data[i]);
@@ -1068,7 +1068,7 @@ void CollisionShape::UpdateShape()
                     auto* heightfield = static_cast<HeightfieldData*>(geometry_.Get());
 
                     shape_ =
-                        new btHeightfieldTerrainShape(heightfield->size_.x_, heightfield->size_.y_, heightfield->heightData_.Get(),
+                        new btHeightfieldTerrainShape(heightfield->size_.x, heightfield->size_.y, heightfield->heightData_.Get(),
                             1.0f, heightfield->minHeight_, heightfield->maxHeight_, 1, PHY_FLOAT, false);
                     shape_->setLocalScaling(
                         ToBtVector3(Vector3(heightfield->spacing_.x_, 1.0f, heightfield->spacing_.z_) * cachedWorldScale_ * size_));

@@ -159,7 +159,7 @@ namespace Urho3D
         /// Rebuild part of the navigation mesh in the rectangular area. Return true if successful.
         virtual bool Build(const IntVector2& from, const IntVector2& to);
         /// Return tile data.
-        virtual PODVector<unsigned char> GetTileData(const IntVector2& tile) const;
+        virtual PODVector<uint8_t> GetTileData(const IntVector2& tile) const;
         /// Add tile to navigation mesh.
         virtual bool AddTile(const PODVector<unsigned char>& tileData);
         /// Remove tile from navigation mesh.

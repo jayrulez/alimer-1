@@ -27,15 +27,13 @@
 
 #include "../DebugNew.h"
 
-namespace Urho3D
-{
+using namespace std;
+using namespace Urho3D;
 
 Skeleton::Skeleton() :
     rootBoneIndex_(M_MAX_UNSIGNED)
 {
 }
-
-Skeleton::~Skeleton() = default;
 
 bool Skeleton::Load(Deserializer& source)
 {
@@ -45,7 +43,7 @@ bool Skeleton::Load(Deserializer& source)
         return false;
 
     unsigned bones = source.ReadUInt();
-    bones_.Reserve(bones);
+    bones_.reserve(bones);
 
     for (unsigned i = 0; i < bones; ++i)
     {
@@ -60,15 +58,15 @@ bool Skeleton::Load(Deserializer& source)
 
         // Read bone collision data
         newBone.collisionMask_ = BoneCollisionShapeFlags(source.ReadUByte());
-        if (newBone.collisionMask_ & BONECOLLISION_SPHERE)
+        if ((newBone.collisionMask_ & BoneCollisionShapeFlags::Sphere) != 0)
             newBone.radius_ = source.ReadFloat();
-        if (newBone.collisionMask_ & BONECOLLISION_BOX)
+        if ((newBone.collisionMask_ & BoneCollisionShapeFlags::Box) != 0)
             newBone.boundingBox_ = source.ReadBoundingBox();
 
         if (newBone.parentIndex_ == i)
             rootBoneIndex_ = i;
 
-        bones_.Push(newBone);
+        bones_.push_back(newBone);
     }
 
     return true;
@@ -76,10 +74,10 @@ bool Skeleton::Load(Deserializer& source)
 
 bool Skeleton::Save(Serializer& dest) const
 {
-    if (!dest.WriteUInt(bones_.Size()))
+    if (!dest.WriteUInt((uint32_t)bones_.size()))
         return false;
 
-    for (unsigned i = 0; i < bones_.Size(); ++i)
+    for (size_t i = 0; i < bones_.size(); ++i)
     {
         const Bone& bone = bones_[i];
         dest.WriteString(bone.name_);
@@ -90,10 +88,10 @@ bool Skeleton::Save(Serializer& dest) const
         dest.Write(bone.offsetMatrix_.Data(), sizeof(Matrix3x4));
 
         // Collision info
-        dest.WriteUByte(bone.collisionMask_);
-        if (bone.collisionMask_ & BONECOLLISION_SPHERE)
+        dest.WriteUByte((uint8_t)bone.collisionMask_);
+        if ((bone.collisionMask_ & BoneCollisionShapeFlags::Sphere) != 0)
             dest.WriteFloat(bone.radius_);
-        if (bone.collisionMask_ & BONECOLLISION_BOX)
+        if ((bone.collisionMask_ & BoneCollisionShapeFlags::Box) != 0)
             dest.WriteBoundingBox(bone.boundingBox_);
     }
 
@@ -107,14 +105,14 @@ void Skeleton::Define(const Skeleton& src)
     bones_ = src.bones_;
     // Make sure we clear node references, if they exist
     // (AnimatedModel will create new nodes on its own)
-    for (Vector<Bone>::Iterator i = bones_.Begin(); i != bones_.End(); ++i)
+    for (vector<Bone>::iterator i = bones_.begin(); i != bones_.end(); ++i)
         i->node_.Reset();
     rootBoneIndex_ = src.rootBoneIndex_;
 }
 
-void Skeleton::SetRootBoneIndex(unsigned index)
+void Skeleton::SetRootBoneIndex(uint32_t index)
 {
-    if (index < bones_.Size())
+    if (index < bones_.size())
         rootBoneIndex_ = index;
     else
         URHO3D_LOGERROR("Root bone index out of bounds");
@@ -122,13 +120,13 @@ void Skeleton::SetRootBoneIndex(unsigned index)
 
 void Skeleton::ClearBones()
 {
-    bones_.Clear();
+    bones_.clear();
     rootBoneIndex_ = M_MAX_UNSIGNED;
 }
 
 void Skeleton::Reset()
 {
-    for (Vector<Bone>::Iterator i = bones_.Begin(); i != bones_.End(); ++i)
+    for (vector<Bone>::iterator i = bones_.begin(); i != bones_.end(); ++i)
     {
         if (i->animated_ && i->node_)
             i->node_->SetTransform(i->initialPosition_, i->initialRotation_, i->initialScale_);
@@ -137,7 +135,7 @@ void Skeleton::Reset()
 
 void Skeleton::ResetSilent()
 {
-    for (Vector<Bone>::Iterator i = bones_.Begin(); i != bones_.End(); ++i)
+    for (vector<Bone>::iterator i = bones_.begin(); i != bones_.end(); ++i)
     {
         if (i->animated_ && i->node_)
             i->node_->SetTransformSilent(i->initialPosition_, i->initialRotation_, i->initialScale_);
@@ -150,24 +148,24 @@ Bone* Skeleton::GetRootBone()
     return GetBone(rootBoneIndex_);
 }
 
-unsigned Skeleton::GetBoneIndex(const StringHash& boneNameHash) const
+uint32_t Skeleton::GetBoneIndex(const StringHash& boneNameHash) const
 {
-    const unsigned numBones = bones_.Size();
-    for (unsigned i = 0; i < numBones; ++i)
+    const size_t numBones = bones_.size();
+    for (size_t i = 0; i < numBones; ++i)
     {
         if (bones_[i].nameHash_ == boneNameHash)
-            return i;
+            return (uint32_t)i;
     }
 
     return M_MAX_UNSIGNED;
 }
 
-unsigned Skeleton::GetBoneIndex(const Bone* bone) const
+uint32_t Skeleton::GetBoneIndex(const Bone* bone) const
 {
-    if (bones_.Empty() || bone < &bones_.Front() || bone > &bones_.Back())
+    if (bones_.empty() || bone < &bones_.front() || bone > &bones_.back())
         return M_MAX_UNSIGNED;
 
-    return static_cast<unsigned>(bone - &bones_.Front());
+    return static_cast<uint32_t>(bone - &bones_.front());
 }
 
 unsigned Skeleton::GetBoneIndex(const String& boneName) const
@@ -185,7 +183,7 @@ Bone* Skeleton::GetBoneParent(const Bone* bone)
 
 Bone* Skeleton::GetBone(unsigned index)
 {
-    return index < bones_.Size() ? &bones_[index] : nullptr;
+    return index < bones_.size() ? &bones_[index] : nullptr;
 }
 
 Bone* Skeleton::GetBone(const String& name)
@@ -201,7 +199,5 @@ Bone* Skeleton::GetBone(const char* name)
 Bone* Skeleton::GetBone(const StringHash& boneNameHash)
 {
     const unsigned index = GetBoneIndex(boneNameHash);
-    return index < bones_.Size() ? &bones_[index] : nullptr;
-}
-
+    return index < bones_.size() ? &bones_[index] : nullptr;
 }
