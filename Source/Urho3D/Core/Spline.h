@@ -20,8 +20,6 @@
 // THE SOFTWARE.
 //
 
-/// \file
-
 #pragma once
 
 #include "../Core/Variant.h"
@@ -33,97 +31,96 @@
 namespace Urho3D
 {
 
-enum InterpolationMode
-{
-    /// Bezier interpolation.
-    BEZIER_CURVE = 0,
-    /// Catmull-Rom interpolation. The first and last knots control velocity and are not included on the path.
-    CATMULL_ROM_CURVE,
-    /// Linear interpolation.
-    LINEAR_CURVE,
-    /// Catmull-Rom full path interpolation. Start and end knots are duplicated or looped as necessary to move through the full path.
-    CATMULL_ROM_FULL_CURVE
-};
-
-/// Spline class to get a point on it based off the interpolation mode.
-class URHO3D_API Spline
-{
-public:
-    /// Default constructor.
-    Spline();
-    /// Constructor setting interpolation mode.
-    explicit Spline(InterpolationMode mode);
-    /// Constructor setting knots and interpolation mode.
-    explicit Spline(const Vector<Variant>& knots, InterpolationMode mode = BEZIER_CURVE);
-    /// Copy constructor.
-    Spline(const Spline& rhs) = default;
-
-    /// Copy operator.
-    Spline& operator =(const Spline& rhs) = default;
-
-    /// Equality operator.
-    bool operator ==(const Spline& rhs) const
+    enum InterpolationMode
     {
-        return (knots_ == rhs.knots_ && interpolationMode_ == rhs.interpolationMode_);
-    }
+        /// Bezier interpolation.
+        BEZIER_CURVE = 0,
+        /// Catmull-Rom interpolation. The first and last knots control velocity and are not included on the path.
+        CATMULL_ROM_CURVE,
+        /// Linear interpolation.
+        LINEAR_CURVE,
+        /// Catmull-Rom full path interpolation. Start and end knots are duplicated or looped as necessary to move through the full path.
+        CATMULL_ROM_FULL_CURVE
+    };
 
-    /// Inequality operator.
-    bool operator !=(const Spline& rhs) const
+    /// Spline class to get a point on it based off the interpolation mode.
+    class URHO3D_API Spline
     {
-        return !(*this == rhs);
-    }
+    public:
+        /// Default constructor.
+        Spline();
+        /// Constructor setting interpolation mode.
+        explicit Spline(InterpolationMode mode);
+        /// Constructor setting knots and interpolation mode.
+        explicit Spline(const VariantVector& knots, InterpolationMode mode = BEZIER_CURVE);
+        /// Copy constructor.
+        Spline(const Spline& rhs) = default;
 
-    /// Return the interpolation mode.
-    /// @property
-    InterpolationMode GetInterpolationMode() const { return interpolationMode_; }
+        /// Copy operator.
+        Spline& operator =(const Spline& rhs) = default;
 
-    /// Return the knots of the spline.
-    const VariantVector& GetKnots() const { return knots_; }
+        /// Equality operator.
+        bool operator ==(const Spline& rhs) const
+        {
+            return (knots_ == rhs.knots_ && interpolationMode_ == rhs.interpolationMode_);
+        }
 
-    /// Return the knot at the specific index.
-    /// @property
-    Variant GetKnot(unsigned index) const { return knots_[index]; }
+        /// Inequality operator.
+        bool operator !=(const Spline& rhs) const
+        {
+            return !(*this == rhs);
+        }
 
-    /// Return the T of the point of the spline at f from 0.f - 1.f.
-    Variant GetPoint(float f) const;
+        /// Return the interpolation mode.
+        /// @property
+        InterpolationMode GetInterpolationMode() const { return interpolationMode_; }
 
-    /// Set the interpolation mode.
-    /// @property
-    void SetInterpolationMode(InterpolationMode interpolationMode) { interpolationMode_ = interpolationMode; }
+        /// Return the knots of the spline.
+        const VariantVector& GetKnots() const { return knots_; }
 
-    /// Set the knots of the spline.
-    void SetKnots(const Vector<Variant>& knots) { knots_ = knots; }
+        /// Return the knot at the specific index.
+        /// @property
+        Variant GetKnot(unsigned index) const { return knots_[index]; }
 
-    /// Set the value of an existing knot.
-    void SetKnot(const Variant& knot, unsigned index);
-    /// Add a knot to the end of the spline.
-    void AddKnot(const Variant& knot);
-    /// Add a knot to the spline at a specific index.
-    void AddKnot(const Variant& knot, unsigned index);
+        /// Return the T of the point of the spline at f from 0.f - 1.f.
+        Variant GetPoint(float f) const;
 
-    /// Remove the last knot on the spline.
-    void RemoveKnot() { knots_.Pop(); }
+        /// Set the interpolation mode.
+        /// @property
+        void SetInterpolationMode(InterpolationMode interpolationMode) { interpolationMode_ = interpolationMode; }
 
-    /// Remove the knot at the specific index.
-    void RemoveKnot(unsigned index) { knots_.Erase(index); }
+        /// Set the knots of the spline.
+        void SetKnots(const VariantVector& knots) { knots_ = knots; }
 
-    /// Clear the spline.
-    void Clear() { knots_.Clear(); }
+        /// Set the value of an existing knot.
+        void SetKnot(const Variant& knot, uint32_t index);
+        /// Add a knot to the end of the spline.
+        void AddKnot(const Variant& knot);
+        /// Add a knot to the spline at a specific index.
+        void AddKnot(const Variant& knot, uint32_t index);
 
-private:
-    /// Perform Bezier interpolation on the spline.
-    Variant BezierInterpolation(const Vector<Variant>& knots, float t) const;
-    /// Perform Spline interpolation on the spline.
-    Variant CatmullRomInterpolation(const Vector<Variant>& knots, float t) const;
-    /// Perform linear interpolation on the spline.
-    Variant LinearInterpolation(const Vector<Variant>& knots, float t) const;
-    /// Linear interpolation between two Variants based on underlying type.
-    Variant LinearInterpolation(const Variant& lhs, const Variant& rhs, float t) const;
+        /// Remove the last knot on the spline.
+        void RemoveKnot() { knots_.pop_back(); }
 
-    /// Interpolation mode.
-    InterpolationMode interpolationMode_;
-    /// Knots on the spline.
-    VariantVector knots_;
-};
+        /// Remove the knot at the specific index.
+        void RemoveKnot(uint32_t index) { knots_.erase(knots_.begin() + index); }
 
+        /// Clear the spline.
+        void Clear() { knots_.clear(); }
+
+    private:
+        /// Perform Bezier interpolation on the spline.
+        Variant BezierInterpolation(const VariantVector& knots, float t) const;
+        /// Perform Spline interpolation on the spline.
+        Variant CatmullRomInterpolation(const VariantVector& knots, float t) const;
+        /// Perform linear interpolation on the spline.
+        Variant LinearInterpolation(const VariantVector& knots, float t) const;
+        /// Linear interpolation between two Variants based on underlying type.
+        Variant LinearInterpolation(const Variant& lhs, const Variant& rhs, float t) const;
+
+        /// Interpolation mode.
+        InterpolationMode interpolationMode_;
+        /// Knots on the spline.
+        VariantVector knots_;
+    };
 }

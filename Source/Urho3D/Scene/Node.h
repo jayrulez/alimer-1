@@ -359,7 +359,7 @@ namespace Urho3D
 
         /// Return ID.
         /// @property{get_id}
-        unsigned GetID() const { return id_; }
+        uint32_t GetID() const { return id_; }
         /// Return whether the node is replicated or local to a scene.
         /// @property
         bool IsReplicated() const;
@@ -736,7 +736,7 @@ namespace Urho3D
         /// Scene (root node).
         Scene* scene_;
         /// Unique ID within the scene.
-        unsigned id_;
+        uint32_t id_;
         /// Position.
         Vector3 position_;
         /// Rotation.

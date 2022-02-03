@@ -368,13 +368,13 @@ namespace Urho3D
     void BillboardSet::SetBillboardsAttr(const VariantVector& value)
     {
         unsigned index = 0;
-        unsigned numBillboards = index < value.Size() ? value[index++].GetUInt() : 0;
+        unsigned numBillboards = index < value.size() ? value[index++].GetUInt() : 0;
         SetNumBillboards(numBillboards);
 
         // Dealing with old billboard format
-        if (value.Size() == billboards_.size() * 6 + 1)
+        if (value.size() == billboards_.size() * 6 + 1)
         {
-            for (std::vector<Billboard>::iterator i = billboards_.begin(); i != billboards_.end() && index < value.Size(); ++i)
+            for (std::vector<Billboard>::iterator i = billboards_.begin(); i != billboards_.end() && index < value.size(); ++i)
             {
                 i->position_ = value[index++].GetVector3();
                 i->size_ = value[index++].GetVector2();
@@ -388,7 +388,7 @@ namespace Urho3D
         // New billboard format
         else
         {
-            for (std::vector<Billboard>::iterator i = billboards_.begin(); i != billboards_.end() && index < value.Size(); ++i)
+            for (std::vector<Billboard>::iterator i = billboards_.begin(); i != billboards_.end() && index < value.size(); ++i)
             {
                 i->position_ = value[index++].GetVector3();
                 i->size_ = value[index++].GetVector2();
@@ -432,18 +432,18 @@ namespace Urho3D
     VariantVector BillboardSet::GetBillboardsAttr() const
     {
         VariantVector ret;
-        ret.Reserve(billboards_.size() * 7 + 1);
-        ret.Push(billboards_.size());
+        ret.reserve(billboards_.size() * 7 + 1);
+        ret.push_back(static_cast<uint32_t>(billboards_.size()));
 
         for (std::vector<Billboard>::const_iterator i = billboards_.begin(); i != billboards_.end(); ++i)
         {
-            ret.Push(i->position_);
-            ret.Push(i->size_);
-            ret.Push(Vector4(i->uv_.min_.x_, i->uv_.min_.y_, i->uv_.max_.x_, i->uv_.max_.y_));
-            ret.Push(i->color_);
-            ret.Push(i->rotation_);
-            ret.Push(i->direction_);
-            ret.Push(i->enabled_);
+            ret.push_back(i->position_);
+            ret.push_back(i->size_);
+            ret.push_back(Vector4(i->uv_.min_.x_, i->uv_.min_.y_, i->uv_.max_.x_, i->uv_.max_.y_));
+            ret.push_back(i->color_);
+            ret.push_back(i->rotation_);
+            ret.push_back(i->direction_);
+            ret.push_back(i->enabled_);
         }
 
         return ret;

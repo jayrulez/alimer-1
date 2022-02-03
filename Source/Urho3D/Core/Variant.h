@@ -76,7 +76,7 @@ namespace Urho3D
     class VectorBuffer;
 
     /// Vector of variants.
-    using VariantVector = Vector<Variant>;
+    using VariantVector = std::vector<Variant>;
 
     /// Vector of strings.
     using StringVector = Vector<String>;
@@ -275,13 +275,13 @@ namespace Urho3D
     template <typename T> CustomVariantValueImpl<T> MakeCustomValue(const T& value) { return CustomVariantValueImpl<T>(value); }
 
     /// Size of variant value. 16 bytes on 32-bit platform, 32 bytes on 64-bit platform.
-    static const unsigned VARIANT_VALUE_SIZE = sizeof(void*) * 4;
+    static constexpr size_t VARIANT_VALUE_SIZE = sizeof(void*) * 4;
 
     /// Union for the possible variant values. Objects exceeding the VARIANT_VALUE_SIZE are allocated on the heap.
     union VariantValue
     {
-        unsigned char storage_[VARIANT_VALUE_SIZE];
-        int int_;
+        uint8_t storage_[VARIANT_VALUE_SIZE];
+        int32_t int_;
         bool bool_;
         float float_;
         double double_;
@@ -328,7 +328,7 @@ namespace Urho3D
         Variant() = default;
 
         /// Construct from integer.
-        Variant(int value)                  // NOLINT(google-explicit-constructor)
+        Variant(int32_t value)                  // NOLINT(google-explicit-constructor)
         {
             *this = value;
         }
@@ -340,13 +340,13 @@ namespace Urho3D
         }
 
         /// Construct from unsigned integer.
-        Variant(unsigned value)             // NOLINT(google-explicit-constructor)
+        Variant(uint32_t value)             // NOLINT(google-explicit-constructor)
         {
-            *this = (int)value;
+            *this = (int32_t)value;
         }
 
         /// Construct from unsigned integer.
-        Variant(unsigned long long value)   // NOLINT(google-explicit-constructor)
+        Variant(uint64_t value)   // NOLINT(google-explicit-constructor)
         {
             *this = (long long)value;
         }
@@ -1127,14 +1127,14 @@ namespace Urho3D
         }
 
         /// Return unsigned int or zero on type mismatch. Floats and doubles are converted.
-        unsigned GetUInt() const
+        uint32_t GetUInt() const
         {
             if (type_ == VAR_INT)
-                return static_cast<unsigned>(value_.int_);
+                return static_cast<uint32_t>(value_.int_);
             else if (type_ == VAR_FLOAT)
-                return static_cast<unsigned>(value_.float_);
+                return static_cast<uint32_t>(value_.float_);
             else if (type_ == VAR_DOUBLE)
-                return static_cast<unsigned>(value_.double_);
+                return static_cast<uint32_t>(value_.double_);
             else
                 return 0;
         }

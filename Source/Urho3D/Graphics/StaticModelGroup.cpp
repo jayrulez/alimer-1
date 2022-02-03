@@ -37,7 +37,6 @@
 
 namespace Urho3D
 {
-
     extern const char* GEOMETRY_CATEGORY;
 
     static const StringVector instanceNodesStructureElementNames =
@@ -84,7 +83,7 @@ namespace Urho3D
         if (scene)
         {
             // The first index stores the number of IDs redundantly. This is for editing
-            for (unsigned i = 1; i < nodeIDsAttr_.Size(); ++i)
+            for (size_t i = 1; i < nodeIDsAttr_.size(); ++i)
             {
                 Node* node = scene->GetNode(nodeIDsAttr_[i].GetUInt());
                 if (node)
@@ -322,9 +321,9 @@ namespace Urho3D
     {
         // Just remember the node IDs. They need to go through the SceneResolver, and we actually find the nodes during
         // ApplyAttributes()
-        if (value.Size())
+        if (value.size())
         {
-            nodeIDsAttr_.Clear();
+            nodeIDsAttr_.clear();
 
             unsigned index = 0;
             unsigned numInstances = value[index++].GetUInt();
@@ -332,20 +331,20 @@ namespace Urho3D
             if (numInstances > M_MAX_INT)
                 numInstances = 0;
 
-            nodeIDsAttr_.Push(numInstances);
+            nodeIDsAttr_.push_back(numInstances);
             while (numInstances--)
             {
                 // If vector contains less IDs than should, fill the rest with zeroes
-                if (index < value.Size())
-                    nodeIDsAttr_.Push(value[index++].GetUInt());
+                if (index < value.size())
+                    nodeIDsAttr_.push_back(value[index++].GetUInt());
                 else
-                    nodeIDsAttr_.Push(0);
+                    nodeIDsAttr_.push_back(0);
             }
         }
         else
         {
-            nodeIDsAttr_.Clear();
-            nodeIDsAttr_.Push(0);
+            nodeIDsAttr_.clear();
+            nodeIDsAttr_.push_back(0);
         }
 
         nodesDirty_ = true;
@@ -402,18 +401,17 @@ namespace Urho3D
 
     void StaticModelGroup::UpdateNodeIDs() const
     {
-        unsigned numInstances = instanceNodes_.Size();
+        size_t numInstances = instanceNodes_.Size();
 
-        nodeIDsAttr_.Clear();
-        nodeIDsAttr_.Push(numInstances);
+        nodeIDsAttr_.clear();
+        nodeIDsAttr_.push_back(numInstances);
 
-        for (unsigned i = 0; i < numInstances; ++i)
+        for (size_t i = 0; i < numInstances; ++i)
         {
             Node* node = instanceNodes_[i];
-            nodeIDsAttr_.Push(node ? node->GetID() : 0);
+            nodeIDsAttr_.push_back(node ? node->GetID() : 0);
         }
 
         nodeIDsDirty_ = false;
     }
-
 }

@@ -594,9 +594,9 @@ namespace Urho3D
     void AnimationController::SetAnimationsAttr(const VariantVector& value)
     {
         animations_.Clear();
-        animations_.Reserve(value.Size() / 5);  // Incomplete data is discarded
+        animations_.Reserve(value.size() / 5);  // Incomplete data is discarded
         unsigned index = 0;
-        while (index + 4 < value.Size())    // Prevent out-of-bound index access
+        while (index + 4 < value.size())    // Prevent out-of-bound index access
         {
             AnimationControl newControl;
             newControl.name_ = value[index++].GetString();
@@ -714,7 +714,7 @@ namespace Urho3D
         auto* cache = GetSubsystem<ResourceCache>();
         nodeAnimationStates_.Clear();
         unsigned index = 0;
-        unsigned numStates = index < value.Size() ? value[index++].GetUInt() : 0;
+        unsigned numStates = index < value.size() ? value[index++].GetUInt() : 0;
         // Prevent negative or overly large value being assigned from the editor
         if (numStates > M_MAX_INT)
             numStates = 0;
@@ -724,7 +724,7 @@ namespace Urho3D
         nodeAnimationStates_.Reserve(numStates);
         while (numStates--)
         {
-            if (index + 2 < value.Size())
+            if (index + 2 < value.size())
             {
                 // Note: null animation is allowed here for editing
                 const ResourceRef& animRef = value[index++].GetResourceRef();
@@ -746,14 +746,14 @@ namespace Urho3D
     VariantVector AnimationController::GetAnimationsAttr() const
     {
         VariantVector ret;
-        ret.Reserve(animations_.Size() * 5);
+        ret.reserve(animations_.Size() * 5);
         for (Vector<AnimationControl>::ConstIterator i = animations_.Begin(); i != animations_.End(); ++i)
         {
-            ret.Push(i->name_);
-            ret.Push(i->speed_);
-            ret.Push(i->targetWeight_);
-            ret.Push(i->fadeTime_);
-            ret.Push(i->autoFadeTime_);
+            ret.push_back(i->name_);
+            ret.push_back(i->speed_);
+            ret.push_back(i->targetWeight_);
+            ret.push_back(i->fadeTime_);
+            ret.push_back(i->autoFadeTime_);
         }
         return ret;
     }
@@ -823,15 +823,15 @@ namespace Urho3D
     VariantVector AnimationController::GetNodeAnimationStatesAttr() const
     {
         VariantVector ret;
-        ret.Reserve(nodeAnimationStates_.Size() * 3 + 1);
-        ret.Push(nodeAnimationStates_.Size());
+        ret.reserve(nodeAnimationStates_.Size() * 3 + 1);
+        ret.push_back(nodeAnimationStates_.Size());
         for (Vector<SharedPtr<AnimationState> >::ConstIterator i = nodeAnimationStates_.Begin(); i != nodeAnimationStates_.End(); ++i)
         {
             AnimationState* state = *i;
             Animation* animation = state->GetAnimation();
-            ret.Push(GetResourceRef(animation, Animation::GetTypeStatic()));
-            ret.Push(state->IsLooped());
-            ret.Push(state->GetTime());
+            ret.push_back(GetResourceRef(animation, Animation::GetTypeStatic()));
+            ret.push_back(state->IsLooped());
+            ret.push_back(state->GetTime());
         }
         return ret;
     }

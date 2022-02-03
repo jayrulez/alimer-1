@@ -30,128 +30,129 @@
 #include "../DebugNew.h"
 #include <unordered_set>
 
-namespace Urho3D
+using namespace Urho3D;
+
+void SceneResolver::Reset()
 {
+    nodes_.clear();
+    components_.clear();
+}
 
-    SceneResolver::SceneResolver() = default;
+void SceneResolver::AddNode(uint32_t oldID, Node* node)
+{
+    if (node)
+        nodes_[oldID] = node;
+}
 
-    SceneResolver::~SceneResolver() = default;
+void SceneResolver::AddComponent(uint32_t oldID, Component* component)
+{
+    if (component)
+        components_[oldID] = component;
+}
 
-    void SceneResolver::Reset()
+void SceneResolver::Resolve()
+{
+    // Nodes do not have component or node ID attributes, so only have to go through components
+    std::unordered_set<StringHash> noIDAttributes;
+    for (auto i = components_.begin(); i != components_.end(); ++i)
     {
-        nodes_.Clear();
-        components_.Clear();
-    }
+        Component* component = i->second;
+        if (!component || noIDAttributes.find(component->GetType()) != noIDAttributes.end())
+            continue;
 
-    void SceneResolver::AddNode(unsigned oldID, Node* node)
-    {
-        if (node)
-            nodes_[oldID] = node;
-    }
-
-    void SceneResolver::AddComponent(unsigned oldID, Component* component)
-    {
-        if (component)
-            components_[oldID] = component;
-    }
-
-    void SceneResolver::Resolve()
-    {
-        // Nodes do not have component or node ID attributes, so only have to go through components
-        std::unordered_set<StringHash> noIDAttributes;
-        for (HashMap<unsigned, WeakPtr<Component> >::ConstIterator i = components_.Begin(); i != components_.End(); ++i)
+        bool hasIDAttributes = false;
+        const Vector<AttributeInfo>* attributes = component->GetAttributes();
+        if (!attributes)
         {
-            Component* component = i->second_;
-            if (!component || noIDAttributes.find(component->GetType()) != noIDAttributes.end())
-                continue;
-
-            bool hasIDAttributes = false;
-            const Vector<AttributeInfo>* attributes = component->GetAttributes();
-            if (!attributes)
-            {
-                noIDAttributes.insert(component->GetType());
-                continue;
-            }
-
-            for (unsigned j = 0; j < attributes->Size(); ++j)
-            {
-                const AttributeInfo& info = attributes->At(j);
-                if (info.mode_ & AM_NODEID)
-                {
-                    hasIDAttributes = true;
-                    unsigned oldNodeID = component->GetAttribute(j).GetUInt();
-
-                    if (oldNodeID)
-                    {
-                        HashMap<unsigned, WeakPtr<Node> >::ConstIterator k = nodes_.Find(oldNodeID);
-
-                        if (k != nodes_.End() && k->second_)
-                        {
-                            unsigned newNodeID = k->second_->GetID();
-                            component->SetAttribute(j, Variant(newNodeID));
-                        }
-                        else
-                            URHO3D_LOGWARNING("Could not resolve node ID " + String(oldNodeID));
-                    }
-                }
-                else if (info.mode_ & AM_COMPONENTID)
-                {
-                    hasIDAttributes = true;
-                    unsigned oldComponentID = component->GetAttribute(j).GetUInt();
-
-                    if (oldComponentID)
-                    {
-                        HashMap<unsigned, WeakPtr<Component> >::ConstIterator k = components_.Find(oldComponentID);
-
-                        if (k != components_.End() && k->second_)
-                        {
-                            unsigned newComponentID = k->second_->GetID();
-                            component->SetAttribute(j, Variant(newComponentID));
-                        }
-                        else
-                            URHO3D_LOGWARNING("Could not resolve component ID " + String(oldComponentID));
-                    }
-                }
-                else if (info.mode_ & AM_NODEIDVECTOR)
-                {
-                    hasIDAttributes = true;
-                    Variant attrValue = component->GetAttribute(j);
-                    const VariantVector& oldNodeIDs = attrValue.GetVariantVector();
-
-                    if (oldNodeIDs.Size())
-                    {
-                        // The first index stores the number of IDs redundantly. This is for editing
-                        unsigned numIDs = oldNodeIDs[0].GetUInt();
-                        VariantVector newIDs;
-                        newIDs.Push(numIDs);
-
-                        for (unsigned k = 1; k < oldNodeIDs.Size(); ++k)
-                        {
-                            unsigned oldNodeID = oldNodeIDs[k].GetUInt();
-                            HashMap<unsigned, WeakPtr<Node> >::ConstIterator l = nodes_.Find(oldNodeID);
-
-                            if (l != nodes_.End() && l->second_)
-                                newIDs.Push(l->second_->GetID());
-                            else
-                            {
-                                // If node was not found, retain number of elements, just store ID 0
-                                newIDs.Push(0);
-                                URHO3D_LOGWARNING("Could not resolve node ID " + String(oldNodeID));
-                            }
-                        }
-
-                        component->SetAttribute(j, newIDs);
-                    }
-                }
-            }
-
-            // If component type had no ID attributes, cache this fact for optimization
-            if (!hasIDAttributes)
-                noIDAttributes.insert(component->GetType());
+            noIDAttributes.insert(component->GetType());
+            continue;
         }
 
-        // Attributes have been resolved, so no need to remember the nodes after this
-        Reset();
+        for (uint32_t j = 0; j < attributes->Size(); ++j)
+        {
+            const AttributeInfo& info = attributes->At(j);
+            if (info.mode_ & AM_NODEID)
+            {
+                hasIDAttributes = true;
+                uint32_t oldNodeID = component->GetAttribute(j).GetUInt();
+
+                if (oldNodeID)
+                {
+                    std::unordered_map<uint32_t, WeakPtr<Node> >::const_iterator k = nodes_.find(oldNodeID);
+
+                    if (k != nodes_.end() && k->second)
+                    {
+                        uint32_t newNodeID = k->second->GetID();
+                        component->SetAttribute(j, Variant(newNodeID));
+                    }
+                    else
+                    {
+                        URHO3D_LOGWARNING("Could not resolve node ID " + String(oldNodeID));
+                    }
+                }
+            }
+            else if (info.mode_ & AM_COMPONENTID)
+            {
+                hasIDAttributes = true;
+                uint32_t oldComponentID = component->GetAttribute(j).GetUInt();
+
+                if (oldComponentID)
+                {
+                    std::unordered_map<uint32_t, WeakPtr<Component> >::const_iterator k = components_.find(oldComponentID);
+
+                    if (k != components_.end() && k->second)
+                    {
+                        uint32_t newComponentID = k->second->GetID();
+                        component->SetAttribute(j, Variant(newComponentID));
+                    }
+                    else
+                    {
+                        URHO3D_LOGWARNING("Could not resolve component ID " + String(oldComponentID));
+                    }
+                }
+            }
+            else if (info.mode_ & AM_NODEIDVECTOR)
+            {
+                hasIDAttributes = true;
+                Variant attrValue = component->GetAttribute(j);
+                const VariantVector& oldNodeIDs = attrValue.GetVariantVector();
+
+                if (oldNodeIDs.size())
+                {
+                    // The first index stores the number of IDs redundantly. This is for editing
+                    uint32_t numIDs = oldNodeIDs[0].GetUInt();
+                    VariantVector newIDs;
+                    newIDs.push_back(numIDs);
+
+                    for (size_t k = 1; k < oldNodeIDs.size(); ++k)
+                    {
+                        uint32_t oldNodeID = oldNodeIDs[k].GetUInt();
+                        std::unordered_map<uint32_t, WeakPtr<Node> >::const_iterator l = nodes_.find(oldNodeID);
+
+                        if (l != nodes_.end() && l->second)
+                        {
+                            newIDs.push_back(l->second->GetID());
+                        }
+                        else
+                        {
+                            // If node was not found, retain number of elements, just store ID 0
+                            newIDs.push_back(0);
+                            URHO3D_LOGWARNING("Could not resolve node ID " + String(oldNodeID));
+                        }
+                    }
+
+                    component->SetAttribute(j, newIDs);
+                }
+            }
+        }
+
+        // If component type had no ID attributes, cache this fact for optimization
+        if (!hasIDAttributes)
+        {
+            noIDAttributes.insert(component->GetType());
+        }
     }
 
+    // Attributes have been resolved, so no need to remember the nodes after this
+    Reset();
 }

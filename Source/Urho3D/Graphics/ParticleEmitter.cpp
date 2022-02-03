@@ -372,9 +372,9 @@ namespace Urho3D
     void ParticleEmitter::SetParticlesAttr(const VariantVector& value)
     {
         unsigned index = 0;
-        SetNumParticles(index < value.Size() ? value[index++].GetUInt() : 0);
+        SetNumParticles(index < value.size() ? value[index++].GetUInt() : 0);
 
-        for (PODVector<Particle>::Iterator i = particles_.Begin(); i != particles_.End() && index < value.Size(); ++i)
+        for (PODVector<Particle>::Iterator i = particles_.Begin(); i != particles_.End() && index < value.size(); ++i)
         {
             i->velocity_ = value[index++].GetVector3();
             i->size_ = value[index++].GetVector2();
@@ -392,22 +392,22 @@ namespace Urho3D
         VariantVector ret;
         if (!serializeParticles_)
         {
-            ret.Push(particles_.Size());
+            ret.push_back(particles_.Size());
             return ret;
         }
 
-        ret.Reserve(particles_.Size() * 8 + 1);
-        ret.Push(particles_.Size());
+        ret.reserve(particles_.Size() * 8 + 1);
+        ret.push_back(particles_.Size());
         for (PODVector<Particle>::ConstIterator i = particles_.Begin(); i != particles_.End(); ++i)
         {
-            ret.Push(i->velocity_);
-            ret.Push(i->size_);
-            ret.Push(i->timer_);
-            ret.Push(i->timeToLive_);
-            ret.Push(i->scale_);
-            ret.Push(i->rotationSpeed_);
-            ret.Push(i->colorIndex_);
-            ret.Push(i->texIndex_);
+            ret.push_back(i->velocity_);
+            ret.push_back(i->size_);
+            ret.push_back(i->timer_);
+            ret.push_back(i->timeToLive_);
+            ret.push_back(i->scale_);
+            ret.push_back(i->rotationSpeed_);
+            ret.push_back(i->colorIndex_);
+            ret.push_back(i->texIndex_);
         }
         return ret;
     }
@@ -417,22 +417,22 @@ namespace Urho3D
         VariantVector ret;
         if (!serializeParticles_)
         {
-            ret.Push(billboards_.size());
+            ret.push_back(billboards_.size());
             return ret;
         }
 
-        ret.Reserve(billboards_.size() * 7 + 1);
-        ret.Push(billboards_.size());
+        ret.reserve(billboards_.size() * 7 + 1);
+        ret.push_back(billboards_.size());
 
         for (std::vector<Billboard>::const_iterator i = billboards_.begin(); i != billboards_.end(); ++i)
         {
-            ret.Push(i->position_);
-            ret.Push(i->size_);
-            ret.Push(Vector4(i->uv_.min_.x_, i->uv_.min_.y_, i->uv_.max_.x_, i->uv_.max_.y_));
-            ret.Push(i->color_);
-            ret.Push(i->rotation_);
-            ret.Push(i->direction_);
-            ret.Push(i->enabled_);
+            ret.push_back(i->position_);
+            ret.push_back(i->size_);
+            ret.push_back(Vector4(i->uv_.min_.x_, i->uv_.min_.y_, i->uv_.max_.x_, i->uv_.max_.y_));
+            ret.push_back(i->color_);
+            ret.push_back(i->rotation_);
+            ret.push_back(i->direction_);
+            ret.push_back(i->enabled_);
         }
 
         return ret;

@@ -332,8 +332,8 @@ namespace Urho3D
     bool Serializer::WriteVariantVector(const VariantVector& value)
     {
         bool success = true;
-        success &= WriteVLE(value.Size());
-        for (VariantVector::ConstIterator i = value.Begin(); i != value.End(); ++i)
+        success &= WriteVLE((uint32_t)value.size());
+        for (VariantVector::const_iterator i = value.begin(); i != value.end(); ++i)
             success &= WriteVariant(*i);
         return success;
     }
@@ -364,7 +364,9 @@ namespace Urho3D
         uint8_t data[4];
 
         if (value < 0x80)
+        {
             return WriteUByte((uint8_t)value);
+        }
         else if (value < 0x4000)
         {
             data[0] = (uint8_t)(value | 0x80u);
