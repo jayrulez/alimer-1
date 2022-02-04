@@ -100,10 +100,10 @@ namespace Urho3D
         void SetNonThreadedWorkMs(int ms) { maxNonThreadedWorkMs_ = Max(ms, 1); }
 
         /// Return number of worker threads.
-        unsigned GetNumThreads() const { return threads_.Size(); }
+        uint32_t GetNumThreads() const { return (uint32_t)threads.size(); }
 
         /// Return whether all work with at least the specified priority is finished.
-        bool IsCompleted(unsigned priority) const;
+        bool IsCompleted(uint32_t priority) const;
         /// Return whether the queue is currently completing work in the main thread.
         bool IsCompleting() const { return completing_; }
 
@@ -115,9 +115,9 @@ namespace Urho3D
 
     private:
         /// Process work items until shut down. Called by the worker threads.
-        void ProcessItems(unsigned threadIndex);
+        void ProcessItems(uint32_t threadIndex);
         /// Purge completed work items which have at least the specified priority, and send completion events as necessary.
-        void PurgeCompleted(unsigned priority);
+        void PurgeCompleted(uint32_t priority);
         /// Purge the pool to reduce allocation where its unneeded.
         void PurgePool();
         /// Return a work item to the pool.
@@ -126,7 +126,7 @@ namespace Urho3D
         void HandleBeginFrame(StringHash eventType, VariantMap& eventData);
 
         /// Worker threads.
-        Vector<SharedPtr<WorkerThread> > threads_;
+        std::vector<SharedPtr<WorkerThread> > threads;
         /// Work item pool for reuse to cut down on allocation. The bool is a flag for item pooling and whether it is available or not.
         std::list<SharedPtr<WorkItem> > poolItems_;
         /// Work item collection. Accessed only by the main thread.

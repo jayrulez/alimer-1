@@ -23,13 +23,11 @@
 
 #pragma once
 
-#include "../Container/Ptr.h"
 #include "../Math/StringHash.h"
+#include <mutex>
 
 namespace Urho3D
 {
-    class Mutex;
-
     /// Helper class used for StringHash reversing.
     class URHO3D_API StringHashRegister
     {
@@ -40,16 +38,16 @@ namespace Urho3D
         ~StringHashRegister();
 
         /// Register string for hash reverse mapping. Could be used from StringHash ctor.
-        StringHash RegisterString(const StringHash& hash, const char* string);
+        StringHash RegisterString(const StringHash& hash, std::string_view string);
         /// Register string for hash reverse mapping.
-        StringHash RegisterString(const char* string);
+        StringHash RegisterString(std::string_view string);
         /// Return string for given StringHash. Return empty string if not found.
-        String GetStringCopy(const StringHash& hash) const;
+        std::string GetStringCopy(const StringHash& hash) const;
         /// Return whether the string in contained in the register.
         bool Contains(const StringHash& hash) const;
 
         /// Return String for given StringHash. Return value is unsafe to use if RegisterString is called from other threads.
-        const String& GetString(const StringHash& hash) const;
+        const std::string& GetString(const StringHash& hash) const;
         /// Return map of hashes. Return value is unsafe to use if RegisterString is called from other threads.
         const StringMap& GetInternalMap() const { return map_; }
 
@@ -57,6 +55,6 @@ namespace Urho3D
         /// Hash to string map.
         StringMap map_;
         /// Mutex.
-        UniquePtr<Mutex> mutex_;
+        std::unique_ptr<std::mutex> mutex_;
     };
 }

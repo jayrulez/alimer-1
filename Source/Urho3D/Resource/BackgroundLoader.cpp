@@ -33,6 +33,7 @@
 
 #include "../DebugNew.h"
 
+using namespace std;
 using namespace Urho3D;
 
 BackgroundLoader::BackgroundLoader(ResourceCache* owner) :
@@ -42,7 +43,7 @@ BackgroundLoader::BackgroundLoader(ResourceCache* owner) :
 
 BackgroundLoader::~BackgroundLoader()
 {
-    MutexLock lock(backgroundLoadMutex_);
+    lock_guard<mutex> lock(backgroundLoadMutex);
 
     backgroundLoadQueue_.clear();
 }
@@ -53,7 +54,7 @@ void BackgroundLoader::ThreadFunction()
 
     while (shouldRun_)
     {
-        backgroundLoadMutex_.Acquire();
+        backgroundLoadMutex.lock();
 
         // Search for a queued resource that has not been loaded yet
         auto i = backgroundLoadQueue_.begin();
@@ -68,7 +69,7 @@ void BackgroundLoader::ThreadFunction()
         if (i == backgroundLoadQueue_.end())
         {
             // No resources to load found
-            backgroundLoadMutex_.Release();
+            backgroundLoadMutex.unlock();
             Time::Sleep(5);
         }
         else
@@ -77,7 +78,7 @@ void BackgroundLoader::ThreadFunction()
             Resource* resource = item.resource_;
             // We can be sure that the item is not removed from the queue as long as it is in the
             // "queued" or "loading" state
-            backgroundLoadMutex_.Release();
+            backgroundLoadMutex.unlock();
 
             bool success = false;
             SharedPtr<File> file = owner_->GetFile(resource->GetName(), item.sendEventOnFailure_);
@@ -90,7 +91,7 @@ void BackgroundLoader::ThreadFunction()
             // Process dependencies now
             // Need to lock the queue again when manipulating other entries
             std::pair<StringHash, StringHash> key = std::make_pair(resource->GetType(), resource->GetNameHash());
-            backgroundLoadMutex_.Acquire();
+            backgroundLoadMutex.lock();
             if (item.dependents_.size())
             {
                 for (std::unordered_set<std::pair<StringHash, StringHash> >::iterator i = item.dependents_.begin();
@@ -107,7 +108,7 @@ void BackgroundLoader::ThreadFunction()
             }
 
             resource->SetAsyncLoadState(success ? ASYNC_SUCCESS : ASYNC_FAIL);
-            backgroundLoadMutex_.Release();
+            backgroundLoadMutex.unlock();
         }
     }
 }
@@ -117,7 +118,7 @@ bool BackgroundLoader::QueueResource(StringHash type, const String& name, bool s
     StringHash nameHash(name);
     std::pair<StringHash, StringHash> key = std::make_pair(type, nameHash);
 
-    MutexLock lock(backgroundLoadMutex_);
+    lock_guard<mutex> lock(backgroundLoadMutex);
 
     // Check if already exists in the queue
     if (backgroundLoadQueue_.find(key) != backgroundLoadQueue_.end())
@@ -175,14 +176,14 @@ bool BackgroundLoader::QueueResource(StringHash type, const String& name, bool s
 
 void BackgroundLoader::WaitForResource(StringHash type, StringHash nameHash)
 {
-    backgroundLoadMutex_.Acquire();
+    backgroundLoadMutex.lock();
 
     // Check if the resource in question is being background loaded
     std::pair<StringHash, StringHash> key = std::make_pair(type, nameHash);
     auto i = backgroundLoadQueue_.find(key);
     if (i != backgroundLoadQueue_.end())
     {
-        backgroundLoadMutex_.Release();
+        backgroundLoadMutex.unlock();
 
         {
             Resource* resource = i->second.resource_;
@@ -210,12 +211,14 @@ void BackgroundLoader::WaitForResource(StringHash type, StringHash nameHash)
         // This may take a long time and may potentially wait on other resources, so it is important we do not hold the mutex during this
         FinishBackgroundLoading(i->second);
 
-        backgroundLoadMutex_.Acquire();
+        backgroundLoadMutex.lock();
         backgroundLoadQueue_.erase(i);
-        backgroundLoadMutex_.Release();
+        backgroundLoadMutex.unlock();
     }
     else
-        backgroundLoadMutex_.Release();
+    {
+        backgroundLoadMutex.unlock();
+    }
 }
 
 void BackgroundLoader::FinishResources(int maxMs)
@@ -224,7 +227,7 @@ void BackgroundLoader::FinishResources(int maxMs)
     {
         HiresTimer timer;
 
-        backgroundLoadMutex_.Acquire();
+        backgroundLoadMutex.lock();
 
         for (auto i = backgroundLoadQueue_.begin(); i != backgroundLoadQueue_.end();)
         {
@@ -239,9 +242,9 @@ void BackgroundLoader::FinishResources(int maxMs)
             {
                 // Finishing a resource may need it to wait for other resources to load, in which case we can not
                 // hold on to the mutex
-                backgroundLoadMutex_.Release();
+                backgroundLoadMutex.unlock();
                 FinishBackgroundLoading(i->second);
-                backgroundLoadMutex_.Acquire();
+                backgroundLoadMutex.lock();
                 i = backgroundLoadQueue_.erase(i);
             }
 
@@ -250,13 +253,13 @@ void BackgroundLoader::FinishResources(int maxMs)
                 break;
         }
 
-        backgroundLoadMutex_.Release();
+        backgroundLoadMutex.unlock();
     }
 }
 
 uint32_t BackgroundLoader::GetNumQueuedResources() const
 {
-    MutexLock lock(backgroundLoadMutex_);
+    lock_guard<mutex> lock(backgroundLoadMutex);
     return (uint32_t)backgroundLoadQueue_.size();
 }
 

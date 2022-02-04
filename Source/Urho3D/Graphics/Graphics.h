@@ -23,7 +23,6 @@
 #pragma once
 
 #include "../Container/ArrayPtr.h"
-#include "../Core/Mutex.h"
 #include "../Core/Object.h"
 #include "../Graphics/GraphicsDefs.h"
 #include "../Graphics/ShaderVariation.h"
@@ -31,6 +30,7 @@
 #include "../Math/Plane.h"
 #include "../Math/Rect.h"
 #include "../Resource/Image.h"
+#include <mutex>
 
 struct SDL_Window;
 
@@ -696,7 +696,7 @@ namespace Urho3D
         void Release(bool clearGPUObjects, bool closeWindow);
 
         /// Mutex for accessing the GPU objects vector from several threads.
-        Mutex gpuObjectMutex_;
+        std::mutex gpuObjectMutex_;
         /// Implementation.
         GraphicsImpl* impl_;
         /// SDL window.
@@ -745,21 +745,21 @@ namespace Urho3D
         /// sRGB conversion on write support flag.
         bool sRGBWriteSupport_{};
         /// Number of primitives this frame.
-        unsigned numPrimitives_{};
+        uint32_t numPrimitives_{};
         /// Number of batches this frame.
-        unsigned numBatches_{};
+        uint32_t numBatches_{};
         /// Largest scratch buffer request this frame.
-        unsigned maxScratchBufferRequest_{};
+        uint32_t maxScratchBufferRequest_{};
         /// GPU objects.
-        PODVector<GPUObject*> gpuObjects_;
+        std::vector<GPUObject*> gpuObjects;
         /// Scratch buffers.
         Vector<ScratchBuffer> scratchBuffers_;
         /// Shadow map dummy color texture format.
-        unsigned dummyColorFormat_{};
+        uint32_t dummyColorFormat_{};
         /// Shadow map depth texture format.
-        unsigned shadowMapFormat_{};
+        uint32_t shadowMapFormat_{};
         /// Shadow map 24-bit depth texture format.
-        unsigned hiresShadowMapFormat_{};
+        uint32_t hiresShadowMapFormat_{};
         /// Vertex buffers in use.
         VertexBuffer* vertexBuffers_[kMaxVertexBufferBindings]{};
         /// Index buffer in use.

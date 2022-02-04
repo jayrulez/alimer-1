@@ -20,13 +20,11 @@
 // THE SOFTWARE.
 //
 
-/// \file
-
 #pragma once
 
-#include "../Core/Mutex.h"
 #include "../IO/File.h"
 #include "../Resource/Resource.h"
+#include <mutex>
 #include <unordered_set>
 
 namespace Urho3D
@@ -243,7 +241,7 @@ namespace Urho3D
         File* SearchPackages(const String& name);
 
         /// Mutex for thread-safe access to the resource directories, resource packages and resource dependencies.
-        mutable Mutex resourceMutex_;
+        mutable std::mutex resourceMutex_;
         /// Resources by type.
         HashMap<StringHash, ResourceGroup> resourceGroups_;
         /// Resource load directories.
@@ -317,5 +315,4 @@ namespace Urho3D
     /// Register Resource library subsystems and objects.
     /// @nobind
     void URHO3D_API RegisterResourceLibrary(Context* context);
-
 }

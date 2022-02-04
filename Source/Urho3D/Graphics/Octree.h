@@ -22,9 +22,9 @@
 
 #pragma once
 
-#include "../Core/Mutex.h"
 #include "../Graphics/Drawable.h"
 #include "../Graphics/OctreeQuery.h"
+#include <mutex>
 
 namespace Urho3D
 {
@@ -213,11 +213,10 @@ namespace Urho3D
         /// Drawable objects that were inserted during threaded update phase.
         PODVector<Drawable*> threadedDrawableUpdates_;
         /// Mutex for octree reinsertions.
-        Mutex octreeMutex_;
+        std::mutex octreeMutex_;
         /// Ray query temporary list of drawables.
         mutable PODVector<Drawable*> rayQueryDrawables_;
         /// Subdivision level.
-        unsigned numLevels_;
+        uint32_t numLevels_;
     };
-
 }

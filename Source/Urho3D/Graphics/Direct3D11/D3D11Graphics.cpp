@@ -230,12 +230,12 @@ namespace Urho3D
     Graphics::~Graphics()
     {
         {
-            MutexLock lock(gpuObjectMutex_);
+            std::lock_guard<std::mutex> lock(gpuObjectMutex_);
 
             // Release all GPU objects that still exist
-            for (PODVector<GPUObject*>::Iterator i = gpuObjects_.Begin(); i != gpuObjects_.End(); ++i)
-                (*i)->Release();
-            gpuObjects_.Clear();
+            for (GPUObject* object : gpuObjects)
+                object->Release();
+            gpuObjects.clear();
         }
 
         impl_->vertexDeclarations_.clear();
@@ -1165,11 +1165,11 @@ namespace Urho3D
 
     void Graphics::SetTextureParametersDirty()
     {
-        MutexLock lock(gpuObjectMutex_);
+        std::lock_guard<std::mutex> lock(gpuObjectMutex_);
 
-        for (PODVector<GPUObject*>::Iterator i = gpuObjects_.Begin(); i != gpuObjects_.End(); ++i)
+        for (GPUObject* object : gpuObjects)
         {
-            Texture* texture = dynamic_cast<Texture*>(*i);
+            Texture* texture = dynamic_cast<Texture*>(object);
             if (texture)
                 texture->SetParametersDirty();
         }

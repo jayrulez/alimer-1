@@ -22,10 +22,10 @@
 
 #pragma once
 
-#include "../Core/Mutex.h"
 #include "../Core/Object.h"
 #include "../Core/Thread.h"
 #include "../Core/Timer.h"
+#include <mutex>
 
 namespace Urho3D
 {
@@ -68,9 +68,9 @@ namespace Urho3D
         /// The path being watched.
         String path_;
         /// Pending changes. These will be returned and removed from the list when their timer has exceeded the delay.
-        HashMap<String, Timer> changes_;
+        std::unordered_map<String, Timer> changes_;
         /// Mutex for the change buffer.
-        Mutex changesMutex_;
+        std::mutex changesMutex_;
         /// Delay in seconds for notifying changes.
         float delay_;
         /// Watch subdirectories flag.
@@ -82,7 +82,6 @@ namespace Urho3D
         void* dirHandle_;
 
 #elif __linux__
-
         /// HashMap for the directory and sub-directories (needed for inotify's int handles).
         HashMap<int, String> dirHandle_;
         /// Linux inotify needs a handle.
@@ -94,8 +93,6 @@ namespace Urho3D
         bool supported_;
         /// Pointer to internal MacFileWatcher delegate.
         void* watcher_;
-
 #endif
     };
-
 }

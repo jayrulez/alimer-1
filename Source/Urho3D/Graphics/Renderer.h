@@ -20,15 +20,13 @@
 // THE SOFTWARE.
 //
 
-/// \file
-
 #pragma once
 
-#include "../Core/Mutex.h"
 #include "../Graphics/Batch.h"
 #include "../Graphics/Drawable.h"
 #include "../Graphics/Viewport.h"
 #include "../Math/Color.h"
+#include <mutex>
 #include <unordered_set>
 
 namespace Urho3D
@@ -597,7 +595,7 @@ namespace Urho3D
         /// Techniques for which missing shader error has been displayed.
         std::unordered_set<Technique*> shaderErrorDisplayed_;
         /// Mutex for shadow camera allocation.
-        Mutex rendererMutex_;
+        std::mutex rendererMutex_;
         /// Current variation names for deferred light volume shaders.
         Vector<String> deferredLightPSVariations_;
         /// Frame info for rendering.

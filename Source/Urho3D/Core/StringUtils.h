@@ -26,6 +26,7 @@
 
 namespace Urho3D
 {
+    URHO3D_API extern const std::string kEmptyString;
 
     /// Parse a bool from a string. Check for the first non-empty character (converted to lowercase) being either 't', 'y' or '1'.
     URHO3D_API bool ToBool(const String& source);

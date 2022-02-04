@@ -23,7 +23,6 @@
 #include "../Precompiled.h"
 
 #include "../Core/Context.h"
-#include "../Core/Mutex.h"
 #include "../Core/Profiler.h"
 #include "../Graphics/DebugRenderer.h"
 #include "../Graphics/Model.h"

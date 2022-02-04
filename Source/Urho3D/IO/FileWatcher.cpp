@@ -34,7 +34,7 @@
 #include <sys/inotify.h>
 extern "C"
 {
-// Need read/close for inotify
+    // Need read/close for inotify
 #include "unistd.h"
 }
 #elif defined(__APPLE__) && !defined(IOS) && !defined(TVOS)
@@ -44,17 +44,21 @@ extern "C"
 }
 #endif
 
-namespace Urho3D
+using namespace std;
+using namespace Urho3D;
+
+namespace
 {
 #ifndef __APPLE__
-static const unsigned BUFFERSIZE = 4096;
+    static constexpr uint32_t BUFFERSIZE = 4096;
 #endif
+}
 
-FileWatcher::FileWatcher(Context* context) :
-    Object(context),
-    fileSystem_(GetSubsystem<FileSystem>()),
-    delay_(1.0f),
-    watchSubDirs_(false)
+FileWatcher::FileWatcher(Context* context)
+    : Object(context)
+    , fileSystem_(GetSubsystem<FileSystem>())
+    , delay_(1.0f)
+    , watchSubDirs_(false)
 {
 #ifdef URHO3D_FILEWATCHER
 #ifdef __linux__
@@ -328,7 +332,7 @@ void FileWatcher::ThreadFunction()
 
 void FileWatcher::AddChange(const String& fileName)
 {
-    MutexLock lock(changesMutex_);
+    lock_guard<mutex> lock(changesMutex_);
 
     // Reset the timer associated with the filename. Will be notified once timer exceeds the delay
     changes_[fileName].Reset();
@@ -336,26 +340,24 @@ void FileWatcher::AddChange(const String& fileName)
 
 bool FileWatcher::GetNextChange(String& dest)
 {
-    MutexLock lock(changesMutex_);
+    lock_guard<mutex> lock(changesMutex_);
 
     auto delayMsec = (unsigned)(delay_ * 1000.0f);
 
-    if (changes_.Empty())
+    if (changes_.empty())
         return false;
     else
     {
-        for (HashMap<String, Timer>::Iterator i = changes_.Begin(); i != changes_.End(); ++i)
+        for (auto i = changes_.begin(); i != changes_.end(); ++i)
         {
-            if (i->second_.GetMSec(false) >= delayMsec)
+            if (i->second.GetMSec(false) >= delayMsec)
             {
-                dest = i->first_;
-                changes_.Erase(i);
+                dest = i->first;
+                changes_.erase(i);
                 return true;
             }
         }
 
         return false;
     }
-}
-
 }

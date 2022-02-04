@@ -34,7 +34,6 @@
 
 namespace Urho3D
 {
-
 #ifdef URHO3D_HASH_DEBUG
 
     // Expose map to let Visual Studio debugger access it if Urho3D is linked statically.
@@ -73,6 +72,14 @@ namespace Urho3D
     {
 #ifdef URHO3D_HASH_DEBUG
         Urho3D::GetGlobalStringHashRegister().RegisterString(*this, str.c_str());
+#endif
+    }
+
+    StringHash::StringHash(std::string_view str) noexcept
+        : value(Calculate(str.data()))
+    {
+#ifdef URHO3D_HASH_DEBUG
+        Urho3D::GetGlobalStringHashRegister().RegisterString(*this, str);
 #endif
     }
 

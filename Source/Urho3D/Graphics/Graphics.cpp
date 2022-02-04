@@ -59,6 +59,7 @@
 
 #include "../DebugNew.h"
 
+using namespace std;
 using namespace Urho3D;
 
 void Graphics::SetExternalWindow(void* window)
@@ -383,16 +384,20 @@ void Graphics::SetShaderCacheDir(const String& path)
 
 void Graphics::AddGPUObject(GPUObject* object)
 {
-    MutexLock lock(gpuObjectMutex_);
+    lock_guard<mutex> lock(gpuObjectMutex_);
 
-    gpuObjects_.Push(object);
+    gpuObjects.push_back(object);
 }
 
 void Graphics::RemoveGPUObject(GPUObject* object)
 {
-    MutexLock lock(gpuObjectMutex_);
+    lock_guard<mutex> lock(gpuObjectMutex_);
 
-    gpuObjects_.Remove(object);
+    auto it = std::find(gpuObjects.begin(), gpuObjects.end(), object);
+    if (it != gpuObjects.end())
+    {
+        gpuObjects.erase(it);
+    }
 }
 
 void* Graphics::ReserveScratchBuffer(unsigned size)

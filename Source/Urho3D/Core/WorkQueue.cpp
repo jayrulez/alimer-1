@@ -85,8 +85,8 @@ namespace Urho3D
         shutDown_ = true;
         Resume();
 
-        for (unsigned i = 0; i < threads_.Size(); ++i)
-            threads_[i]->Stop();
+        for (size_t i = 0; i < threads.size(); ++i)
+            threads[i]->Stop();
     }
 
     void WorkQueue::CreateThreads(unsigned numThreads)
@@ -94,7 +94,7 @@ namespace Urho3D
 #ifdef URHO3D_THREADING
         // Other subsystems may initialize themselves according to the number of threads.
         // Therefore allow creating the threads only once, after which the amount is fixed
-        if (!threads_.Empty())
+        if (!threads.empty())
             return;
 
         // Start threads in paused mode
@@ -104,7 +104,7 @@ namespace Urho3D
         {
             SharedPtr<WorkerThread> thread(new WorkerThread(this, i + 1));
             thread->Run();
-            threads_.Push(thread);
+            threads.push_back(thread);
         }
 #else
         URHO3D_LOGERROR("Can not create worker threads as threading is disabled");
@@ -145,8 +145,10 @@ namespace Urho3D
         item->completed_ = false;
 
         // Make sure worker threads' list is safe to modify
-        if (threads_.Size() && !paused_)
+        if (threads.size() && !paused_)
+        {
             queueMutex_.lock();
+        }
 
         // Find position for new item
         if (queue_.empty())
@@ -171,7 +173,7 @@ namespace Urho3D
                 queue_.push_back(item);
         }
 
-        if (threads_.Size())
+        if (threads.size())
         {
             queueMutex_.unlock();
             paused_ = false;
@@ -253,7 +255,7 @@ namespace Urho3D
     {
         completing_ = true;
 
-        if (threads_.Size())
+        if (threads.size())
         {
             Resume();
 
@@ -301,7 +303,7 @@ namespace Urho3D
         completing_ = false;
     }
 
-    bool WorkQueue::IsCompleted(unsigned priority) const
+    bool WorkQueue::IsCompleted(uint32_t priority) const
     {
         for (list<SharedPtr<WorkItem> >::const_iterator i = workItems_.begin(); i != workItems_.end(); ++i)
         {
@@ -312,7 +314,7 @@ namespace Urho3D
         return true;
     }
 
-    void WorkQueue::ProcessItems(unsigned threadIndex)
+    void WorkQueue::ProcessItems(uint32_t threadIndex)
     {
         bool wasActive = false;
 
@@ -347,7 +349,7 @@ namespace Urho3D
         }
     }
 
-    void WorkQueue::PurgeCompleted(unsigned priority)
+    void WorkQueue::PurgeCompleted(uint32_t priority)
     {
         // Purge completed work items and send completion events. Do not signal items lower than priority threshold,
         // as those may be user submitted and lead to eg. scene manipulation that could happen in the middle of the
@@ -409,7 +411,7 @@ namespace Urho3D
     void WorkQueue::HandleBeginFrame(StringHash eventType, VariantMap& eventData)
     {
         // If no worker threads, complete low-priority work here
-        if (threads_.Empty() && !queue_.empty())
+        if (threads.empty() && !queue_.empty())
         {
             URHO3D_PROFILE(CompleteWorkNonthreaded);
 

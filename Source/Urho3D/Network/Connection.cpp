@@ -132,11 +132,11 @@ void Connection::SendMessage(int msgID, bool reliable, bool inOrder, const unsig
 
     if (buffer.GetSize() == 0)
     {
-        buffer.WriteUByte((unsigned char)DefaultMessageIDTypes::ID_USER_PACKET_ENUM);
-        buffer.WriteUInt((unsigned int)MSG_PACKED_MESSAGE);
+        buffer.WriteUByte((uint8_t)DefaultMessageIDTypes::ID_USER_PACKET_ENUM);
+        buffer.WriteUInt((uint32_t)MSG_PACKED_MESSAGE);
     }
 
-    buffer.WriteUInt((unsigned int)msgID);
+    buffer.WriteUInt((uint8_t)msgID);
     buffer.WriteUInt(numBytes);
     buffer.Write(data, numBytes);
 }

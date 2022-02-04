@@ -53,6 +53,8 @@ namespace Urho3D
         StringHash(const String& str) noexcept;      // NOLINT(google-explicit-constructor)
         /// Construct from a string.
         StringHash(const std::string& str) noexcept;      // NOLINT(google-explicit-constructor)
+        /// Construct from a string.
+        StringHash( std::string_view str) noexcept;      // NOLINT(google-explicit-constructor)
 
         /// Assign from another hash.
         StringHash& operator =(const StringHash& rhs) noexcept = default;

@@ -86,6 +86,8 @@ namespace Urho3D
         return ret;
     }
 
+    const std::string kEmptyString{};
+
     bool ToBool(const String& source)
     {
         return ToBool(source.CString());

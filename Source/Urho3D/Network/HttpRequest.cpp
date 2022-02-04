@@ -30,14 +30,17 @@
 
 #include "../DebugNew.h"
 
-namespace Urho3D
+using namespace std;
+using namespace Urho3D;
+
+namespace
 {
+    static constexpr uint32_t ERROR_BUFFER_SIZE = 256;
+    static constexpr uint32_t READ_BUFFER_SIZE = 65536; // Must be a power of two
+}
 
-static const unsigned ERROR_BUFFER_SIZE = 256;
-static const unsigned READ_BUFFER_SIZE = 65536; // Must be a power of two
-
-HttpRequest::HttpRequest(const String& url, const String& verb, const Vector<String>& headers, const String& postData) :
-    url_(url.Trimmed()),
+HttpRequest::HttpRequest(const String& url, const String& verb, const Vector<String>& headers, const String& postData)
+    : url_(url.Trimmed()),
     verb_(!verb.Empty() ? verb : "GET"),
     headers_(headers),
     postData_(postData),
@@ -143,7 +146,7 @@ void HttpRequest::ThreadFunction()
     }
 
     {
-        MutexLock lock(mutex_);
+        lock_guard<mutex> lock(mutex_);
         state_ = connection ? HTTP_OPEN : HTTP_ERROR;
 
         // If no connection could be made, store the error and exit
@@ -162,7 +165,7 @@ void HttpRequest::ThreadFunction()
         if (bytesRead <= 0)
             break;
 
-        mutex_.Acquire();
+        mutex_.lock();
 
         // Wait until enough space in the main thread's ring buffer
         for (;;)
@@ -171,14 +174,14 @@ void HttpRequest::ThreadFunction()
             if ((int)spaceInBuffer > bytesRead || !shouldRun_)
                 break;
 
-            mutex_.Release();
+            mutex_.unlock();
             Time::Sleep(5);
-            mutex_.Acquire();
+            mutex_.lock();
         }
 
         if (!shouldRun_)
         {
-            mutex_.Release();
+            mutex_.unlock();
             break;
         }
 
@@ -196,14 +199,14 @@ void HttpRequest::ThreadFunction()
         writePosition_ += bytesRead;
         writePosition_ &= READ_BUFFER_SIZE - 1;
 
-        mutex_.Release();
+        mutex_.unlock();
     }
 
     // Close the connection
     mg_close_connection(connection);
 
     {
-        MutexLock lock(mutex_);
+        lock_guard<mutex> lock(mutex_);
         state_ = HTTP_CLOSED;
     }
 }
@@ -211,7 +214,7 @@ void HttpRequest::ThreadFunction()
 unsigned HttpRequest::Read(void* dest, unsigned size)
 {
 #ifdef URHO3D_THREADING
-    mutex_.Acquire();
+    mutex_.lock();
 
     auto* destPtr = (unsigned char*)dest;
     unsigned sizeLeft = size;
@@ -227,9 +230,9 @@ unsigned HttpRequest::Read(void* dest, unsigned size)
             if (status.first_ || status.second_)
                 break;
             // While no bytes and connection is still open, block until has some data
-            mutex_.Release();
+            mutex_.unlock();
             Time::Sleep(5);
-            mutex_.Acquire();
+            mutex_.lock();
         }
 
         unsigned bytesAvailable = status.first_;
@@ -261,7 +264,7 @@ unsigned HttpRequest::Read(void* dest, unsigned size)
             break;
     }
 
-    mutex_.Release();
+    mutex_.unlock();
     return totalRead;
 #else
     // Threading disabled, nothing to read
@@ -276,25 +279,25 @@ unsigned HttpRequest::Seek(unsigned position)
 
 bool HttpRequest::IsEof() const
 {
-    MutexLock lock(mutex_);
+    lock_guard<mutex> lock(mutex_);
     return CheckAvailableSizeAndEof().second_;
 }
 
 String HttpRequest::GetError() const
 {
-    MutexLock lock(mutex_);
+    lock_guard<mutex> lock(mutex_);
     return error_;
 }
 
 HttpRequestState HttpRequest::GetState() const
 {
-    MutexLock lock(mutex_);
+    lock_guard<mutex> lock(mutex_);
     return state_;
 }
 
 unsigned HttpRequest::GetAvailableSize() const
 {
-    MutexLock lock(mutex_);
+    lock_guard<mutex> lock(mutex_);
     return CheckAvailableSizeAndEof().first_;
 }
 
@@ -302,6 +305,4 @@ Pair<unsigned, bool> HttpRequest::CheckAvailableSizeAndEof() const
 {
     unsigned size = (writePosition_ - readPosition_) & (READ_BUFFER_SIZE - 1);
     return {size, (state_ == HTTP_ERROR || (state_ == HTTP_CLOSED && !size))};
-}
-
 }

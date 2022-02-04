@@ -42,30 +42,33 @@
 
 #include <cstdio>
 
-namespace Urho3D
-{
+using namespace std;
+using namespace Urho3D;
 
-static const char* checkDirs[] =
+namespace
 {
-    "Fonts",
-    "Materials",
-    "Models",
-    "Music",
-    "Objects",
-    "Particle",
-    "PostProcess",
-    "RenderPaths",
-    "Scenes",
-    "Scripts",
-    "Sounds",
-    "Shaders",
-    "Techniques",
-    "Textures",
-    "UI",
-    nullptr
-};
+    static const char* checkDirs[] =
+    {
+        "Fonts",
+        "Materials",
+        "Models",
+        "Music",
+        "Objects",
+        "Particle",
+        "PostProcess",
+        "RenderPaths",
+        "Scenes",
+        "Scripts",
+        "Sounds",
+        "Shaders",
+        "Techniques",
+        "Textures",
+        "UI",
+        nullptr
+    };
 
-static const SharedPtr<Resource> noResource;
+    static const SharedPtr<Resource> noResource;
+}
 
 ResourceCache::ResourceCache(Context* context) :
     Object(context),
@@ -97,7 +100,7 @@ ResourceCache::~ResourceCache()
 
 bool ResourceCache::AddResourceDir(const String& pathName, unsigned priority)
 {
-    MutexLock lock(resourceMutex_);
+    lock_guard<mutex> lock(resourceMutex_);
 
     auto* fileSystem = GetSubsystem<FileSystem>();
     if (!fileSystem || !fileSystem->DirExists(pathName))
@@ -135,7 +138,7 @@ bool ResourceCache::AddResourceDir(const String& pathName, unsigned priority)
 
 bool ResourceCache::AddPackageFile(PackageFile* package, unsigned priority)
 {
-    MutexLock lock(resourceMutex_);
+    lock_guard<mutex> lock(resourceMutex_);
 
     // Do not add packages that failed to load
     if (!package || !package->GetNumFiles())
@@ -182,7 +185,7 @@ bool ResourceCache::AddManualResource(Resource* resource)
 
 void ResourceCache::RemoveResourceDir(const String& pathName)
 {
-    MutexLock lock(resourceMutex_);
+    lock_guard<mutex> lock(resourceMutex_);
 
     String fixedPath = SanitateResourceDirName(pathName);
 
@@ -208,7 +211,7 @@ void ResourceCache::RemoveResourceDir(const String& pathName)
 
 void ResourceCache::RemovePackageFile(PackageFile* package, bool releaseResources, bool forceRelease)
 {
-    MutexLock lock(resourceMutex_);
+    lock_guard<mutex> lock(resourceMutex_);
 
     for (Vector<SharedPtr<PackageFile> >::Iterator i = packages_.Begin(); i != packages_.End(); ++i)
     {
@@ -225,7 +228,7 @@ void ResourceCache::RemovePackageFile(PackageFile* package, bool releaseResource
 
 void ResourceCache::RemovePackageFile(const String& fileName, bool releaseResources, bool forceRelease)
 {
-    MutexLock lock(resourceMutex_);
+    lock_guard<mutex> lock(resourceMutex_);
 
     // Compare the name and extension only, not the path
     String fileNameNoPath = GetFileNameAndExtension(fileName);
@@ -266,7 +269,7 @@ void ResourceCache::ReleaseResources(StringHash type, bool force)
     if (i != resourceGroups_.End())
     {
         for (HashMap<StringHash, SharedPtr<Resource> >::Iterator j = i->second_.resources_.Begin();
-             j != i->second_.resources_.End();)
+            j != i->second_.resources_.End();)
         {
             HashMap<StringHash, SharedPtr<Resource> >::Iterator current = j++;
             // If other references exist, do not release, unless forced
@@ -290,7 +293,7 @@ void ResourceCache::ReleaseResources(StringHash type, const String& partialName,
     if (i != resourceGroups_.End())
     {
         for (HashMap<StringHash, SharedPtr<Resource> >::Iterator j = i->second_.resources_.Begin();
-             j != i->second_.resources_.End();)
+            j != i->second_.resources_.End();)
         {
             HashMap<StringHash, SharedPtr<Resource> >::Iterator current = j++;
             if (current->second_->GetName().Contains(partialName))
@@ -321,7 +324,7 @@ void ResourceCache::ReleaseResources(const String& partialName, bool force)
         for (HashMap<StringHash, ResourceGroup>::Iterator i = resourceGroups_.Begin(); i != resourceGroups_.End(); ++i)
         {
             for (HashMap<StringHash, SharedPtr<Resource> >::Iterator j = i->second_.resources_.Begin();
-                 j != i->second_.resources_.End();)
+                j != i->second_.resources_.End();)
             {
                 HashMap<StringHash, SharedPtr<Resource> >::Iterator current = j++;
                 if (current->second_->GetName().Contains(partialName))
@@ -349,10 +352,10 @@ void ResourceCache::ReleaseAllResources(bool force)
         released = false;
 
         for (HashMap<StringHash, ResourceGroup>::Iterator i = resourceGroups_.Begin();
-             i != resourceGroups_.End(); ++i)
+            i != resourceGroups_.End(); ++i)
         {
             for (HashMap<StringHash, SharedPtr<Resource> >::Iterator j = i->second_.resources_.Begin();
-                 j != i->second_.resources_.End();)
+                j != i->second_.resources_.End();)
             {
                 HashMap<StringHash, SharedPtr<Resource> >::Iterator current = j++;
                 // If other references exist, do not release, unless forced
@@ -487,7 +490,7 @@ void ResourceCache::RemoveResourceRouter(ResourceRouter* router)
 
 SharedPtr<File> ResourceCache::GetFile(const String& name, bool sendEventOnFailure)
 {
-    MutexLock lock(resourceMutex_);
+    lock_guard<mutex> lock(resourceMutex_);
 
     String sanitatedName = SanitateResourceName(name);
     if (!isRouting_)
@@ -724,14 +727,14 @@ void ResourceCache::GetResources(PODVector<Resource*>& result, StringHash type) 
     if (i != resourceGroups_.End())
     {
         for (HashMap<StringHash, SharedPtr<Resource> >::ConstIterator j = i->second_.resources_.Begin();
-             j != i->second_.resources_.End(); ++j)
+            j != i->second_.resources_.End(); ++j)
             result.Push(j->second_);
     }
 }
 
 bool ResourceCache::Exists(const String& name) const
 {
-    MutexLock lock(resourceMutex_);
+    lock_guard<mutex> lock(resourceMutex_);
 
     String sanitatedName = SanitateResourceName(name);
     if (!isRouting_)
@@ -886,7 +889,7 @@ void ResourceCache::StoreResourceDependency(Resource* resource, const String& de
     if (!resource)
         return;
 
-    MutexLock lock(resourceMutex_);
+    lock_guard<mutex> lock(resourceMutex_);
 
     StringHash nameHash(resource->GetName());
     std::unordered_set<StringHash>& dependents = dependentResources_[dependency];
@@ -898,7 +901,7 @@ void ResourceCache::ResetDependencies(Resource* resource)
     if (!resource)
         return;
 
-    MutexLock lock(resourceMutex_);
+    lock_guard<mutex> lock(resourceMutex_);
 
     StringHash nameHash(resource->GetName());
 
@@ -974,7 +977,7 @@ String ResourceCache::PrintMemoryUsage() const
 
 const SharedPtr<Resource>& ResourceCache::FindResource(StringHash type, StringHash nameHash)
 {
-    MutexLock lock(resourceMutex_);
+    lock_guard<mutex> lock(resourceMutex_);
 
     HashMap<StringHash, ResourceGroup>::Iterator i = resourceGroups_.Find(type);
     if (i == resourceGroups_.End())
@@ -988,7 +991,7 @@ const SharedPtr<Resource>& ResourceCache::FindResource(StringHash type, StringHa
 
 const SharedPtr<Resource>& ResourceCache::FindResource(StringHash nameHash)
 {
-    MutexLock lock(resourceMutex_);
+    lock_guard<mutex> lock(resourceMutex_);
 
     for (HashMap<StringHash, ResourceGroup>::Iterator i = resourceGroups_.Begin(); i != resourceGroups_.End(); ++i)
     {
@@ -1045,7 +1048,7 @@ void ResourceCache::UpdateResourceGroup(StringHash type)
         HashMap<StringHash, SharedPtr<Resource> >::Iterator oldestResource = i->second_.resources_.End();
 
         for (HashMap<StringHash, SharedPtr<Resource> >::Iterator j = i->second_.resources_.Begin();
-             j != i->second_.resources_.End(); ++j)
+            j != i->second_.resources_.End(); ++j)
         {
             totalSize += j->second_->GetMemoryUse();
             unsigned useTimer = j->second_->GetUseTimer();
@@ -1064,7 +1067,7 @@ void ResourceCache::UpdateResourceGroup(StringHash type)
             oldestResource != i->second_.resources_.End())
         {
             URHO3D_LOGDEBUG("Resource group " + oldestResource->second_->GetTypeName() + " over memory budget, releasing resource " +
-                     oldestResource->second_->GetName());
+                oldestResource->second_->GetName());
             i->second_.resources_.Erase(oldestResource);
         }
         else
@@ -1133,12 +1136,10 @@ File* ResourceCache::SearchPackages(const String& name)
     return nullptr;
 }
 
-void RegisterResourceLibrary(Context* context)
+void Urho3D::RegisterResourceLibrary(Context* context)
 {
     Image::RegisterObject(context);
     JSONFile::RegisterObject(context);
     PListFile::RegisterObject(context);
     XMLFile::RegisterObject(context);
-}
-
 }

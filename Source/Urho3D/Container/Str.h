@@ -28,6 +28,7 @@
 #include <cstdarg>
 #include <cctype>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 
 namespace Urho3D
@@ -40,7 +41,7 @@ namespace Urho3D
     class StringHash;
 
     /// Map of strings.
-    using StringMap = std::unordered_map<StringHash, String>;
+    using StringMap = std::unordered_map<StringHash, std::string>;
 
     /// %String class.
     class URHO3D_API String

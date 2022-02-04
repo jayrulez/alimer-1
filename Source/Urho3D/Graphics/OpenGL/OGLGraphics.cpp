@@ -24,7 +24,6 @@
 #include "../../Precompiled.h"
 
 #include "../../Core/Context.h"
-#include "../../Core/Mutex.h"
 #include "../../Core/ProcessUtils.h"
 #include "../../Core/Profiler.h"
 #include "../../Graphics/ConstantBuffer.h"
@@ -1480,11 +1479,11 @@ namespace Urho3D
 
     void Graphics::SetTextureParametersDirty()
     {
-        MutexLock lock(gpuObjectMutex_);
+        std::lock_guard<std::mutex> lock(gpuObjectMutex_);
 
-        for (PODVector<GPUObject*>::Iterator i = gpuObjects_.Begin(); i != gpuObjects_.End(); ++i)
+        for (GPUObject* object : gpuObjects)
         {
-            auto* texture = dynamic_cast<Texture*>(*i);
+            auto* texture = dynamic_cast<Texture*>(object);
             if (texture)
                 texture->SetParametersDirty();
         }
@@ -2227,31 +2226,40 @@ namespace Urho3D
         if (!window_)
             return;
 
+        if (clearGPUObjects)
         {
-            MutexLock lock(gpuObjectMutex_);
+            // Shutting down: release all GPU objects that still exist
+            // Shader programs are also GPU objects; clear them first to avoid list modification during iteration
+            impl_->shaderPrograms_.Clear();
 
-            if (clearGPUObjects)
             {
-                // Shutting down: release all GPU objects that still exist
-                // Shader programs are also GPU objects; clear them first to avoid list modification during iteration
-                impl_->shaderPrograms_.Clear();
+                std::lock_guard<std::mutex> lock(gpuObjectMutex_);
 
-                for (PODVector<GPUObject*>::Iterator i = gpuObjects_.Begin(); i != gpuObjects_.End(); ++i)
-                    (*i)->Release();
-                gpuObjects_.Clear();
+                for (GPUObject* object : gpuObjects)
+                {
+                    object->Release();
+                }
             }
-            else
+
+            gpuObjects.clear();
+        }
+        else
+        {
             {
+                std::lock_guard<std::mutex> lock(gpuObjectMutex_);
+
                 // We are not shutting down, but recreating the context: mark GPU objects lost
-                for (PODVector<GPUObject*>::Iterator i = gpuObjects_.Begin(); i != gpuObjects_.End(); ++i)
-                    (*i)->OnDeviceLost();
-
-                // In this case clear shader programs last so that they do not attempt to delete their OpenGL program
-                // from a context that may no longer exist
-                impl_->shaderPrograms_.Clear();
-
-                SendEvent(E_DEVICELOST);
+                for (GPUObject* object : gpuObjects)
+                {
+                    object->OnDeviceLost();
+                }
             }
+
+            // In this case clear shader programs last so that they do not attempt to delete their OpenGL program
+            // from a context that may no longer exist
+            impl_->shaderPrograms_.Clear();
+
+            SendEvent(E_DEVICELOST);
         }
 
         impl_->CleanupFramebuffers(IsDeviceLost());
@@ -2350,14 +2358,16 @@ namespace Urho3D
         }
 
         {
-            MutexLock lock(gpuObjectMutex_);
+            std::lock_guard<std::mutex> lock(gpuObjectMutex_);
 
-            for (PODVector<GPUObject*>::Iterator i = gpuObjects_.Begin(); i != gpuObjects_.End(); ++i)
-                (*i)->OnDeviceReset();
+            for (GPUObject* object : gpuObjects)
+            {
+                object->OnDeviceReset();
+            }
         }
 
         SendEvent(E_DEVICERESET);
-    }
+            }
 
     void Graphics::MarkFBODirty()
     {
@@ -3043,4 +3053,4 @@ namespace Urho3D
         else
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, object);
     }
-}
+    }

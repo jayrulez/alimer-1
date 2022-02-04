@@ -55,9 +55,11 @@
 #pragma warning(disable:6293)
 #endif
 
+using namespace std;
+using namespace Urho3D;
+
 namespace Urho3D
 {
-
     static const float dirLightVertexData[] =
     {
         -1, 1, 0,
@@ -266,9 +268,9 @@ namespace Urho3D
         return elements;
     }
 
-    Renderer::Renderer(Context* context) :
-        Object(context),
-        defaultZone_(new Zone(context))
+    Renderer::Renderer(Context* context)
+        : Object(context)
+        , defaultZone_(new Zone(context))
     {
         SubscribeToEvent(E_SCREENMODE, URHO3D_HANDLER(Renderer, HandleScreenMode));
 
@@ -1123,7 +1125,7 @@ namespace Urho3D
 
     Camera* Renderer::GetShadowCamera()
     {
-        MutexLock lock(rendererMutex_);
+        lock_guard<mutex> lock(rendererMutex_);
 
         assert(numShadowCameras_ <= shadowCameraNodes_.Size());
         if (numShadowCameras_ == shadowCameraNodes_.Size())

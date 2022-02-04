@@ -23,16 +23,16 @@
 #include "../Precompiled.h"
 
 #include "../Core/StringHashRegister.h"
-#include "../Core/Mutex.h"
 #include "../IO/Log.h"
 #include <cstdio>
 
+using namespace std;
 using namespace Urho3D;
 
 StringHashRegister::StringHashRegister(bool threadSafe)
 {
     if (threadSafe)
-        mutex_ = MakeUnique<Mutex>();
+        mutex_ = make_unique<mutex>();
 }
 
 
@@ -41,43 +41,43 @@ StringHashRegister::~StringHashRegister()       // NOLINT(hicpp-use-equals-defau
     // Keep destructor here to let mutex_ destruct
 }
 
-StringHash StringHashRegister::RegisterString(const StringHash& hash, const char* string)
+StringHash StringHashRegister::RegisterString(const StringHash& hash, string_view string)
 {
     if (mutex_)
-        mutex_->Acquire();
+        mutex_->lock();
 
     auto iter = map_.find(hash);
     if (iter == map_.end())
     {
         map_[hash] = string;
     }
-    else if (iter->second.Compare(string, false) != 0)
+    else if (string_view(iter->second) != string)
     {
         URHO3D_LOGWARNINGF("StringHash collision detected! Both \"%s\" and \"%s\" have hash #%s",
-            string, iter->second.CString(), hash.ToString().CString());
+            string, iter->second.c_str(), hash.ToString().CString());
     }
 
     if (mutex_)
-        mutex_->Release();
+        mutex_->unlock();
 
     return hash;
 }
 
-StringHash StringHashRegister::RegisterString(const char* string)
+StringHash StringHashRegister::RegisterString(std::string_view string)
 {
     StringHash hash(string);
     return RegisterString(hash, string);
 }
 
-String StringHashRegister::GetStringCopy(const StringHash& hash) const
+std::string StringHashRegister::GetStringCopy(const StringHash& hash) const
 {
     if (mutex_)
-        mutex_->Acquire();
+        mutex_->lock();
 
-    const String copy = GetString(hash);
+    const std::string copy = GetString(hash);
 
     if (mutex_)
-        mutex_->Release();
+        mutex_->unlock();
 
     return copy;
 }
@@ -85,18 +85,18 @@ String StringHashRegister::GetStringCopy(const StringHash& hash) const
 bool StringHashRegister::Contains(const StringHash& hash) const
 {
     if (mutex_)
-        mutex_->Acquire();
+        mutex_->lock();
 
     const bool contains = map_.find(hash) != map_.end();
 
     if (mutex_)
-        mutex_->Release();
+        mutex_->unlock();
 
     return contains;
 }
 
-const String& StringHashRegister::GetString(const StringHash& hash) const
+const std::string& StringHashRegister::GetString(const StringHash& hash) const
 {
     auto iter = map_.find(hash);
-    return iter == map_.end() ? String::EMPTY : iter->second;
+    return iter == map_.end() ? kEmptyString : iter->second;
 }

@@ -20,12 +20,9 @@
 // THE SOFTWARE.
 //
 
-/// \file
-
 #pragma once
 
 #include "../Container/FlagSet.h"
-#include "../Core/Mutex.h"
 #include "../Core/Object.h"
 #include "../Input/InputEvents.h"
 #include "../UI/Cursor.h"

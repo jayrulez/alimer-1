@@ -20,15 +20,13 @@
 // THE SOFTWARE.
 //
 
-/// \file
-
 #pragma once
 
-#include "../Core/Mutex.h"
 #include "../Resource/XMLElement.h"
 #include "../Resource/JSONFile.h"
 #include "../Scene/Node.h"
 #include "../Scene/SceneResolver.h"
+#include <mutex>
 #include <unordered_set>
 
 namespace Urho3D
@@ -36,10 +34,10 @@ namespace Urho3D
     class File;
     class PackageFile;
 
-    static const unsigned FIRST_REPLICATED_ID = 0x1;
-    static const unsigned LAST_REPLICATED_ID = 0xffffff;
-    static const unsigned FIRST_LOCAL_ID = 0x01000000;
-    static const unsigned LAST_LOCAL_ID = 0xffffffff;
+    static constexpr uint32_t FIRST_REPLICATED_ID = 0x1;
+    static constexpr uint32_t LAST_REPLICATED_ID = 0xffffff;
+    static constexpr uint32_t FIRST_LOCAL_ID = 0x01000000;
+    static constexpr uint32_t LAST_LOCAL_ID = 0xffffffff;
 
     /// Asynchronous scene loading mode.
     enum LoadMode
@@ -329,7 +327,7 @@ namespace Urho3D
         /// Delayed dirty notification queue for components.
         PODVector<Component*> delayedDirtyComponents_;
         /// Mutex for the delayed dirty notification queue.
-        Mutex sceneMutex_;
+        std::mutex sceneMutex_;
         /// Preallocated event data map for smoothing update events.
         VariantMap smoothingData_;
         /// Next free non-local node ID.
@@ -363,5 +361,4 @@ namespace Urho3D
     /// Register Scene library objects.
     /// @nobind
     void URHO3D_API RegisterSceneLibrary(Context* context);
-
 }

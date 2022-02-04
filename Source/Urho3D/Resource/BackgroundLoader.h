@@ -22,11 +22,11 @@
 
 #pragma once
 
-#include "../Core/Mutex.h"
 #include "../Container/Ptr.h"
 #include "../Container/RefCounted.h"
 #include "../Core/Thread.h"
 #include "../Math/StringHash.h"
+#include <mutex>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -79,7 +79,7 @@ namespace Urho3D
         /// Resource cache.
         ResourceCache* owner_;
         /// Mutex for thread-safe access to the background load queue.
-        mutable Mutex backgroundLoadMutex_;
+        mutable std::mutex backgroundLoadMutex;
         /// Resources that are queued for background loading.
         std::unordered_map<std::pair<StringHash, StringHash>, BackgroundLoadItem> backgroundLoadQueue_;
     };
