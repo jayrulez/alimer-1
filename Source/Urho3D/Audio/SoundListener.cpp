@@ -23,21 +23,19 @@
 #include "../Precompiled.h"
 
 #include "../Audio/SoundListener.h"
+#include "../Audio/Audio.h"
 #include "../Core/Context.h"
 
-namespace Urho3D
+using namespace Urho3D;
+
+SoundListener::SoundListener(Context* context)
+    : Component(context)
 {
-    extern const char* AUDIO_CATEGORY;
+}
 
-    SoundListener::SoundListener(Context* context)
-        : Component(context)
-    {
-    }
+void SoundListener::RegisterObject(Context* context)
+{
+    context->RegisterFactory<SoundListener>(AUDIO_CATEGORY);
 
-    void SoundListener::RegisterObject(Context* context)
-    {
-        context->RegisterFactory<SoundListener>(AUDIO_CATEGORY);
-
-        URHO3D_ACCESSOR_ATTRIBUTE("Is Enabled", IsEnabled, SetEnabled, bool, true, AM_DEFAULT);
-    }
+    URHO3D_ACCESSOR_ATTRIBUTE("Is Enabled", IsEnabled, SetEnabled, bool, true, AM_DEFAULT);
 }

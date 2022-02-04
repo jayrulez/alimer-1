@@ -206,6 +206,26 @@ if (TARGET Urho3D)
     if(PLATFORM_WIN32 OR PLATFORM_UWP OR PLATFORM_XBOXONE)
         # Enable full optimization in dev/release
 	    target_compile_options(${TARGET_NAME} PRIVATE $<$<CONFIG:DEBUG>:/Od> $<$<NOT:$<CONFIG:DEBUG>>:/Ox>)
+
+        # Set warning level 3
+        target_compile_options(${TARGET_NAME} PRIVATE /W3)
+
+        # Warnings as Errors Enabled
+        #target_compile_options(${TARGET_NAME} PRIVATE /WX)
+
+        # Multiprocessor compiler
+        target_compile_options(${TARGET_NAME} PRIVATE /MP)
+
+        #target_compile_options(${TARGET_NAME} PRIVATE /fp:fast)
+        target_compile_options(${TARGET_NAME} PRIVATE /permissive- /JMC- /Zc:__cplusplus)
+
+        if (ALIMER_BUILD_ENABLE_CODE_ANALYSIS)
+            target_compile_options(${TARGET_NAME} PRIVATE /analyze)
+        endif()
+
+        if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.26)
+            target_compile_options(${TARGET_NAME} PRIVATE /Zc:preprocessor /wd5104 /wd5105)
+        endif()
     elseif (PLATFORM_EMSCRIPTEN)
     endif()
 

@@ -41,235 +41,17 @@
 #   pragma warning(disable:6293)
 #endif
 
+using namespace std;
+using namespace Urho3D;
+
 namespace Urho3D
 {
-    const char* AUDIO_CATEGORY = "Audio";
-
     static const int MIN_BUFFERLENGTH = 20;
     static const int MIN_MIXRATE = 11025;
     static const int MAX_MIXRATE = 48000;
     static const StringHash SOUND_MASTER_HASH("Master");
 
-    static void SDLAudioCallback(void* userdata, Uint8* stream, int len);
-
-    Audio::Audio(Context* context) :
-        Object(context)
-    {
-        context_->RequireSDL(SDL_INIT_AUDIO);
-
-        // Set the master to the default value
-        masterGain[SOUND_MASTER_HASH] = 1.0f;
-
-        // Register Audio library object factories
-        RegisterAudioLibrary(context_);
-
-        SubscribeToEvent(E_RENDERUPDATE, URHO3D_HANDLER(Audio, HandleRenderUpdate));
-    }
-
-    Audio::~Audio()
-    {
-        Release();
-        context_->ReleaseSDL();
-    }
-
-    bool Audio::SetMode(int bufferLengthMSec, int mixRate, bool stereo, bool interpolation)
-    {
-        Release();
-
-        bufferLengthMSec = Max(bufferLengthMSec, MIN_BUFFERLENGTH);
-        mixRate = Clamp(mixRate, MIN_MIXRATE, MAX_MIXRATE);
-
-        SDL_AudioSpec desired;
-        SDL_AudioSpec obtained;
-
-        desired.freq = mixRate;
-
-        desired.format = AUDIO_S16;
-        desired.callback = SDLAudioCallback;
-        desired.userdata = this;
-
-        // SDL uses power of two audio fragments. Determine the closest match
-        int bufferSamples = mixRate * bufferLengthMSec / 1000;
-        desired.samples = (Uint16)NextPowerOfTwo((unsigned)bufferSamples);
-        if (Abs((int)desired.samples / 2 - bufferSamples) < Abs((int)desired.samples - bufferSamples))
-            desired.samples /= 2;
-
-        // Intentionally disallow format change so that the obtained format will always be the desired format, even though that format
-        // is not matching the device format, however in doing it will enable the SDL's internal audio stream with audio conversion.
-        // Also disallow channels change to avoid issues on multichannel audio device (5.1, 7.1, etc)
-        int allowedChanges = SDL_AUDIO_ALLOW_ANY_CHANGE & ~SDL_AUDIO_ALLOW_FORMAT_CHANGE & ~SDL_AUDIO_ALLOW_CHANNELS_CHANGE;
-
-        if (stereo)
-        {
-            desired.channels = 2;
-            deviceID_ = SDL_OpenAudioDevice(nullptr, SDL_FALSE, &desired, &obtained, allowedChanges);
-        }
-
-        // If stereo requested but not available then fall back into mono
-        if (!stereo || !deviceID_)
-        {
-            desired.channels = 1;
-            deviceID_ = SDL_OpenAudioDevice(nullptr, SDL_FALSE, &desired, &obtained, allowedChanges);
-
-            if (!deviceID_)
-            {
-                URHO3D_LOGERROR("Could not initialize audio output");
-                return false;
-            }
-        }
-
-        if (obtained.format != AUDIO_S16)
-        {
-            URHO3D_LOGERROR("Could not initialize audio output, 16-bit buffer format not supported");
-            SDL_CloseAudioDevice(deviceID_);
-            deviceID_ = 0;
-            return false;
-        }
-
-        stereo_ = obtained.channels == 2;
-        sampleSize_ = (unsigned)(stereo_ ? sizeof(int) : sizeof(short));
-        // Guarantee a fragment size that is low enough so that Vorbis decoding buffers do not wrap
-        fragmentSize_ = Min(NextPowerOfTwo((unsigned)mixRate >> 6u), (unsigned)obtained.samples);
-        mixRate_ = obtained.freq;
-        interpolation_ = interpolation;
-        clipBuffer_ = new int[stereo ? fragmentSize_ << 1u : fragmentSize_];
-
-        URHO3D_LOGINFO("Set audio mode " + String(mixRate_) + " Hz " + (stereo_ ? "stereo" : "mono") + (interpolation_ ? " interpolated" : ""));
-
-        return Play();
-    }
-
-    void Audio::Update(float timeStep)
-    {
-        if (!playing_)
-            return;
-
-        UpdateInternal(timeStep);
-    }
-
-    bool Audio::Play()
-    {
-        if (playing_)
-            return true;
-
-        if (!deviceID_)
-        {
-            URHO3D_LOGERROR("No audio mode set, can not start playback");
-            return false;
-        }
-
-        SDL_PauseAudioDevice(deviceID_, 0);
-
-        // Update sound sources before resuming playback to make sure 3D positions are up to date
-        UpdateInternal(0.0f);
-
-        playing_ = true;
-        return true;
-    }
-
-    void Audio::Stop()
-    {
-        playing_ = false;
-    }
-
-    void Audio::SetMasterGain(const String& type, float gain)
-    {
-        masterGain[type] = Clamp(gain, 0.0f, 1.0f);
-
-        for (SoundSource* source : soundSources)
-            source->UpdateMasterGain();
-    }
-
-    void Audio::PauseSoundType(const String& type)
-    {
-        std::lock_guard<std::mutex> lock(audioMutex);
-        pausedSoundTypes.insert(type);
-    }
-
-    void Audio::ResumeSoundType(const String& type)
-    {
-        std::lock_guard<std::mutex> lock(audioMutex);
-        pausedSoundTypes.erase(type);
-        // Update sound sources before resuming playback to make sure 3D positions are up to date
-        // Done under mutex to ensure no mixing happens before we are ready
-        UpdateInternal(0.0f);
-    }
-
-    void Audio::ResumeAll()
-    {
-        std::lock_guard<std::mutex> lock(audioMutex);
-        pausedSoundTypes.clear();
-        UpdateInternal(0.0f);
-    }
-
-    void Audio::SetListener(SoundListener* listener)
-    {
-        listener_ = listener;
-    }
-
-    void Audio::StopSound(Sound* sound)
-    {
-        for (SoundSource* source : soundSources)
-        {
-            if (source->GetSound() == sound)
-            {
-                source->Stop();
-            }
-        }
-    }
-
-    float Audio::GetMasterGain(const String& type) const
-    {
-        // By definition previously unknown types return full volume
-        auto it = masterGain.find(type);
-        if (it == masterGain.end())
-            return 1.0f;
-
-        return it->second.GetFloat();
-    }
-
-    bool Audio::IsSoundTypePaused(const String& type) const
-    {
-        return pausedSoundTypes.find(type) != pausedSoundTypes.end();
-    }
-
-    SoundListener* Audio::GetListener() const
-    {
-        return listener_;
-    }
-
-    void Audio::AddSoundSource(SoundSource* soundSource)
-    {
-        std::lock_guard<std::mutex> lock(audioMutex);
-        soundSources.push_back(soundSource);
-    }
-
-    void Audio::RemoveSoundSource(SoundSource* soundSource)
-    {
-        std::vector<SoundSource*>::iterator i = std::find( soundSources.begin(), soundSources.end(), soundSource);
-        if (i != soundSources.end())
-        {
-            std::lock_guard<std::mutex> lock(audioMutex);
-            soundSources.erase(i);
-        }
-    }
-
-    float Audio::GetSoundSourceMasterGain(StringHash typeHash) const
-    {
-        auto masterIt = masterGain.find(SOUND_MASTER_HASH);
-
-        if (!typeHash)
-            return masterIt->second.GetFloat();
-
-        auto typeIt = masterGain.find(typeHash);
-
-        if (typeIt == masterGain.end() || typeIt == masterIt)
-            return masterIt->second.GetFloat();
-
-        return masterIt->second.GetFloat() * typeIt->second.GetFloat();
-    }
-
-    void SDLAudioCallback(void* userdata, Uint8* stream, int len)
+    static inline void SDLAudioCallback(void* userdata, Uint8* stream, int len)
     {
         auto* audio = static_cast<Audio*>(userdata);
         {
@@ -277,92 +59,308 @@ namespace Urho3D
             audio->MixOutput(stream, len / audio->GetSampleSize());
         }
     }
+}
 
-    void Audio::MixOutput(void* dest, unsigned samples)
+Audio::Audio(Context* context)
+    : Object(context)
+{
+    context_->RequireSDL(SDL_INIT_AUDIO);
+
+    // Set the master to the default value
+    masterGain[SOUND_MASTER_HASH] = 1.0f;
+
+    // Register Audio library object factories
+    RegisterAudioLibrary(context_);
+
+    SubscribeToEvent(E_RENDERUPDATE, URHO3D_HANDLER(Audio, HandleRenderUpdate));
+}
+
+Audio::~Audio()
+{
+    Release();
+    context_->ReleaseSDL();
+}
+
+bool Audio::SetMode(int bufferLengthMSec, int mixRate, bool stereo, bool interpolation)
+{
+    Release();
+
+    bufferLengthMSec = Max(bufferLengthMSec, MIN_BUFFERLENGTH);
+    mixRate = Clamp(mixRate, MIN_MIXRATE, MAX_MIXRATE);
+
+    SDL_AudioSpec desired;
+    SDL_AudioSpec obtained;
+
+    desired.freq = mixRate;
+
+    desired.format = AUDIO_S16;
+    desired.callback = SDLAudioCallback;
+    desired.userdata = this;
+
+    // SDL uses power of two audio fragments. Determine the closest match
+    int bufferSamples = mixRate * bufferLengthMSec / 1000;
+    desired.samples = (Uint16)NextPowerOfTwo((unsigned)bufferSamples);
+    if (Abs((int)desired.samples / 2 - bufferSamples) < Abs((int)desired.samples - bufferSamples))
+        desired.samples /= 2;
+
+    // Intentionally disallow format change so that the obtained format will always be the desired format, even though that format
+    // is not matching the device format, however in doing it will enable the SDL's internal audio stream with audio conversion.
+    // Also disallow channels change to avoid issues on multichannel audio device (5.1, 7.1, etc)
+    int allowedChanges = SDL_AUDIO_ALLOW_ANY_CHANGE & ~SDL_AUDIO_ALLOW_FORMAT_CHANGE & ~SDL_AUDIO_ALLOW_CHANNELS_CHANGE;
+
+    if (stereo)
     {
-        if (!playing_ || !clipBuffer_)
+        desired.channels = 2;
+        deviceID_ = SDL_OpenAudioDevice(nullptr, SDL_FALSE, &desired, &obtained, allowedChanges);
+    }
+
+    // If stereo requested but not available then fall back into mono
+    if (!stereo || !deviceID_)
+    {
+        desired.channels = 1;
+        deviceID_ = SDL_OpenAudioDevice(nullptr, SDL_FALSE, &desired, &obtained, allowedChanges);
+
+        if (!deviceID_)
         {
-            memset(dest, 0, samples * (size_t)sampleSize_);
-            return;
-        }
-
-        while (samples)
-        {
-            // If sample count exceeds the fragment (clip buffer) size, split the work
-            unsigned workSamples = Min(samples, fragmentSize_);
-            unsigned clipSamples = workSamples;
-            if (stereo_)
-                clipSamples <<= 1;
-
-            // Clear clip buffer
-            int* clipPtr = clipBuffer_.Get();
-            memset(clipPtr, 0, clipSamples * sizeof(int));
-
-            // Mix samples to clip buffer
-            for (SoundSource* source : soundSources)
-            {
-                // Check for pause if necessary
-                if (!pausedSoundTypes.empty())
-                {
-                    if (pausedSoundTypes.find(source->GetSoundType()) != pausedSoundTypes.end())
-                        continue;
-                }
-
-                source->Mix(clipPtr, workSamples, mixRate_, stereo_, interpolation_);
-            }
-            // Copy output from clip buffer to destination
-            auto* destPtr = (short*)dest;
-            while (clipSamples--)
-                *destPtr++ = (short)Clamp(*clipPtr++, -32768, 32767);
-            samples -= workSamples;
-            ((unsigned char*&)dest) += sampleSize_ * workSamples;
+            URHO3D_LOGERROR("Could not initialize audio output");
+            return false;
         }
     }
 
-    void Audio::HandleRenderUpdate(StringHash eventType, VariantMap& eventData)
+    if (obtained.format != AUDIO_S16)
     {
-        using namespace RenderUpdate;
-
-        Update(eventData[P_TIMESTEP].GetFloat());
+        URHO3D_LOGERROR("Could not initialize audio output, 16-bit buffer format not supported");
+        SDL_CloseAudioDevice(deviceID_);
+        deviceID_ = 0;
+        return false;
     }
 
-    void Audio::Release()
-    {
-        Stop();
+    stereo_ = obtained.channels == 2;
+    sampleSize_ = (unsigned)(stereo_ ? sizeof(int) : sizeof(short));
+    // Guarantee a fragment size that is low enough so that Vorbis decoding buffers do not wrap
+    fragmentSize_ = Min(NextPowerOfTwo((unsigned)mixRate >> 6u), (unsigned)obtained.samples);
+    mixRate_ = obtained.freq;
+    interpolation_ = interpolation;
+    clipBuffer_.reset(new int32_t[stereo ? fragmentSize_ << 1u : fragmentSize_]);
 
-        if (deviceID_)
+    URHO3D_LOGINFO("Set audio mode " + String(mixRate_) + " Hz " + (stereo_ ? "stereo" : "mono") + (interpolation_ ? " interpolated" : ""));
+
+    return Play();
+}
+
+void Audio::Update(float timeStep)
+{
+    if (!playing_)
+        return;
+
+    UpdateInternal(timeStep);
+}
+
+bool Audio::Play()
+{
+    if (playing_)
+        return true;
+
+    if (!deviceID_)
+    {
+        URHO3D_LOGERROR("No audio mode set, can not start playback");
+        return false;
+    }
+
+    SDL_PauseAudioDevice(deviceID_, 0);
+
+    // Update sound sources before resuming playback to make sure 3D positions are up to date
+    UpdateInternal(0.0f);
+
+    playing_ = true;
+    return true;
+}
+
+void Audio::Stop()
+{
+    playing_ = false;
+}
+
+void Audio::SetMasterGain(const String& type, float gain)
+{
+    masterGain[type] = Clamp(gain, 0.0f, 1.0f);
+
+    for (SoundSource* source : soundSources)
+        source->UpdateMasterGain();
+}
+
+void Audio::PauseSoundType(const String& type)
+{
+    std::lock_guard<std::mutex> lock(audioMutex);
+    pausedSoundTypes.insert(type);
+}
+
+void Audio::ResumeSoundType(const String& type)
+{
+    std::lock_guard<std::mutex> lock(audioMutex);
+    pausedSoundTypes.erase(type);
+    // Update sound sources before resuming playback to make sure 3D positions are up to date
+    // Done under mutex to ensure no mixing happens before we are ready
+    UpdateInternal(0.0f);
+}
+
+void Audio::ResumeAll()
+{
+    std::lock_guard<std::mutex> lock(audioMutex);
+    pausedSoundTypes.clear();
+    UpdateInternal(0.0f);
+}
+
+void Audio::SetListener(SoundListener* listener)
+{
+    listener_ = listener;
+}
+
+void Audio::StopSound(Sound* sound)
+{
+    for (SoundSource* source : soundSources)
+    {
+        if (source->GetSound() == sound)
         {
-            SDL_CloseAudioDevice(deviceID_);
-            deviceID_ = 0;
-            clipBuffer_.Reset();
+            source->Stop();
         }
     }
+}
 
-    void Audio::UpdateInternal(float timeStep)
+float Audio::GetMasterGain(const String& type) const
+{
+    // By definition previously unknown types return full volume
+    auto it = masterGain.find(type);
+    if (it == masterGain.end())
+        return 1.0f;
+
+    return it->second.GetFloat();
+}
+
+bool Audio::IsSoundTypePaused(const String& type) const
+{
+    return pausedSoundTypes.find(type) != pausedSoundTypes.end();
+}
+
+SoundListener* Audio::GetListener() const
+{
+    return listener_;
+}
+
+void Audio::AddSoundSource(SoundSource* soundSource)
+{
+    std::lock_guard<std::mutex> lock(audioMutex);
+    soundSources.push_back(soundSource);
+}
+
+void Audio::RemoveSoundSource(SoundSource* soundSource)
+{
+    std::vector<SoundSource*>::iterator i = std::find(soundSources.begin(), soundSources.end(), soundSource);
+    if (i != soundSources.end())
     {
-        URHO3D_PROFILE(UpdateAudio);
+        std::lock_guard<std::mutex> lock(audioMutex);
+        soundSources.erase(i);
+    }
+}
 
-        // Update in reverse order, because sound sources might remove themselves
-        for (size_t i = soundSources.size() - 1; i < soundSources.size(); --i)
+float Audio::GetSoundSourceMasterGain(StringHash typeHash) const
+{
+    auto masterIt = masterGain.find(SOUND_MASTER_HASH);
+
+    if (!typeHash)
+        return masterIt->second.GetFloat();
+
+    auto typeIt = masterGain.find(typeHash);
+
+    if (typeIt == masterGain.end() || typeIt == masterIt)
+        return masterIt->second.GetFloat();
+
+    return masterIt->second.GetFloat() * typeIt->second.GetFloat();
+}
+void Audio::MixOutput(void* dest, uint32_t samples)
+{
+    if (!playing_ || !clipBuffer_)
+    {
+        memset(dest, 0, samples * (size_t)sampleSize_);
+        return;
+    }
+
+    while (samples)
+    {
+        // If sample count exceeds the fragment (clip buffer) size, split the work
+        unsigned workSamples = Min(samples, fragmentSize_);
+        unsigned clipSamples = workSamples;
+        if (stereo_)
+            clipSamples <<= 1;
+
+        // Clear clip buffer
+        int32_t* clipPtr = clipBuffer_.get();
+        memset(clipPtr, 0, clipSamples * sizeof(int32_t));
+
+        // Mix samples to clip buffer
+        for (SoundSource* source : soundSources)
         {
-            SoundSource* source = soundSources[i];
-
-            // Check for pause if necessary; do not update paused sound sources
+            // Check for pause if necessary
             if (!pausedSoundTypes.empty())
             {
                 if (pausedSoundTypes.find(source->GetSoundType()) != pausedSoundTypes.end())
                     continue;
             }
 
-            source->Update(timeStep);
+            source->Mix(clipPtr, workSamples, mixRate_, stereo_, interpolation_);
         }
+        // Copy output from clip buffer to destination
+        auto* destPtr = (int16_t*)dest;
+        while (clipSamples--)
+            *destPtr++ = (int16_t)Clamp(*clipPtr++, -32768, 32767);
+        samples -= workSamples;
+        ((uint8_t*&)dest) += sampleSize_ * workSamples;
     }
+}
 
-    void RegisterAudioLibrary(Context* context)
+void Audio::HandleRenderUpdate(StringHash eventType, VariantMap& eventData)
+{
+    using namespace RenderUpdate;
+
+    Update(eventData[P_TIMESTEP].GetFloat());
+}
+
+void Audio::Release()
+{
+    Stop();
+
+    if (deviceID_)
     {
-        Sound::RegisterObject(context);
-        SoundSource::RegisterObject(context);
-        SoundSource3D::RegisterObject(context);
-        SoundListener::RegisterObject(context);
+        SDL_CloseAudioDevice(deviceID_);
+        deviceID_ = 0;
+        clipBuffer_.reset();
     }
+}
+
+void Audio::UpdateInternal(float timeStep)
+{
+    URHO3D_PROFILE(UpdateAudio);
+
+    // Update in reverse order, because sound sources might remove themselves
+    for (size_t i = soundSources.size() - 1; i < soundSources.size(); --i)
+    {
+        SoundSource* source = soundSources[i];
+
+        // Check for pause if necessary; do not update paused sound sources
+        if (!pausedSoundTypes.empty())
+        {
+            if (pausedSoundTypes.find(source->GetSoundType()) != pausedSoundTypes.end())
+                continue;
+        }
+
+        source->Update(timeStep);
+    }
+}
+
+void Urho3D::RegisterAudioLibrary(Context* context)
+{
+    Sound::RegisterObject(context);
+    SoundSource::RegisterObject(context);
+    SoundSource3D::RegisterObject(context);
+    SoundListener::RegisterObject(context);
 }

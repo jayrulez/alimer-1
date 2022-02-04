@@ -26,7 +26,6 @@
 
 namespace Urho3D
 {
-
     class ParticleEffect;
 
     /// One particle in the particle system.
@@ -45,9 +44,9 @@ namespace Urho3D
         /// Rotation speed.
         float rotationSpeed_;
         /// Current color animation index.
-        unsigned colorIndex_;
+        uint32_t colorIndex_;
         /// Current texture animation index.
-        unsigned texIndex_;
+        uint32_t texIndex_;
     };
 
     /// %Particle emitter component.
@@ -162,7 +161,6 @@ namespace Urho3D
         /// Ready to send effect finish event flag.
         bool sendFinishedEvent_;
         /// Automatic removal mode.
-        AutoRemoveMode autoRemove_;
+        AutoRemoveMode autoRemove_{ AutoRemoveMode::Disabled };
     };
-
 }

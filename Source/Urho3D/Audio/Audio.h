@@ -71,11 +71,11 @@ namespace Urho3D
 
         /// Return byte size of one sample.
         /// @property
-        unsigned GetSampleSize() const { return sampleSize_; }
+        uint32_t GetSampleSize() const { return sampleSize_; }
 
         /// Return mixing rate.
         /// @property
-        int GetMixRate() const { return mixRate_; }
+        int32_t GetMixRate() const { return mixRate_; }
 
         /// Return whether output is interpolated.
         /// @property
@@ -122,7 +122,7 @@ namespace Urho3D
         float GetSoundSourceMasterGain(StringHash typeHash) const;
 
         /// Mix sound sources into the buffer.
-        void MixOutput(void* dest, unsigned samples);
+        void MixOutput(void* dest, uint32_t samples);
 
     private:
         /// Handle render update event.
@@ -133,17 +133,17 @@ namespace Urho3D
         void UpdateInternal(float timeStep);
 
         /// Clipping buffer for mixing.
-        SharedArrayPtr<int> clipBuffer_;
+        std::unique_ptr<int32_t[]> clipBuffer_;
         /// Audio thread mutex.
         std::mutex audioMutex;
         /// SDL audio device ID.
-        unsigned deviceID_{};
+        uint32_t deviceID_{};
         /// Sample size.
-        unsigned sampleSize_{};
+        uint32_t sampleSize_{};
         /// Clip buffer size in samples.
-        unsigned fragmentSize_{};
+        uint32_t fragmentSize_{};
         /// Mixing rate.
-        int mixRate_{};
+        int32_t mixRate_{};
         /// Mixing interpolation flag.
         bool interpolation_{};
         /// Stereo flag.

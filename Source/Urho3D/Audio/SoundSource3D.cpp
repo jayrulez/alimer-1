@@ -30,26 +30,26 @@
 #include "../Graphics/DebugRenderer.h"
 #include "../Scene/Node.h"
 
-namespace Urho3D
+using namespace Urho3D;
+
+namespace
 {
+    static constexpr float DEFAULT_NEARDISTANCE = 0.0f;
+    static constexpr float DEFAULT_FARDISTANCE = 100.0f;
+    static constexpr float DEFAULT_ROLLOFF = 2.0f;
+    static constexpr float DEFAULT_ANGLE = 360.0f;
+    static constexpr float MIN_ROLLOFF = 0.1f;
+    static constexpr Color INNER_COLOR(1.0f, 0.5f, 1.0f);
+    static constexpr Color OUTER_COLOR(1.0f, 0.0f, 1.0f);
+}
 
-static const float DEFAULT_NEARDISTANCE = 0.0f;
-static const float DEFAULT_FARDISTANCE = 100.0f;
-static const float DEFAULT_ROLLOFF = 2.0f;
-static const float DEFAULT_ANGLE = 360.0f;
-static const float MIN_ROLLOFF = 0.1f;
-static const Color INNER_COLOR(1.0f, 0.5f, 1.0f);
-static const Color OUTER_COLOR(1.0f, 0.0f, 1.0f);
-
-extern const char* AUDIO_CATEGORY;
-
-SoundSource3D::SoundSource3D(Context* context) :
-    SoundSource(context),
-    nearDistance_(DEFAULT_NEARDISTANCE),
-    farDistance_(DEFAULT_FARDISTANCE),
-    innerAngle_(DEFAULT_ANGLE),
-    outerAngle_(DEFAULT_ANGLE),
-    rolloffFactor_(DEFAULT_ROLLOFF)
+SoundSource3D::SoundSource3D(Context* context)
+    : SoundSource(context)
+    , nearDistance_(DEFAULT_NEARDISTANCE)
+    , farDistance_(DEFAULT_FARDISTANCE)
+    , innerAngle_(DEFAULT_ANGLE)
+    , outerAngle_(DEFAULT_ANGLE)
+    , rolloffFactor_(DEFAULT_ROLLOFF)
 {
     // Start from zero volume until attenuation properly calculated
     attenuation_ = 0.0f;
@@ -202,6 +202,4 @@ void SoundSource3D::CalculateAttenuation()
     }
     else
         attenuation_ = 0.0f;
-}
-
 }

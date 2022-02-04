@@ -31,11 +31,6 @@ SoundStream::SoundStream()
 {
 }
 
-bool SoundStream::Seek(uint32_t sample_number)
-{
-    return false;
-}
-
 void SoundStream::SetFormat(uint32_t frequency, bool sixteenBit, bool stereo)
 {
     frequency_ = frequency;
@@ -50,7 +45,7 @@ void SoundStream::SetStopAtEnd(bool enable)
 
 uint32_t SoundStream::GetSampleSize() const
 {
-    unsigned size = 1;
+    uint32_t size = 1;
     if (sixteenBit_)
         size <<= 1;
     if (stereo_)

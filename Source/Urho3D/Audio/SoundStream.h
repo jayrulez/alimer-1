@@ -31,13 +31,11 @@ namespace Urho3D
     class URHO3D_API SoundStream : public RefCounted
     {
     public:
-        /// Construct.
-        SoundStream();
         /// Destruct.
         ~SoundStream() override = default;
 
         /// Seek to sample number. Return true on success. Need not be implemented by all streams.
-        virtual bool Seek(uint32_t sample_number);
+        virtual bool Seek(uint32_t sample_number) { return false; }
 
         /// Produce sound data into destination. Return number of bytes produced. Called by SoundSource from the mixing thread.
         virtual uint32_t GetData(int8_t* dest, uint32_t numBytes) = 0;
@@ -66,6 +64,9 @@ namespace Urho3D
         bool IsStereo() const { return stereo_; }
 
     protected:
+        /// Constructor.
+        SoundStream();
+
         /// Default frequency.
         uint32_t frequency_{ 44100u };
         /// Stop when no more data flag.

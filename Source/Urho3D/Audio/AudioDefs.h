@@ -22,16 +22,15 @@
 
 #pragma once
 
-#include "../Container/Str.h"
-
 namespace Urho3D
 {
+    // Audio category
+    static constexpr const char* AUDIO_CATEGORY = "Audio";
 
-// SoundSource type defaults
-static const String SOUND_MASTER = "Master";
-static const String SOUND_EFFECT = "Effect";
-static const String SOUND_AMBIENT = "Ambient";
-static const String SOUND_VOICE = "Voice";
-static const String SOUND_MUSIC = "Music";
-
+    // SoundSource type defaults
+    static constexpr const char* SOUND_MASTER = "Master";
+    static constexpr const char* SOUND_EFFECT = "Effect";
+    static constexpr const char* SOUND_AMBIENT = "Ambient";
+    static constexpr const char* SOUND_VOICE = "Voice";
+    static constexpr const char* SOUND_MUSIC = "Music";
 }

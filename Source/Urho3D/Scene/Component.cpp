@@ -41,26 +41,22 @@
 #pragma warning(disable:6293)
 #endif
 
+using namespace Urho3D;
+
 namespace Urho3D
 {
-
-const char* autoRemoveModeNames[] = {
-    "Disabled",
-    "Component",
-    "Node",
-    nullptr
-};
-
-Component::Component(Context* context) :
-    Animatable(context),
-    node_(nullptr),
-    id_(0),
-    networkUpdate_(false),
-    enabled_(true)
-{
+    extern URHO3D_API const char* autoRemoveModeNames[] = {
+        "Disabled",
+        "Component",
+        "Node",
+        nullptr
+    };
 }
 
-Component::~Component() = default;
+Component::Component(Context* context)
+    : Animatable(context)
+{
+}
 
 bool Component::Save(Serializer& dest) const
 {
@@ -192,7 +188,7 @@ void Component::PrepareNetworkUpdate()
 
             // Mark the attribute dirty in all replication states that are tracking this component
             for (PODVector<ReplicationState*>::Iterator j = networkState_->replicationStates_.Begin();
-                 j != networkState_->replicationStates_.End(); ++j)
+                j != networkState_->replicationStates_.End(); ++j)
             {
                 auto* compState = static_cast<ComponentReplicationState*>(*j);
                 compState->dirtyAttributes_.Set(i);
@@ -310,18 +306,16 @@ void Component::DoAutoRemove(AutoRemoveMode mode)
 {
     switch (mode)
     {
-    case REMOVE_COMPONENT:
-        Remove();
-        return;
+        case AutoRemoveMode::Compontent:
+            Remove();
+            return;
 
-    case REMOVE_NODE:
-        if (node_)
-            node_->Remove();
-        return;
+        case AutoRemoveMode::Node:
+            if (node_)
+                node_->Remove();
+            return;
 
-    default:
-        return;
+        default:
+            return;
     }
-}
-
 }

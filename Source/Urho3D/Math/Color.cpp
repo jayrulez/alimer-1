@@ -28,8 +28,7 @@
 
 #include "../DebugNew.h"
 
-namespace Urho3D
-{
+using namespace Urho3D;
 
 unsigned Color::ToUInt() const
 {
@@ -78,8 +77,8 @@ void Color::FromUInt(unsigned color)
 {
     a_ = ((color >> 24u) & 0xffu) / 255.0f;
     b_ = ((color >> 16u) & 0xffu) / 255.0f;
-    g_ = ((color >> 8u)  & 0xffu) / 255.0f;
-    r_ = ((color >> 0u)  & 0xffu) / 255.0f;
+    g_ = ((color >> 8u) & 0xffu) / 255.0f;
+    r_ = ((color >> 0u) & 0xffu) / 255.0f;
 }
 
 void Color::FromUIntMask(unsigned color, const ChannelMask& mask)
@@ -358,7 +357,6 @@ void Color::FromHCM(float h, float c, float m)
     b_ += m;
 }
 
-
 const Color::ChannelMask Color::ABGR{ 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000 };
 const Color::ChannelMask Color::ARGB{ 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000 };
 const Color Color::WHITE;
@@ -371,4 +369,3 @@ const Color Color::CYAN(0.0f, 1.0f, 1.0f);
 const Color Color::MAGENTA(1.0f, 0.0f, 1.0f);
 const Color Color::YELLOW(1.0f, 1.0f, 0.0f);
 const Color Color::TRANSPARENT_BLACK(0.0f, 0.0f, 0.0f, 0.0f);
-}
