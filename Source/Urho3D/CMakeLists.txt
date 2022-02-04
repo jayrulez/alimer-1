@@ -234,6 +234,19 @@ if (TARGET Urho3D)
         target_compile_definitions(${TARGET_NAME} PRIVATE _UNICODE UNICODE )
     endif ()
 
+    # Graphics
+    if (URHO3D_OPENGL)
+        if (WIN32 OR APPLE)
+            # Do nothing
+        elseif (ANDROID OR ARM)
+            target_link_libraries (${TARGET_NAME} GLESv3)
+        else ()
+            target_link_libraries (${TARGET_NAME} GL)
+        endif ()
+    else ()
+        target_link_libraries (${TARGET_NAME} d3dcompiler d3d11 dxgi dxguid)
+    endif ()
+
     target_link_libraries(${TARGET_NAME} stb)
 
     if (NOT ANDROID AND NOT ARM AND NOT WEB)

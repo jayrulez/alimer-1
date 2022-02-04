@@ -443,20 +443,6 @@ foreach (OPT
     endif ()
 endforeach ()
 
-# TODO: The logic below is earmarked to be moved into SDL's CMakeLists.txt when refactoring the library dependency handling, until then ensure the DirectX package is not being searched again in external projects such as when building LuaJIT library
-if (WIN32 AND NOT CMAKE_PROJECT_NAME MATCHES ^Urho3D-ExternalProject-)
-    set (DIRECTX_REQUIRED_COMPONENTS)
-    set (DIRECTX_OPTIONAL_COMPONENTS DInput DSound XInput)
-    if (NOT URHO3D_OPENGL)
-        list (APPEND DIRECTX_REQUIRED_COMPONENTS D3D11)
-    endif ()
-    find_package (DirectX REQUIRED ${DIRECTX_REQUIRED_COMPONENTS} OPTIONAL_COMPONENTS ${DIRECTX_OPTIONAL_COMPONENTS})
-    if (DIRECTX_FOUND)
-        include_directories (SYSTEM ${DIRECTX_INCLUDE_DIRS})   # These variables may be empty when WinSDK or MinGW is being used
-        link_directories (${DIRECTX_LIBRARY_DIRS})
-    endif ()
-endif ()
-
 # Platform and compiler specific options
 set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -854,22 +840,6 @@ macro (define_dependency_libs TARGET)
             else ()
                 list (APPEND LIBS "-framework AudioToolbox" "-framework Carbon" "-framework Cocoa" "-framework CoreFoundation" "-framework SystemConfiguration" "-framework CoreAudio" "-framework CoreBluetooth" "-framework CoreServices" "-framework CoreVideo" "-framework ForceFeedback" "-framework IOKit" "-framework OpenGL")
             endif ()
-        endif ()
-
-        # Graphics
-        if (URHO3D_OPENGL)
-            if (APPLE)
-                # Do nothing
-            elseif (WIN32)
-                list (APPEND LIBS opengl32)
-            elseif (ANDROID OR ARM)
-                # GLES 3.0
-                list (APPEND LIBS GLESv3)
-            else ()
-                list (APPEND LIBS GL)
-            endif ()
-        elseif (DIRECT3D_LIBRARIES)
-            list (APPEND LIBS ${DIRECT3D_LIBRARIES})
         endif ()
 
         # This variable value can either be 'Urho3D' target or an absolute path to an actual static/shared Urho3D library or empty (if we are building the library itself)
