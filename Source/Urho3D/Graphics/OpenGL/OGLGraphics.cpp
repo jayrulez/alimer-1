@@ -2028,20 +2028,21 @@ namespace Urho3D
 
     TextureUnit Graphics::GetTextureUnit(const String& name)
     {
-        HashMap<String, TextureUnit>::Iterator i = textureUnits_.Find(name);
-        if (i != textureUnits_.End())
-            return i->second_;
-        else
-            return MAX_TEXTURE_UNITS;
+        auto it = textureUnits_.find(name);
+        if (it != textureUnits_.end())
+            return it->second;
+
+        return MAX_TEXTURE_UNITS;
     }
 
     const String& Graphics::GetTextureUnitName(TextureUnit unit)
     {
-        for (HashMap<String, TextureUnit>::Iterator i = textureUnits_.Begin(); i != textureUnits_.End(); ++i)
+        for (auto i = textureUnits_.begin(); i != textureUnits_.end(); ++i)
         {
-            if (i->second_ == unit)
-                return i->first_;
+            if (i->second == unit)
+                return i->first;
         }
+
         return String::EMPTY;
     }
 

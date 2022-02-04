@@ -775,7 +775,7 @@ namespace Urho3D
         /// Textures in use.
         Texture* textures_[MAX_TEXTURE_UNITS]{};
         /// Texture unit mappings.
-        HashMap<String, TextureUnit> textureUnits_;
+        std::unordered_map<String, TextureUnit> textureUnits_;
         /// Rendertargets in use.
         RenderSurface* renderTargets_[kMaxColorAttachments]{};
         /// Depth-stencil surface in use.

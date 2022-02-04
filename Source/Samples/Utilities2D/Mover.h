@@ -50,7 +50,7 @@ public:
     void SetPathAttr(const PODVector<unsigned char>& value);
 
     /// Path.
-    PODVector<Vector2> path_;
+    std::vector<Vector2> path_;
     /// Movement speed.
     float speed_;
     /// ID of the current path point.

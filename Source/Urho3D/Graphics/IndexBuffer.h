@@ -84,10 +84,10 @@ namespace Urho3D
         bool GetUsedVertexRange(unsigned start, unsigned count, unsigned& minVertex, unsigned& vertexCount);
 
         /// Return CPU memory shadow data.
-        unsigned char* GetShadowData() const { return shadowData_.Get(); }
+        uint8_t* GetShadowData() const { return shadowData_.Get(); }
 
         /// Return shared array pointer to the CPU memory shadow data.
-        SharedArrayPtr<unsigned char> GetShadowDataShared() const { return shadowData_; }
+        SharedArrayPtr<uint8_t> GetShadowDataShared() const { return shadowData_; }
 
     private:
         /// Create buffer.
@@ -102,7 +102,7 @@ namespace Urho3D
 #endif
 
         /// Shadow data.
-        SharedArrayPtr<unsigned char> shadowData_;
+        SharedArrayPtr<uint8_t> shadowData_;
         /// Number of indices.
         uint32_t indexCount_{ 0u };
         /// Index size.
@@ -124,5 +124,4 @@ namespace Urho3D
         bool discardLock_{ false };
 #endif
     };
-
 }

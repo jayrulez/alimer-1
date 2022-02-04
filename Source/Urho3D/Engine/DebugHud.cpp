@@ -39,11 +39,11 @@
 
 #include "../DebugNew.h"
 
+using namespace std;
 using namespace Urho3D;
 
 namespace
 {
-
     static const char* qualityTexts[] =
     {
         "Low",
@@ -155,11 +155,11 @@ void DebugHud::Update()
             renderer->GetNumShadowMaps(true),
             renderer->GetNumOccluders(true));
 
-        if (!appStats_.Empty())
+        if (!appStats_.empty())
         {
             stats.Append("\n");
-            for (HashMap<String, String>::ConstIterator i = appStats_.Begin(); i != appStats_.End(); ++i)
-                stats.AppendWithFormat("\n%s %s", i->first_.CString(), i->second_.CString());
+            for (map<String, String>::const_iterator i = appStats_.begin(); i != appStats_.end(); ++i)
+                stats.AppendWithFormat("\n%s %s", i->first.CString(), i->second.CString());
         }
 
         statsText_->SetText(stats);
@@ -288,20 +288,22 @@ void DebugHud::SetAppStats(const String& label, const Variant& stats)
 
 void DebugHud::SetAppStats(const String& label, const String& stats)
 {
-    bool newLabel = !appStats_.Contains(label);
+    bool newLabel = appStats_.find(label) == appStats_.end();
     appStats_[label] = stats;
-    if (newLabel)
-        appStats_.Sort();
+    //if (newLabel)
+    //{
+    //    std::sort(appStats_.begin(), appStats_.end());
+    //}
 }
 
 bool DebugHud::ResetAppStats(const String& label)
 {
-    return appStats_.Erase(label);
+    return appStats_.erase(label);
 }
 
 void DebugHud::ClearAppStats()
 {
-    appStats_.Clear();
+    appStats_.clear();
 }
 
 void DebugHud::HandlePostUpdate(StringHash eventType, VariantMap& eventData)

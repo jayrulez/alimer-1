@@ -64,14 +64,14 @@ void Mover::SetPathAttr(const PODVector<unsigned char>& value)
 
     MemoryBuffer buffer(value);
     while (!buffer.IsEof())
-        path_.Push(buffer.ReadVector2());
+        path_.push_back(buffer.ReadVector2());
 }
 
 PODVector<unsigned char> Mover::GetPathAttr() const
 {
     VectorBuffer buffer;
 
-    for (unsigned i = 0; i < path_.Size(); ++i)
+    for (size_t i = 0; i < path_.size(); ++i)
         buffer.WriteVector2(path_[i]);
 
     return buffer.GetBuffer();
@@ -79,7 +79,7 @@ PODVector<unsigned char> Mover::GetPathAttr() const
 
 void Mover::Update(float timeStep)
 {
-    if (path_.Size() < 2)
+    if (path_.size() < 2)
         return;
 
     // Handle Orc states (idle/wounded/fighting)
@@ -135,7 +135,7 @@ void Mover::Update(float timeStep)
     {
         if (speed_ > 0.0f)
         {
-            if (currentPathID_ + 1 < path_.Size())
+            if (currentPathID_ + 1 < path_.size())
                 currentPathID_ = currentPathID_ + 1;
             else
             {

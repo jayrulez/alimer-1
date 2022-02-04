@@ -188,7 +188,7 @@ void SoundEffects::HandlePlaySound(StringHash eventType, VariantMap& eventData)
         // SoundSource3D component would be used instead
         auto* soundSource = scene_->CreateComponent<SoundSource>();
         // Component will automatically remove itself when the sound finished playing
-        soundSource->SetAutoRemoveMode(REMOVE_COMPONENT);
+        soundSource->SetAutoRemoveMode(AutoRemoveMode::Compontent);
         soundSource->Play(sound);
         // In case we also play music, set the sound volume below maximum so that we don't clip the output
         soundSource->SetGain(0.75f);

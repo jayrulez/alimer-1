@@ -23,7 +23,6 @@
 
 #pragma once
 
-#include "../Container/HashMap.h"
 #include "../Container/Ptr.h"
 #include "../Math/StringHash.h"
 
@@ -60,5 +59,4 @@ namespace Urho3D
         /// Mutex.
         UniquePtr<Mutex> mutex_;
     };
-
 }
