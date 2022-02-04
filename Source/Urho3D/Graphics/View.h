@@ -31,7 +31,6 @@
 
 namespace Urho3D
 {
-
     class Camera;
     class DebugRenderer;
     class Light;
@@ -56,15 +55,15 @@ namespace Urho3D
         /// Light.
         Light* light_;
         /// Lit geometries.
-        PODVector<Drawable*> litGeometries_;
+        std::vector<Drawable*> litGeometries_;
         /// Shadow casters.
-        PODVector<Drawable*> shadowCasters_;
+        std::vector<Drawable*> shadowCasters_;
         /// Shadow cameras.
         Camera* shadowCameras_[MAX_LIGHT_SPLITS];
         /// Shadow caster start indices.
-        unsigned shadowCasterBegin_[MAX_LIGHT_SPLITS];
+        size_t shadowCasterBegin_[MAX_LIGHT_SPLITS];
         /// Shadow caster end indices.
-        unsigned shadowCasterEnd_[MAX_LIGHT_SPLITS];
+        size_t shadowCasterEnd_[MAX_LIGHT_SPLITS];
         /// Combined bounding box of shadow casters in light projection space. Only used for focused spot lights.
         BoundingBox shadowCasterBox_[MAX_LIGHT_SPLITS];
         /// Shadow camera near splits (directional lights only).
@@ -72,14 +71,14 @@ namespace Urho3D
         /// Shadow camera far splits (directional lights only).
         float shadowFarSplits_[MAX_LIGHT_SPLITS];
         /// Shadow map split count.
-        unsigned numSplits_;
+        uint32_t numSplits_;
     };
 
     /// Scene render pass info.
     struct ScenePassInfo
     {
         /// Pass index.
-        unsigned passIndex_;
+        uint32_t passIndex_;
         /// Allow instancing flag.
         bool allowInstancing_;
         /// Mark to stencil flag.
@@ -413,19 +412,19 @@ namespace Urho3D
         /// Per-vertex light queues.
         HashMap<unsigned long long, LightBatchQueue> vertexLightQueues_;
         /// Batch queues by pass index.
-        HashMap<unsigned, BatchQueue> batchQueues_;
+        std::unordered_map<uint32_t, BatchQueue> batchQueues_;
         /// Index of the GBuffer pass.
-        unsigned gBufferPassIndex_{};
+        uint32_t gBufferPassIndex_{};
         /// Index of the opaque forward base pass.
-        unsigned basePassIndex_{};
+        uint32_t basePassIndex_{};
         /// Index of the alpha pass.
-        unsigned alphaPassIndex_{};
+        uint32_t alphaPassIndex_{};
         /// Index of the forward light pass.
-        unsigned lightPassIndex_{};
+        uint32_t lightPassIndex_{};
         /// Index of the litbase pass.
-        unsigned litBasePassIndex_{};
+        uint32_t litBasePassIndex_{};
         /// Index of the litalpha pass.
-        unsigned litAlphaPassIndex_{};
+        uint32_t litAlphaPassIndex_{};
         /// Pointer to the light volume command if any.
         const RenderPathCommand* lightVolumeCommand_{};
         /// Pointer to the forwardlights command if any.

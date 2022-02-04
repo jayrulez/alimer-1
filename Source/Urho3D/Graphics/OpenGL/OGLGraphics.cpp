@@ -133,7 +133,7 @@ EMSCRIPTEN_BINDINGS(Module) {
 #include <windows.h>
 extern "C"
 {
-    __declspec(dllexport) DWORD NvOptimusEnablement = 1;
+    __declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
     __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
 #endif
@@ -941,16 +941,16 @@ namespace Urho3D
             vertexShader_ = vs;
             pixelShader_ = ps;
 
-            Pair<ShaderVariation*, ShaderVariation*> combination(vs, ps);
-            ShaderProgramMap::Iterator i = impl_->shaderPrograms_.Find(combination);
+            std::pair<ShaderVariation*, ShaderVariation*> combination(vs, ps);
+            ShaderProgramMap::iterator i = impl_->shaderPrograms_.find(combination);
 
-            if (i != impl_->shaderPrograms_.End())
+            if (i != impl_->shaderPrograms_.end())
             {
                 // Use the existing linked program
-                if (i->second_->GetGPUObjectName())
+                if (i->second->GetGPUObjectName())
                 {
-                    glUseProgram(i->second_->GetGPUObjectName());
-                    impl_->shaderProgram_ = i->second_;
+                    glUseProgram(i->second->GetGPUObjectName());
+                    impl_->shaderProgram_ = i->second;
                 }
                 else
                 {
@@ -2194,10 +2194,10 @@ namespace Urho3D
 
     void Graphics::CleanupShaderPrograms(ShaderVariation* variation)
     {
-        for (ShaderProgramMap::Iterator i = impl_->shaderPrograms_.Begin(); i != impl_->shaderPrograms_.End();)
+        for (ShaderProgramMap::iterator i = impl_->shaderPrograms_.begin(); i != impl_->shaderPrograms_.end();)
         {
-            if (i->second_->GetVertexShader() == variation || i->second_->GetPixelShader() == variation)
-                i = impl_->shaderPrograms_.Erase(i);
+            if (i->second->GetVertexShader() == variation || i->second->GetPixelShader() == variation)
+                i = impl_->shaderPrograms_.erase(i);
             else
                 ++i;
         }
@@ -2211,14 +2211,18 @@ namespace Urho3D
         // Note: shaderType parameter is not used on OpenGL, instead binding index should already use the PS range
         // for PS constant buffers
 
-        unsigned key = (index << 16u) | size;
-        HashMap<unsigned, SharedPtr<ConstantBuffer> >::Iterator i = impl_->allConstantBuffers_.Find(key);
-        if (i == impl_->allConstantBuffers_.End())
+        size_t key = 0;
+        HashCombine(key, index);
+        HashCombine(key, size);
+
+        auto it = impl_->allConstantBuffers_.find(key);
+        if (it == impl_->allConstantBuffers_.end())
         {
-            i = impl_->allConstantBuffers_.Insert(MakePair(key, SharedPtr<ConstantBuffer>(new ConstantBuffer(context_))));
-            i->second_->SetSize(size);
+            it = impl_->allConstantBuffers_.insert(std::make_pair(key, SharedPtr<ConstantBuffer>(new ConstantBuffer(context_)))).first;
+            it->second->SetSize(size);
         }
-        return i->second_.Get();
+
+        return it->second.Get();
     }
 
     void Graphics::Release(bool clearGPUObjects, bool closeWindow)
@@ -2230,7 +2234,7 @@ namespace Urho3D
         {
             // Shutting down: release all GPU objects that still exist
             // Shader programs are also GPU objects; clear them first to avoid list modification during iteration
-            impl_->shaderPrograms_.Clear();
+            impl_->shaderPrograms_.clear();
 
             {
                 std::lock_guard<std::mutex> lock(gpuObjectMutex_);
@@ -2257,7 +2261,7 @@ namespace Urho3D
 
             // In this case clear shader programs last so that they do not attempt to delete their OpenGL program
             // from a context that may no longer exist
-            impl_->shaderPrograms_.Clear();
+            impl_->shaderPrograms_.clear();
 
             SendEvent(E_DEVICELOST);
         }

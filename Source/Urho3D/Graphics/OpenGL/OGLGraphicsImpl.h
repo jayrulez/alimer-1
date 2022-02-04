@@ -22,7 +22,6 @@
 
 #pragma once
 
-#include "../../Container/HashMap.h"
 #include "../../Core/Timer.h"
 #include "../../Graphics/ConstantBuffer.h"
 #include "../../Graphics/ShaderProgram.h"
@@ -80,11 +79,10 @@ using SDL_GLContext = void*;
 
 namespace Urho3D
 {
-
     class Context;
 
-    using ConstantBufferMap = HashMap<unsigned, SharedPtr<ConstantBuffer> >;
-    using ShaderProgramMap = HashMap<Pair<ShaderVariation*, ShaderVariation*>, SharedPtr<ShaderProgram> >;
+    using ConstantBufferMap = std::unordered_map<size_t, SharedPtr<ConstantBuffer> >;
+    using ShaderProgramMap = std::unordered_map<std::pair<ShaderVariation*, ShaderVariation*>, SharedPtr<ShaderProgram> >;
 
     /// Cached state of a frame buffer object.
     struct FrameBufferObject

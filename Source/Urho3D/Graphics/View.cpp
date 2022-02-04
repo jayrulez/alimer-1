@@ -52,9 +52,10 @@
 
 #include "../DebugNew.h"
 
+using namespace std;
+
 namespace Urho3D
 {
-
     /// %Frustum octree query for shadowcasters.
     class ShadowCasterOctreeQuery : public FrustumOctreeQuery
     {
@@ -431,17 +432,21 @@ namespace Urho3D
                     }
                 }
 
-                HashMap<unsigned, BatchQueue>::Iterator j = batchQueues_.Find(info.passIndex_);
-                if (j == batchQueues_.End())
-                    j = batchQueues_.Insert(Pair<unsigned, BatchQueue>(info.passIndex_, BatchQueue()));
-                info.batchQueue_ = &j->second_;
+                unordered_map<uint32_t, BatchQueue>::iterator j = batchQueues_.find(info.passIndex_);
+                if (j == batchQueues_.end())
+                {
+                    j = batchQueues_.insert(make_pair(info.passIndex_, BatchQueue())).first;
+                }
+                info.batchQueue_ = &j->second;
                 SetQueueShaderDefines(*info.batchQueue_, command);
 
                 scenePasses_.Push(info);
             }
             // Allow a custom forward light pass
             else if (command.type_ == CMD_FORWARDLIGHTS && !command.pass_.Empty())
+            {
                 lightPassIndex_ = command.passIndex_ = Technique::GetPassIndex(command.pass_);
+            }
         }
 
         octree_ = nullptr;
@@ -540,8 +545,8 @@ namespace Urho3D
         occluders_.Clear();
         activeOccluders_ = 0;
         vertexLightQueues_.Clear();
-        for (HashMap<unsigned, BatchQueue>::Iterator i = batchQueues_.Begin(); i != batchQueues_.End(); ++i)
-            i->second_.Clear(maxSortedInstances);
+        for (unordered_map<uint32_t, BatchQueue>::iterator i = batchQueues_.begin(); i != batchQueues_.end(); ++i)
+            i->second.Clear(maxSortedInstances);
 
         if (hasScenePasses_ && (!cullCamera_ || !octree_))
         {
@@ -1002,7 +1007,7 @@ namespace Urho3D
 
     void View::GetLightBatches()
     {
-        BatchQueue* alphaQueue = batchQueues_.Contains(alphaPassIndex_) ? &batchQueues_[alphaPassIndex_] : nullptr;
+        BatchQueue* alphaQueue = batchQueues_.find(alphaPassIndex_) != batchQueues_.end() ? &batchQueues_[alphaPassIndex_] : nullptr;
 
         // Build light queues and lit batches
         {
@@ -1013,7 +1018,7 @@ namespace Urho3D
             unsigned usedLightQueues = 0;
             for (Vector<LightQueryResult>::ConstIterator i = lightQueryResults_.Begin(); i != lightQueryResults_.End(); ++i)
             {
-                if (!i->light_->GetPerVertex() && i->litGeometries_.Size())
+                if (!i->light_->GetPerVertex() && i->litGeometries_.size())
                     ++numLightQueues;
             }
 
@@ -1026,7 +1031,7 @@ namespace Urho3D
                 LightQueryResult& query = *i;
 
                 // If light has no affected geometries, no need to process further
-                if (query.litGeometries_.Empty())
+                if (query.litGeometries_.empty())
                     continue;
 
                 Light* light = query.light_;
@@ -1081,8 +1086,8 @@ namespace Urho3D
                         FinalizeShadowCamera(shadowCamera, light, shadowQueue.shadowViewport_, query.shadowCasterBox_[j]);
 
                         // Loop through shadow casters
-                        for (PODVector<Drawable*>::ConstIterator k = query.shadowCasters_.Begin() + query.shadowCasterBegin_[j];
-                            k < query.shadowCasters_.Begin() + query.shadowCasterEnd_[j]; ++k)
+                        for (vector<Drawable*>::const_iterator k = query.shadowCasters_.begin() + query.shadowCasterBegin_[j];
+                            k < query.shadowCasters_.begin() + query.shadowCasterEnd_[j]; ++k)
                         {
                             Drawable* drawable = *k;
                             // If drawable is not in actual view frustum, mark it in view here and check its geometry update type
@@ -1121,9 +1126,8 @@ namespace Urho3D
                     }
 
                     // Process lit geometries
-                    for (PODVector<Drawable*>::ConstIterator j = query.litGeometries_.Begin(); j != query.litGeometries_.End(); ++j)
+                    for (Drawable* drawable : query.litGeometries_)
                     {
-                        Drawable* drawable = *j;
                         drawable->AddLight(light);
 
                         // If drawable limits maximum lights, only record the light, and check maximum count / build batches later
@@ -1157,9 +1161,8 @@ namespace Urho3D
                 else
                 {
                     // Add the vertex light to lit drawables. It will be processed later during base pass batch generation
-                    for (PODVector<Drawable*>::ConstIterator j = query.litGeometries_.Begin(); j != query.litGeometries_.End(); ++j)
+                    for (Drawable* drawable : query.litGeometries_)
                     {
-                        Drawable* drawable = *j;
                         drawable->AddVertexLight(light);
                     }
                 }
@@ -2287,7 +2290,7 @@ namespace Urho3D
 #endif
         // Get lit geometries. They must match the light mask and be inside the main camera frustum to be considered
         PODVector<Drawable*>& tempDrawables = tempDrawables_[threadIndex];
-        query.litGeometries_.Clear();
+        query.litGeometries_.clear();
 
         switch (type)
         {
@@ -2295,7 +2298,9 @@ namespace Urho3D
                 for (unsigned i = 0; i < geometries_.Size(); ++i)
                 {
                     if (GetLightMask(geometries_[i]) & lightMask)
-                        query.litGeometries_.Push(geometries_[i]);
+                    {
+                        query.litGeometries_.push_back(geometries_[i]);
+                    }
                 }
                 break;
 
@@ -2307,7 +2312,9 @@ namespace Urho3D
                 for (unsigned i = 0; i < tempDrawables.Size(); ++i)
                 {
                     if (tempDrawables[i]->IsInView(frame_) && (GetLightMask(tempDrawables[i]) & lightMask))
-                        query.litGeometries_.Push(tempDrawables[i]);
+                    {
+                        query.litGeometries_.push_back(tempDrawables[i]);
+                    }
                 }
             }
             break;
@@ -2320,14 +2327,16 @@ namespace Urho3D
                 for (unsigned i = 0; i < tempDrawables.Size(); ++i)
                 {
                     if (tempDrawables[i]->IsInView(frame_) && (GetLightMask(tempDrawables[i]) & lightMask))
-                        query.litGeometries_.Push(tempDrawables[i]);
+                    {
+                        query.litGeometries_.push_back(tempDrawables[i]);
+                    }
                 }
             }
             break;
         }
 
         // If no lit geometries or not shadowed, no need to process shadow cameras
-        if (query.litGeometries_.Empty() || !isShadowed)
+        if (query.litGeometries_.empty() || !isShadowed)
         {
             query.numSplits_ = 0;
             return;
@@ -2337,12 +2346,12 @@ namespace Urho3D
         SetupShadowCameras(query);
 
         // Process each split for shadow casters
-        query.shadowCasters_.Clear();
+        query.shadowCasters_.clear();
         for (unsigned i = 0; i < query.numSplits_; ++i)
         {
             Camera* shadowCamera = query.shadowCameras_[i];
             const Frustum& shadowCameraFrustum = shadowCamera->GetFrustum();
-            query.shadowCasterBegin_[i] = query.shadowCasterEnd_[i] = query.shadowCasters_.Size();
+            query.shadowCasterBegin_[i] = query.shadowCasterEnd_[i] = query.shadowCasters_.size();
 
             // For point light check that the face is visible: if not, can skip the split
             if (type == LightType::Point && frustum.IsInsideFast(BoundingBox(shadowCameraFrustum)) == OUTSIDE)
@@ -2367,7 +2376,7 @@ namespace Urho3D
 
         // If no shadow casters, the light can be rendered unshadowed. At this point we have not allocated a shadow map yet, so the
         // only cost has been the shadow camera setup & queries
-        if (query.shadowCasters_.Empty())
+        if (query.shadowCasters_.empty())
             query.numSplits_ = 0;
     }
 
@@ -2440,11 +2449,11 @@ namespace Urho3D
                     lightProjBox = lightViewBox.Projected(lightProj);
                     query.shadowCasterBox_[splitIndex].Merge(lightProjBox);
                 }
-                query.shadowCasters_.Push(drawable);
+                query.shadowCasters_.push_back(drawable);
             }
         }
 
-        query.shadowCasterEnd_[splitIndex] = query.shadowCasters_.Size();
+        query.shadowCasterEnd_[splitIndex] = query.shadowCasters_.size();
     }
 
     bool View::IsShadowCasterVisible(Drawable* drawable, BoundingBox lightViewBox, Camera* shadowCamera, const Matrix3x4& lightView,
@@ -2958,10 +2967,10 @@ namespace Urho3D
 
         URHO3D_PROFILE(PrepareInstancingBuffer);
 
-        unsigned totalInstances = 0;
+        uint32_t totalInstances = 0;
 
-        for (HashMap<unsigned, BatchQueue>::Iterator i = batchQueues_.Begin(); i != batchQueues_.End(); ++i)
-            totalInstances += i->second_.GetNumInstances();
+        for (unordered_map<uint32_t, BatchQueue>::iterator i = batchQueues_.begin(); i != batchQueues_.end(); ++i)
+            totalInstances += i->second.GetNumInstances();
 
         for (Vector<LightBatchQueue>::Iterator i = lightQueues_.Begin(); i != lightQueues_.End(); ++i)
         {
@@ -2980,9 +2989,11 @@ namespace Urho3D
         if (!dest)
             return;
 
-        const unsigned stride = instancingBuffer->GetVertexSize();
-        for (HashMap<unsigned, BatchQueue>::Iterator i = batchQueues_.Begin(); i != batchQueues_.End(); ++i)
-            i->second_.SetInstancingData(dest, stride, freeIndex);
+        const uint32_t stride = instancingBuffer->GetVertexSize();
+        for (unordered_map<uint32_t, BatchQueue>::iterator i = batchQueues_.begin(); i != batchQueues_.end(); ++i)
+        {
+            i->second.SetInstancingData(dest, stride, freeIndex);
+        }
 
         for (Vector<LightBatchQueue>::Iterator i = lightQueues_.Begin(); i != lightQueues_.End(); ++i)
         {
