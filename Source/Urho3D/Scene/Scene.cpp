@@ -503,7 +503,7 @@ bool Scene::LoadAsyncJSON(File* file, LoadMode mode)
         asyncProgress_.jsonIndex_ = 0;
 
         // Count the amount of child nodes
-        asyncProgress_.totalNodes_ = childrenArray.Size();
+        asyncProgress_.totalNodes_ = childrenArray.size();
     }
     else
     {
@@ -1223,7 +1223,7 @@ void Scene::UpdateAsyncLoading()
         }
         else if (asyncProgress_.jsonFile_) // Load from JSON
         {
-            const JSONValue& childValue = asyncProgress_.jsonFile_->GetRoot().Get("children").GetArray().At(asyncProgress_.jsonIndex_);
+            const JSONValue& childValue = asyncProgress_.jsonFile_->GetRoot().Get("children").GetArray().at(asyncProgress_.jsonIndex_);
 
             unsigned nodeID = childValue.Get("id").GetUInt();
             Node* newNode = CreateChild(nodeID, IsReplicatedID(nodeID) ? REPLICATED : LOCAL);
@@ -1460,9 +1460,9 @@ void Scene::PreloadResourcesJSON(const JSONValue& value)
     // Node or Scene attributes do not include any resources; therefore skip to the components
     JSONArray componentArray = value.Get("components").GetArray();
 
-    for (unsigned i = 0; i < componentArray.Size(); i++)
+    for (unsigned i = 0; i < componentArray.size(); i++)
     {
-        const JSONValue& compValue = componentArray.At(i);
+        const JSONValue& compValue = componentArray.at(i);
         String typeName = compValue.Get("type").GetString();
 
         const std::vector<AttributeInfo>* attributes = context_->GetAttributes(StringHash(typeName));
@@ -1472,9 +1472,9 @@ void Scene::PreloadResourcesJSON(const JSONValue& value)
 
             unsigned startIndex = 0;
 
-            for (unsigned j = 0; j < attributesArray.Size(); j++)
+            for (unsigned j = 0; j < attributesArray.size(); j++)
             {
-                const JSONValue& attrVal = attributesArray.At(j);
+                const JSONValue& attrVal = attributesArray.at(j);
                 String name = attrVal.Get("name").GetString();
                 unsigned i = startIndex;
                 unsigned attempts = attributes->size();
@@ -1526,9 +1526,9 @@ void Scene::PreloadResourcesJSON(const JSONValue& value)
     }
 
     JSONArray childrenArray = value.Get("children").GetArray();
-    for (unsigned i = 0; i < childrenArray.Size(); i++)
+    for (unsigned i = 0; i < childrenArray.size(); i++)
     {
-        const JSONValue& childVal = childrenArray.At(i);
+        const JSONValue& childVal = childrenArray.at(i);
         PreloadResourcesJSON(childVal);
     }
 #endif

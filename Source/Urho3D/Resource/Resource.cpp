@@ -175,9 +175,9 @@ void ResourceWithMetadata::LoadMetadataFromXML(const XMLElement& source)
 
 void ResourceWithMetadata::LoadMetadataFromJSON(const JSONArray& array)
 {
-    for (unsigned i = 0; i < array.Size(); i++)
+    for (unsigned i = 0; i < array.size(); i++)
     {
-        const JSONValue& value = array.At(i);
+        const JSONValue& value = array.at(i);
         AddMetadata(value.Get("name").GetString(), value.GetVariant());
     }
 }

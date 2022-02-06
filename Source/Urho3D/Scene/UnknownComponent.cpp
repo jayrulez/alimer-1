@@ -146,9 +146,9 @@ bool UnknownComponent::LoadJSON(const JSONValue& source)
     binaryAttributes_.Clear();
 
     JSONArray attributesArray = source.Get("attributes").GetArray();
-    for (unsigned i = 0; i < attributesArray.Size(); i++)
+    for (unsigned i = 0; i < attributesArray.size(); i++)
     {
-        const JSONValue& attrVal = attributesArray.At(i);
+        const JSONValue& attrVal = attributesArray.at(i);
 
         AttributeInfo attr;
         attr.mode_ = AM_FILE;
@@ -226,13 +226,13 @@ bool UnknownComponent::SaveJSON(JSONValue& dest) const
     dest.Set("id", (int) id_);
 
     JSONArray attributesArray;
-    attributesArray.Reserve(xmlAttributeInfos_.size());
+    attributesArray.reserve(xmlAttributeInfos_.size());
     for (unsigned i = 0; i < xmlAttributeInfos_.size(); ++i)
     {
         JSONValue attrVal;
         attrVal.Set("name", xmlAttributeInfos_[i].name_);
         attrVal.Set("value", xmlAttributes_[i]);
-        attributesArray.Push(attrVal);
+        attributesArray.push_back(attrVal);
     }
     dest.Set("attributes", attributesArray);
 

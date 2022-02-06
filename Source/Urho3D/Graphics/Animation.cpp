@@ -199,9 +199,9 @@ namespace Urho3D
             const JSONValue& rootVal = jsonFile->GetRoot();
             const JSONArray& triggerArray = rootVal.Get("triggers").GetArray();
 
-            for (unsigned i = 0; i < triggerArray.Size(); i++)
+            for (unsigned i = 0; i < triggerArray.size(); i++)
             {
-                const JSONValue& triggerValue = triggerArray.At(i);
+                const JSONValue& triggerValue = triggerArray.at(i);
                 JSONValue normalizedTimeValue = triggerValue.Get("normalizedTime");
                 if (!normalizedTimeValue.IsNull())
                     AddTrigger(normalizedTimeValue.GetFloat(), true, triggerValue.GetVariant());

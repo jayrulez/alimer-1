@@ -239,7 +239,7 @@ bool Node::SaveJSON(JSONValue& dest) const
 
     // Write components
     JSONArray componentsArray;
-    componentsArray.Reserve(components_.size());
+    componentsArray.reserve(components_.size());
     for (unsigned i = 0; i < components_.size(); ++i)
     {
         Component* component = components_[i];
@@ -249,13 +249,13 @@ bool Node::SaveJSON(JSONValue& dest) const
         JSONValue compVal;
         if (!component->SaveJSON(compVal))
             return false;
-        componentsArray.Push(compVal);
+        componentsArray.push_back(compVal);
     }
     dest.Set("components", componentsArray);
 
     // Write child nodes
     JSONArray childrenArray;
-    childrenArray.Reserve(children_.size());
+    childrenArray.reserve(children_.size());
     for (unsigned i = 0; i < children_.size(); ++i)
     {
         Node* node = children_[i];
@@ -265,7 +265,7 @@ bool Node::SaveJSON(JSONValue& dest) const
         JSONValue childVal;
         if (!node->SaveJSON(childVal))
             return false;
-        childrenArray.Push(childVal);
+        childrenArray.push_back(childVal);
     }
     dest.Set("children", childrenArray);
 
@@ -1659,9 +1659,9 @@ bool Node::LoadJSON(const JSONValue& source, SceneResolver& resolver, bool loadC
 
     const JSONArray& componentsArray = source.Get("components").GetArray();
 
-    for (unsigned i = 0; i < componentsArray.Size(); i++)
+    for (unsigned i = 0; i < componentsArray.size(); i++)
     {
-        const JSONValue& compVal = componentsArray.At(i);
+        const JSONValue& compVal = componentsArray.at(i);
         String typeName = compVal.Get("type").GetString();
         unsigned compID = compVal.Get("id").GetUInt();
         Component* newComponent = SafeCreateComponent(typeName, StringHash(typeName),
@@ -1678,9 +1678,9 @@ bool Node::LoadJSON(const JSONValue& source, SceneResolver& resolver, bool loadC
         return true;
 
     const JSONArray& childrenArray = source.Get("children").GetArray();
-    for (unsigned i = 0; i < childrenArray.Size(); i++)
+    for (unsigned i = 0; i < childrenArray.size(); i++)
     {
-        const JSONValue& childVal = childrenArray.At(i);
+        const JSONValue& childVal = childrenArray.at(i);
 
         unsigned nodeID = childVal.Get("id").GetUInt();
         Node* newNode = CreateChild(rewriteIDs ? 0 : nodeID, (mode == REPLICATED && Scene::IsReplicatedID(nodeID)) ? REPLICATED :

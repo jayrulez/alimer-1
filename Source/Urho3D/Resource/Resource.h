@@ -171,16 +171,16 @@ namespace Urho3D
         return ResourceRef(GetResourceType(resource, defaultType), GetResourceName(resource));
     }
 
-    template <class T> Vector<String> GetResourceNames(const Vector<SharedPtr<T> >& resources)
+    template <class T> std::vector<String> GetResourceNames(const std::vector<SharedPtr<T> >& resources)
     {
-        Vector<String> ret(resources.Size());
-        for (unsigned i = 0; i < resources.Size(); ++i)
+        std::vector<String> ret(resources.size());
+        for (unsigned i = 0; i < resources.size(); ++i)
             ret[i] = GetResourceName(resources[i]);
 
         return ret;
     }
 
-    template <class T> ResourceRefList GetResourceRefList(const Vector<SharedPtr<T> >& resources)
+    template <class T> ResourceRefList GetResourceRefList(const std::vector<SharedPtr<T> >& resources)
     {
         return ResourceRefList(T::GetTypeStatic(), GetResourceNames(resources));
     }

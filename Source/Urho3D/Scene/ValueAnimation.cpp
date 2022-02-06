@@ -162,7 +162,7 @@ namespace Urho3D
 
         // Load keyframes
         JSONArray keyFramesArray = source.Get("keyframes").GetArray();
-        for (unsigned i = 0; i < keyFramesArray.Size(); i++)
+        for (unsigned i = 0; i < keyFramesArray.size(); i++)
         {
             const JSONValue& val = keyFramesArray[i];
             float time = val.Get("time").GetFloat();
@@ -172,7 +172,7 @@ namespace Urho3D
 
         // Load event frames
         JSONArray eventFramesArray = source.Get("eventframes").GetArray();
-        for (unsigned i = 0; i < eventFramesArray.Size(); i++)
+        for (unsigned i = 0; i < eventFramesArray.size(); i++)
         {
             const JSONValue& eventFrameVal = eventFramesArray[i];
             float time = eventFrameVal.Get("time").GetFloat();
@@ -191,7 +191,7 @@ namespace Urho3D
             dest.Set("splinetension", (float)splineTension_);
 
         JSONArray keyFramesArray;
-        keyFramesArray.Reserve(keyFrames_.size());
+        keyFramesArray.reserve(keyFrames_.size());
         for (unsigned i = 0; i < keyFrames_.size(); ++i)
         {
             const VAnimKeyFrame& keyFrame = keyFrames_[i];
@@ -200,12 +200,12 @@ namespace Urho3D
             JSONValue valueVal;
             valueVal.SetVariant(keyFrame.value_);
             keyFrameVal.Set("value", valueVal);
-            keyFramesArray.Push(keyFrameVal);
+            keyFramesArray.push_back(keyFrameVal);
         }
         dest.Set("keyframes", keyFramesArray);
 
         JSONArray eventFramesArray;
-        eventFramesArray.Reserve(eventFrames_.size());
+        eventFramesArray.reserve(eventFrames_.size());
         for (unsigned i = 0; i < eventFrames_.size(); ++i)
         {
             const VAnimEventFrame& eventFrame = eventFrames_[i];
@@ -216,7 +216,7 @@ namespace Urho3D
             eventDataVal.SetVariantMap(eventFrame.eventData_);
             eventFrameVal.Set("eventdata", eventDataVal);
 
-            eventFramesArray.Push(eventFrameVal);
+            eventFramesArray.push_back(eventFrameVal);
         }
         dest.Set("eventframes", eventFramesArray);
 

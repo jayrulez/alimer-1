@@ -204,7 +204,7 @@ namespace Urho3D
         // Convert to array type
         SetType(JSON_ARRAY);
 
-        arrayValue_->Push(value);
+        arrayValue_->push_back(value);
     }
 
     void JSONValue::Pop()
@@ -212,7 +212,7 @@ namespace Urho3D
         if (GetValueType() != JSON_ARRAY)
             return;
 
-        arrayValue_->Pop();
+        arrayValue_->pop_back();
     }
 
     void JSONValue::Insert(unsigned pos, const JSONValue& value)
@@ -220,7 +220,7 @@ namespace Urho3D
         if (GetValueType() != JSON_ARRAY)
             return;
 
-        arrayValue_->Insert(pos, value);
+        arrayValue_->insert(arrayValue_->begin() + std::min(pos, (unsigned)arrayValue_->size()), value);
     }
 
     void JSONValue::Erase(unsigned pos, unsigned length)
@@ -228,7 +228,8 @@ namespace Urho3D
         if (GetValueType() != JSON_ARRAY)
             return;
 
-        arrayValue_->Erase(pos, length);
+        if(pos + length <= arrayValue_->size())
+            arrayValue_->erase(arrayValue_->begin() + pos, arrayValue_->begin() + pos + length);
     }
 
     void JSONValue::Resize(unsigned newSize)
@@ -236,13 +237,13 @@ namespace Urho3D
         // Convert to array type
         SetType(JSON_ARRAY);
 
-        arrayValue_->Resize(newSize);
+        arrayValue_->resize(newSize);
     }
 
     unsigned JSONValue::Size() const
     {
         if (GetValueType() == JSON_ARRAY)
-            return arrayValue_->Size();
+            return arrayValue_->size();
         else if (GetValueType() == JSON_OBJECT)
             return objectValue_->Size();
 
@@ -336,7 +337,7 @@ namespace Urho3D
     void JSONValue::Clear()
     {
         if (GetValueType() == JSON_ARRAY)
-            arrayValue_->Clear();
+            arrayValue_->clear();
         else if (GetValueType() == JSON_OBJECT)
             objectValue_->Clear();
     }
@@ -593,12 +594,12 @@ namespace Urho3D
     void JSONValue::SetVariantVector(const VariantVector& variantVector, Context* context)
     {
         SetType(JSON_ARRAY);
-        arrayValue_->Reserve(variantVector.size());
+        arrayValue_->reserve(variantVector.size());
         for (size_t i = 0; i < variantVector.size(); ++i)
         {
             JSONValue val;
             val.SetVariant(variantVector[i], context);
-            arrayValue_->Push(val);
+            arrayValue_->push_back(val);
         }
     }
 

@@ -147,7 +147,7 @@ String Localization::Get(const String& id)
 
 void Localization::Reset()
 {
-    languages_.Clear();
+    languages_.clear();
     languageIndex_ = -1;
     strings_.Clear();
 }
@@ -203,8 +203,8 @@ void Localization::LoadMultipleLanguageJSON(const JSONValue& source)
                             "\", language=\"" + lang + "\"");
                 }
                 strings_[StringHash(lang)][StringHash(id)] = string;
-                if (!languages_.Contains(lang))
-                    languages_.Push(lang);
+                if (std::find(languages_.begin(), languages_.end(), lang) == languages_.end())
+                    languages_.push_back(lang);
                 if (languageIndex_ == -1)
                     languageIndex_ = 0;
             }
@@ -241,8 +241,8 @@ void Localization::LoadSingleLanguageJSON(const JSONValue& source, const String&
                         "\", language=\"" + language + "\"");
             }
             strings_[StringHash(language)][StringHash(id)] = value.GetString();
-            if (!languages_.Contains(language))
-                languages_.Push(language);
+            if (std::find(languages_.begin(), languages_.end(), language) == languages_.end())
+                languages_.push_back(language);
         }
         else
             URHO3D_LOGWARNING(
