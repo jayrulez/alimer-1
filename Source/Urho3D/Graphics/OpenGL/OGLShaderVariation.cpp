@@ -144,7 +144,7 @@ namespace Urho3D
 
         // Prepend the defines to the shader code
         std::vector<String> defineVec = defines_.Split(' ');
-        for (unsigned i = 0; i < defineVec.Size(); ++i)
+        for (unsigned i = 0; i < defineVec.size(); ++i)
         {
             // Add extra space for the checking code below
             String defineString = "#define " + defineVec[i].Replaced('=', ' ') + " \n";
