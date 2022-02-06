@@ -98,7 +98,7 @@ namespace Urho3D
             // Adjust the container size for child clipping effect
             overlayContainer_->SetSize(GetParent()->GetSize());
 
-            for (unsigned i = 0; i < children_.Size(); ++i)
+            for (unsigned i = 0; i < children_.size(); ++i)
             {
                 const IntVector2& position = children_[i]->GetPosition();
                 auto* overlay = overlayContainer_->GetChildStaticCast<CheckBox>(i);
@@ -132,10 +132,10 @@ namespace Urho3D
             auto* overlay = static_cast<UIElement*>(eventData[UIMouseClick::P_ELEMENT].GetPtr());
             if (overlay)
             {
-                const Vector<SharedPtr<UIElement> >& children = overlayContainer_->GetChildren();
-                Vector<SharedPtr<UIElement> >::ConstIterator i = children.Find(SharedPtr<UIElement>(overlay));
-                if (i != children.End())
-                    listView_->ToggleExpand((unsigned)(i - children.Begin()));
+                const std::vector<SharedPtr<UIElement> >& children = overlayContainer_->GetChildren();
+                std::vector<SharedPtr<UIElement> >::const_iterator i = std::find(children.begin(), children.end(), SharedPtr<UIElement>(overlay));
+                if (i != children.end())
+                    listView_->ToggleExpand((unsigned)(i - children.begin()));
             }
         }
 
@@ -854,14 +854,14 @@ unsigned ListView::FindItem(UIElement * item) const
     if (item->GetParent() != contentElement_)
         return M_MAX_UNSIGNED;
 
-    const Vector<SharedPtr<UIElement> >& children = contentElement_->GetChildren();
+    const std::vector<SharedPtr<UIElement> >& children = contentElement_->GetChildren();
 
     // Binary search for list item based on screen coordinate Y
     if (contentElement_->GetLayoutMode() == LM_VERTICAL && item->GetHeight())
     {
         int itemY = item->GetScreenPosition().y;
         int left = 0;
-        int right = children.Size() - 1;
+        int right = children.size() - 1;
         while (right >= left)
         {
             int mid = (left + right) / 2;
@@ -875,7 +875,7 @@ unsigned ListView::FindItem(UIElement * item) const
     }
 
     // Fallback to linear search in case the coordinates/sizes were not yet initialized
-    for (unsigned i = 0; i < children.Size(); ++i)
+    for (unsigned i = 0; i < children.size(); ++i)
     {
         if (children[i] == item)
             return i;

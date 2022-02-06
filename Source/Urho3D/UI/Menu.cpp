@@ -81,8 +81,8 @@ void Menu::Update(float timeStep)
 
     if (popup_ && showPopup_)
     {
-        const Vector<SharedPtr<UIElement> >& children = popup_->GetChildren();
-        for (unsigned i = 0; i < children.Size(); ++i)
+        const std::vector<SharedPtr<UIElement> >& children = popup_->GetChildren();
+        for (unsigned i = 0; i < children.size(); ++i)
         {
             auto* menu = dynamic_cast<Menu*>(children[i].Get());
             if (menu && !menu->autoPopup_ && !menu->IsHovering())
@@ -198,7 +198,7 @@ bool Menu::LoadXML(const XMLElement& source, XMLFile* styleFile)
                 child = popup_;
             else
             {
-                for (unsigned i = nextInternalChild; i < children_.Size(); ++i)
+                for (unsigned i = nextInternalChild; i < children_.size(); ++i)
                 {
                     if (children_[i]->IsInternal() && children_[i]->GetTypeName() == typeName)
                     {

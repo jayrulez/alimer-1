@@ -187,8 +187,11 @@ namespace Urho3D
 
         std::vector<String> vsDefines = vertexShaderDefines_.Split(' ');
         std::vector<String> vsExcludes = vertexShaderDefineExcludes_.Split(' ');
-        for (unsigned i = 0; i < vsExcludes.size(); ++i)
-            vsDefines.erase(vsExcludes.begin() + i);
+        for (unsigned i = 0; i < vsExcludes.size(); ++i) {
+            auto foundIt = std::find(vsDefines.begin(), vsDefines.end(), vsExcludes[i]);
+            if(foundIt != vsDefines.end())
+                vsDefines.erase(foundIt);
+        }
 
         return String::Joined(vsDefines, " ");
     }
@@ -201,8 +204,11 @@ namespace Urho3D
 
         std::vector<String> psDefines = pixelShaderDefines_.Split(' ');
         std::vector<String> psExcludes = pixelShaderDefineExcludes_.Split(' ');
-        for (unsigned i = 0; i < psExcludes.size(); ++i)
-            psDefines.erase(psExcludes.begin() + i);
+        for (unsigned i = 0; i < psExcludes.size(); ++i) {
+            auto foundIt = std::find(psDefines.begin(), psDefines.end(), psExcludes[i]);
+            if(foundIt != psDefines.end())
+                psDefines.erase(foundIt);
+        }
 
         return String::Joined(psDefines, " ");
     }

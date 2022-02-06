@@ -1021,8 +1021,8 @@ namespace Urho3D
         unsigned numButtons = 0;
         unsigned numAxes = 0;
         unsigned numHats = 0;
-        const Vector<SharedPtr<UIElement> >& children = state.screenJoystick_->GetChildren();
-        for (Vector<SharedPtr<UIElement> >::ConstIterator iter = children.Begin(); iter != children.End(); ++iter)
+        const std::vector<SharedPtr<UIElement> >& children = state.screenJoystick_->GetChildren();
+        for (std::vector<SharedPtr<UIElement> >::const_iterator iter = children.begin(); iter != children.end(); ++iter)
         {
             UIElement* element = iter->Get();
             String name = element->GetName();

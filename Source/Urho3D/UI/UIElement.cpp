@@ -102,7 +102,7 @@ namespace Urho3D
     UIElement::~UIElement()
     {
         // If child elements have outside references, detach them
-        for (Vector<SharedPtr<UIElement> >::Iterator i = children_.Begin(); i < children_.End(); ++i)
+        for (std::vector<SharedPtr<UIElement> >::iterator i = children_.begin(); i < children_.end(); ++i)
         {
             if (i->Refs() > 1)
                 (*i)->Detach();
@@ -226,7 +226,7 @@ namespace Urho3D
                 child = CreateChild(typeName, String::EMPTY, index);
             else
             {
-                for (unsigned i = nextInternalChild; i < children_.Size(); ++i)
+                for (unsigned i = nextInternalChild; i < children_.size(); ++i)
                 {
                     if (children_[i]->IsInternal() && children_[i]->GetTypeName() == typeName)
                     {
@@ -321,7 +321,7 @@ namespace Urho3D
             return false;
 
         // Write child elements
-        for (unsigned i = 0; i < children_.Size(); ++i)
+        for (unsigned i = 0; i < children_.size(); ++i)
         {
             UIElement* element = children_[i];
             if (element->IsTemporary())
@@ -894,7 +894,7 @@ namespace Urho3D
     {
         enabled_ = enable;
 
-        for (Vector<SharedPtr<UIElement> >::ConstIterator i = children_.Begin(); i != children_.End(); ++i)
+        for (std::vector<SharedPtr<UIElement> >::const_iterator i = children_.begin(); i != children_.end(); ++i)
             (*i)->SetDeepEnabled(enable);
     }
 
@@ -902,7 +902,7 @@ namespace Urho3D
     {
         enabled_ = enabledPrev_;
 
-        for (Vector<SharedPtr<UIElement> >::ConstIterator i = children_.Begin(); i != children_.End(); ++i)
+        for (std::vector<SharedPtr<UIElement> >::const_iterator i = children_.begin(); i != children_.end(); ++i)
             (*i)->ResetDeepEnabled();
     }
 
@@ -911,7 +911,7 @@ namespace Urho3D
         enabled_ = enable;
         enabledPrev_ = enable;
 
-        for (Vector<SharedPtr<UIElement> >::ConstIterator i = children_.Begin(); i != children_.End(); ++i)
+        for (std::vector<SharedPtr<UIElement> >::const_iterator i = children_.begin(); i != children_.end(); ++i)
             (*i)->SetEnabledRecursive(enable);
     }
 
@@ -1112,7 +1112,7 @@ namespace Urho3D
         {
             int minChildHeight = 0;
 
-            for (unsigned i = 0; i < children_.Size(); ++i)
+            for (unsigned i = 0; i < children_.size(); ++i)
             {
                 if (!children_[i]->IsVisible())
                     continue;
@@ -1139,7 +1139,7 @@ namespace Urho3D
             height = size_.y;
 
             unsigned j = 0;
-            for (unsigned i = 0; i < children_.Size(); ++i)
+            for (unsigned i = 0; i < children_.size(); ++i)
             {
                 if (!children_[i]->IsVisible())
                     continue;
@@ -1152,7 +1152,7 @@ namespace Urho3D
         {
             int minChildWidth = 0;
 
-            for (unsigned i = 0; i < children_.Size(); ++i)
+            for (unsigned i = 0; i < children_.size(); ++i)
             {
                 if (!children_[i]->IsVisible())
                     continue;
@@ -1177,7 +1177,7 @@ namespace Urho3D
             height = size_.y;
 
             uint32_t j = 0;
-            for (uint32_t i = 0; i < children_.Size(); ++i)
+            for (uint32_t i = 0; i < children_.size(); ++i)
             {
                 if (!children_[i]->IsVisible())
                     continue;
@@ -1189,7 +1189,7 @@ namespace Urho3D
         }
         else
         {
-            for (unsigned i = 0; i < children_.Size(); ++i)
+            for (unsigned i = 0; i < children_.size(); ++i)
             {
                 if (children_[i]->GetEnableAnchor())
                     children_[i]->UpdateAnchoring();
@@ -1235,8 +1235,8 @@ namespace Urho3D
         std::unordered_set<int> usedPriorities;
 
         int maxPriority = M_MIN_INT;
-        const Vector<SharedPtr<UIElement> >& rootChildren = root->GetChildren();
-        for (Vector<SharedPtr<UIElement> >::ConstIterator i = rootChildren.Begin(); i != rootChildren.End(); ++i)
+        const std::vector<SharedPtr<UIElement> >& rootChildren = root->GetChildren();
+        for (std::vector<SharedPtr<UIElement> >::const_iterator i = rootChildren.begin(); i != rootChildren.end(); ++i)
         {
             UIElement* other = *i;
             if (other->IsEnabled() && other->bringToBack_ && other != ptr)
@@ -1258,7 +1258,7 @@ namespace Urho3D
             while (usedPriorities.find(minPriority) != usedPriorities.end())
                 --minPriority;
 
-            for (Vector<SharedPtr<UIElement> >::ConstIterator i = rootChildren.Begin(); i != rootChildren.End(); ++i)
+            for (std::vector<SharedPtr<UIElement> >::const_iterator i = rootChildren.begin(); i != rootChildren.end(); ++i)
             {
                 UIElement* other = *i;
                 int priority = other->GetPriority();
@@ -1306,10 +1306,10 @@ namespace Urho3D
         }
 
         // Add first, then remove from old parent, to ensure the element does not get deleted
-        if (index >= children_.Size())
-            children_.Push(SharedPtr<UIElement>(element));
+        if (index >= children_.size())
+            children_.push_back(SharedPtr<UIElement>(element));
         else
-            children_.Insert(children_.Begin() + index, SharedPtr<UIElement>(element));
+            children_.insert(children_.begin() + index, SharedPtr<UIElement>(element));
 
         element->Remove();
 
@@ -1343,7 +1343,7 @@ namespace Urho3D
 
     void UIElement::RemoveChild(UIElement* element, unsigned index)
     {
-        for (unsigned i = index; i < children_.Size(); ++i)
+        for (unsigned i = index; i < children_.size(); ++i)
         {
             if (children_[i] == element)
             {
@@ -1362,7 +1362,7 @@ namespace Urho3D
                 }
 
                 element->Detach();
-                children_.Erase(i);
+                children_.erase(children_.begin() + i);
                 UpdateLayout();
                 return;
             }
@@ -1371,7 +1371,7 @@ namespace Urho3D
 
     void UIElement::RemoveChildAtIndex(unsigned index)
     {
-        if (index >= children_.Size())
+        if (index >= children_.size())
             return;
 
         // Send change event if not already being destroyed
@@ -1389,7 +1389,7 @@ namespace Urho3D
         }
 
         children_[index]->Detach();
-        children_.Erase(index);
+        children_.erase(children_.begin() + index);
         UpdateLayout();
     }
 
@@ -1398,7 +1398,7 @@ namespace Urho3D
         UIElement* root = GetRoot();
         UIElement* sender = Refs() > 0 ? GetElementEventSender() : nullptr;
 
-        for (Vector<SharedPtr<UIElement> >::Iterator i = children_.Begin(); i < children_.End();)
+        for (std::vector<SharedPtr<UIElement> >::iterator i = children_.begin(); i < children_.end();)
         {
             // Send change event if not already being destroyed
             if (sender)
@@ -1415,7 +1415,7 @@ namespace Urho3D
 
             (*i++)->Detach();
         }
-        children_.Clear();
+        children_.clear();
         UpdateLayout();
     }
 
@@ -1427,8 +1427,8 @@ namespace Urho3D
 
     unsigned UIElement::FindChild(UIElement* element) const
     {
-        Vector<SharedPtr<UIElement> >::ConstIterator i = children_.Find(SharedPtr<UIElement>(element));
-        return i != children_.End() ? (unsigned)(i - children_.Begin()) : M_MAX_UNSIGNED;
+        std::vector<SharedPtr<UIElement> >::const_iterator i = std::find(children_.begin(), children_.end(), SharedPtr<UIElement>(element));
+        return i != children_.end() ? (unsigned)(i - children_.begin()) : M_MAX_UNSIGNED;
     }
 
     void UIElement::SetParent(UIElement* parent, unsigned index)
@@ -1608,8 +1608,8 @@ namespace Urho3D
 
         if (!recursive)
         {
-            dest.Reserve(children_.Size());
-            for (Vector<SharedPtr<UIElement> >::ConstIterator i = children_.Begin(); i != children_.End(); ++i)
+            dest.Reserve(children_.size());
+            for (std::vector<SharedPtr<UIElement> >::const_iterator i = children_.begin(); i != children_.end(); ++i)
                 dest.Push(*i);
         }
         else
@@ -1626,11 +1626,11 @@ namespace Urho3D
     unsigned UIElement::GetNumChildren(bool recursive) const
     {
         if (!recursive)
-            return children_.Size();
+            return children_.size();
         else
         {
-            unsigned allChildren = children_.Size();
-            for (Vector<SharedPtr<UIElement> >::ConstIterator i = children_.Begin(); i != children_.End(); ++i)
+            unsigned allChildren = children_.size();
+            for (std::vector<SharedPtr<UIElement> >::const_iterator i = children_.begin(); i != children_.end(); ++i)
                 allChildren += (*i)->GetNumChildren(true);
 
             return allChildren;
@@ -1639,12 +1639,12 @@ namespace Urho3D
 
     UIElement* UIElement::GetChild(unsigned index) const
     {
-        return index < children_.Size() ? children_[index] : nullptr;
+        return index < children_.size() ? children_[index] : nullptr;
     }
 
     UIElement* UIElement::GetChild(const String& name, bool recursive) const
     {
-        for (Vector<SharedPtr<UIElement> >::ConstIterator i = children_.Begin(); i != children_.End(); ++i)
+        for (std::vector<SharedPtr<UIElement> >::const_iterator i = children_.begin(); i != children_.end(); ++i)
         {
             if ((*i)->name_ == name)
                 return *i;
@@ -1662,7 +1662,7 @@ namespace Urho3D
 
     UIElement* UIElement::GetChild(const StringHash& key, const Variant& value, bool recursive) const
     {
-        for (Vector<SharedPtr<UIElement> >::ConstIterator i = children_.Begin(); i != children_.End(); ++i)
+        for (std::vector<SharedPtr<UIElement> >::const_iterator i = children_.begin(); i != children_.end(); ++i)
         {
             const Variant& varValue = (*i)->GetVar(key);
             if (value != Variant::EMPTY ? varValue == value : varValue != Variant::EMPTY)
@@ -1718,7 +1718,7 @@ namespace Urho3D
 
         if (!recursive)
         {
-            for (Vector<SharedPtr<UIElement> >::ConstIterator i = children_.Begin(); i != children_.End(); ++i)
+            for (std::vector<SharedPtr<UIElement> >::const_iterator i = children_.begin(); i != children_.end(); ++i)
             {
                 UIElement* element = *i;
                 if (element->HasTag(tag))
@@ -1738,12 +1738,12 @@ namespace Urho3D
 
     void UIElement::GetChildrenWithTagRecursive(PODVector<UIElement*>& dest, const String& tag) const
     {
-        for (Vector<SharedPtr<UIElement> >::ConstIterator i = children_.Begin(); i != children_.End(); ++i)
+        for (std::vector<SharedPtr<UIElement> >::const_iterator i = children_.begin(); i != children_.end(); ++i)
         {
             UIElement* element = *i;
             if (element->HasTag(tag))
                 dest.Push(element);
-            if (!element->children_.Empty())
+            if (!element->children_.empty())
                 element->GetChildrenWithTagRecursive(dest, tag);
         }
     }
@@ -1779,7 +1779,7 @@ namespace Urho3D
 
         if (!clipChildren_)
         {
-            for (Vector<SharedPtr<UIElement> >::Iterator i = children_.Begin(); i != children_.End(); ++i)
+            for (std::vector<SharedPtr<UIElement> >::iterator i = children_.begin(); i != children_.end(); ++i)
             {
                 IntRect childCombined((*i)->GetCombinedScreenRect());
 
@@ -1803,7 +1803,7 @@ namespace Urho3D
         {
             // Only sort when there is no layout
             if (layoutMode_ == LM_FREE)
-                std::stable_sort(children_.Begin().ptr_, children_.End().ptr_, CompareUIElements);
+                std::stable_sort(children_.begin(), children_.end(), CompareUIElements);
             sortOrderDirty_ = false;
         }
     }
@@ -1813,7 +1813,7 @@ namespace Urho3D
         if (offset != childOffset_)
         {
             childOffset_ = offset;
-            for (Vector<SharedPtr<UIElement> >::ConstIterator i = children_.Begin(); i != children_.End(); ++i)
+            for (std::vector<SharedPtr<UIElement> >::const_iterator i = children_.begin(); i != children_.end(); ++i)
                 (*i)->MarkDirty();
         }
     }
@@ -1854,7 +1854,7 @@ namespace Urho3D
         }
 
         AdjustScissor(currentScissor);
-        for (Vector<SharedPtr<UIElement> >::ConstIterator i = children_.Begin(); i != children_.End(); ++i)
+        for (std::vector<SharedPtr<UIElement> >::const_iterator i = children_.begin(); i != children_.end(); ++i)
         {
             if ((*i)->IsVisible())
                 (*i)->GetBatchesWithOffset(offset, batches, vertexData, currentScissor);
@@ -1949,7 +1949,7 @@ namespace Urho3D
         opacityDirty_ = true;
         derivedColorDirty_ = true;
 
-        for (Vector<SharedPtr<UIElement> >::ConstIterator i = children_.Begin(); i != children_.End(); ++i)
+        for (std::vector<SharedPtr<UIElement> >::const_iterator i = children_.begin(); i != children_.end(); ++i)
             (*i)->MarkDirty();
     }
 
@@ -2065,11 +2065,11 @@ namespace Urho3D
 
     void UIElement::GetChildrenRecursive(PODVector<UIElement*>& dest) const
     {
-        for (Vector<SharedPtr<UIElement> >::ConstIterator i = children_.Begin(); i != children_.End(); ++i)
+        for (std::vector<SharedPtr<UIElement> >::const_iterator i = children_.begin(); i != children_.end(); ++i)
         {
             UIElement* element = *i;
             dest.Push(element);
-            if (!element->children_.Empty())
+            if (!element->children_.empty())
                 element->GetChildrenRecursive(dest);
         }
     }
@@ -2080,7 +2080,7 @@ namespace Urho3D
         if (!element->appliedStyle_.Empty() && element->appliedStyleFile_.Get() != element->GetDefaultStyle())
         {
             element->SetStyle(element->appliedStyle_);
-            for (Vector<SharedPtr<UIElement> >::ConstIterator i = element->children_.Begin(); i != element->children_.End(); ++i)
+            for (std::vector<SharedPtr<UIElement> >::const_iterator i = element->children_.begin(); i != element->children_.end(); ++i)
                 element->ApplyStyleRecursive(*i);
         }
     }
@@ -2238,7 +2238,7 @@ namespace Urho3D
 
     void UIElement::VerifyChildAlignment()
     {
-        for (Vector<SharedPtr<UIElement> >::ConstIterator i = children_.Begin(); i != children_.End(); ++i)
+        for (std::vector<SharedPtr<UIElement> >::const_iterator i = children_.begin(); i != children_.end(); ++i)
         {
             // Reapply child alignments. If they are illegal compared to layout, they will be set left/top as neded
             (*i)->SetHorizontalAlignment((*i)->GetHorizontalAlignment());

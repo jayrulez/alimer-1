@@ -861,11 +861,11 @@ IntVector2 UI::ConvertUIToSystem(const IntVector2& uiPos) const
 
 UIElement* UI::GetFrontElement() const
 {
-    const Vector<SharedPtr<UIElement> >& rootChildren = rootElement_->GetChildren();
+    const std::vector<SharedPtr<UIElement> >& rootChildren = rootElement_->GetChildren();
     int maxPriority = M_MIN_INT;
     UIElement* front = nullptr;
 
-    for (unsigned i = 0; i < rootChildren.Size(); ++i)
+    for (unsigned i = 0; i < rootChildren.size(); ++i)
     {
         // Do not take into account input-disabled elements, hidden elements or those that are always in the front
         if (!rootChildren[i]->IsEnabled() || !rootChildren[i]->IsVisible() || !rootChildren[i]->GetBringToBack())
@@ -970,9 +970,9 @@ void UI::Update(float timeStep, UIElement* element)
     if (elementWeak.Expired())
         return;
 
-    const Vector<SharedPtr<UIElement> >& children = element->GetChildren();
+    const std::vector<SharedPtr<UIElement> >& children = element->GetChildren();
     // Update of an element may modify its child vector. Use just index-based iteration to be safe
-    for (unsigned i = 0; i < children.Size(); ++i)
+    for (unsigned i = 0; i < children.size(); ++i)
         Update(timeStep, children[i]);
 }
 
@@ -1178,20 +1178,20 @@ void UI::GetBatches(PODVector<UIBatch>& batches, PODVector<float>& vertexData, U
         return;
 
     element->SortChildren();
-    const Vector<SharedPtr<UIElement> >& children = element->GetChildren();
-    if (children.Empty())
+    const std::vector<SharedPtr<UIElement> >& children = element->GetChildren();
+    if (children.empty())
         return;
 
     // For non-root elements draw all children of same priority before recursing into their children: assumption is that they have
     // same renderstate
-    Vector<SharedPtr<UIElement> >::ConstIterator i = children.Begin();
+    std::vector<SharedPtr<UIElement> >::const_iterator i = children.begin();
     if (element->GetTraversalMode() == TM_BREADTH_FIRST)
     {
-        Vector<SharedPtr<UIElement> >::ConstIterator j = i;
-        while (i != children.End())
+        std::vector<SharedPtr<UIElement> >::const_iterator j = i;
+        while (i != children.end())
         {
             int currentPriority = (*i)->GetPriority();
-            while (j != children.End() && (*j)->GetPriority() == currentPriority)
+            while (j != children.end() && (*j)->GetPriority() == currentPriority)
             {
                 if ((*j)->IsWithinScissor(currentScissor) && (*j) != cursor_)
                     (*j)->GetBatches(batches, vertexData, currentScissor);
@@ -1209,7 +1209,7 @@ void UI::GetBatches(PODVector<UIBatch>& batches, PODVector<float>& vertexData, U
     // On the root level draw each element and its children immediately after to avoid artifacts
     else
     {
-        while (i != children.End())
+        while (i != children.end())
         {
             if ((*i) != cursor_)
             {
@@ -1229,10 +1229,10 @@ void UI::GetElementAt(UIElement*& result, UIElement* current, const IntVector2& 
         return;
 
     current->SortChildren();
-    const Vector<SharedPtr<UIElement> >& children = current->GetChildren();
+    const std::vector<SharedPtr<UIElement> >& children = current->GetChildren();
     LayoutMode parentLayoutMode = current->GetLayoutMode();
 
-    for (unsigned i = 0; i < children.Size(); ++i)
+    for (unsigned i = 0; i < children.size(); ++i)
     {
         UIElement* element = children[i];
         bool hasChildren = element->GetNumChildren() > 0;

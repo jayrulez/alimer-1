@@ -399,7 +399,7 @@ bool AnimationSet2D::EndLoadSpriter()
     }
     else
     {
-        Vector<SpriteInfo> spriteInfos;
+        std::vector<SpriteInfo> spriteInfos;
         String parentPath = GetParentPath(GetName());
 
         for (unsigned i = 0; i < spriterData_->folders_.Size(); ++i)
@@ -431,17 +431,17 @@ bool AnimationSet2D::EndLoadSpriter()
                 def.y = 0;
                 def.file_ = file;
                 def.image_ = image;
-                spriteInfos.Push(def);
+                spriteInfos.push_back(def);
             }
         }
 
-        if (spriteInfos.Empty())
+        if (spriteInfos.empty())
             return false;
 
-        if (spriteInfos.Size() > 1)
+        if (spriteInfos.size() > 1)
         {
             AreaAllocator allocator(128, 128, 2048, 2048);
-            for (unsigned i = 0; i < spriteInfos.Size(); ++i)
+            for (unsigned i = 0; i < spriteInfos.size(); ++i)
             {
                 SpriteInfo& info = spriteInfos[i];
                 Image* image = info.image_;
@@ -464,7 +464,7 @@ bool AnimationSet2D::EndLoadSpriter()
             sprite_ = new Sprite2D(context_);
             sprite_->SetTexture(texture);
 
-            for (unsigned i = 0; i < spriteInfos.Size(); ++i)
+            for (unsigned i = 0; i < spriteInfos.size(); ++i)
             {
                 SpriteInfo& info = spriteInfos[i];
                 Image* image = info.image_;
