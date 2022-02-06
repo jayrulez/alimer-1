@@ -268,7 +268,7 @@ protected:
     /// Applying transforms.
     bool applyingTransforms_{};
     /// Rigid bodies.
-    Vector<WeakPtr<RigidBody2D> > rigidBodies_;
+    std::vector<WeakPtr<RigidBody2D> > rigidBodies_;
     /// Delayed (parented) world transform assignments.
     HashMap<RigidBody2D*, DelayedWorldTransform2D> delayedWorldTransforms_;
 
@@ -304,9 +304,9 @@ protected:
         float separations_[b2_maxManifoldPoints]{};
     };
     /// Begin contact infos.
-    Vector<ContactInfo> beginContactInfos_;
+    std::vector<ContactInfo> beginContactInfos_;
     /// End contact infos.
-    Vector<ContactInfo> endContactInfos_;
+    std::vector<ContactInfo> endContactInfos_;
     /// Temporary buffer with contact data.
     VectorBuffer contacts_;
 };
