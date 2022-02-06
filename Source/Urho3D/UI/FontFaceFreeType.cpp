@@ -208,7 +208,7 @@ bool FontFaceFreeType::Load(const unsigned char* fontData, unsigned fontDataSize
     if (!texture)
         return false;
 
-    textures_.Push(texture);
+    textures_.push_back(texture);
     font_->SetMemoryUse(font_->GetMemoryUse() + textureWidth * textureHeight);
 
     // Store kerning if face has kerning information
@@ -325,7 +325,7 @@ bool FontFaceFreeType::SetupNextTexture(int textureWidth, int textureHeight)
     if (!texture)
         return false;
 
-    textures_.Push(texture);
+    textures_.push_back(texture);
     allocator_.Reset(FONT_TEXTURE_MIN_SIZE, FONT_TEXTURE_MIN_SIZE, textureWidth, textureHeight);
 
     font_->SetMemoryUse(font_->GetMemoryUse() + textureWidth * textureHeight);
@@ -480,7 +480,7 @@ bool FontFaceFreeType::LoadCharGlyph(unsigned charCode, Image* image)
         }
         else
         {
-            fontGlyph.page_ = textures_.Size() - 1;
+            fontGlyph.page_ = textures_.size() - 1;
             dest = new unsigned char[fontGlyph.texWidth_ * fontGlyph.texHeight_];
             pitch = (unsigned)fontGlyph.texWidth_;
         }
@@ -509,7 +509,7 @@ bool FontFaceFreeType::LoadCharGlyph(unsigned charCode, Image* image)
 
         if (!image)
         {
-            textures_.Back()->SetData(0, fontGlyph.x_, fontGlyph.y_, fontGlyph.texWidth_, fontGlyph.texHeight_, dest);
+            textures_.back()->SetData(0, fontGlyph.x_, fontGlyph.y_, fontGlyph.texWidth_, fontGlyph.texHeight_, dest);
             delete[] dest;
         }
     }
