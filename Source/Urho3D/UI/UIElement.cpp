@@ -1468,7 +1468,7 @@ namespace Urho3D
         if (tag.Empty() || HasTag(tag))
             return;
 
-        tags_.Push(tag);
+        tags_.push_back(tag);
     }
 
     void UIElement::AddTags(const String& tags, char separator)
@@ -1479,18 +1479,26 @@ namespace Urho3D
 
     void UIElement::AddTags(const StringVector& tags)
     {
-        for (unsigned i = 0; i < tags.Size(); ++i)
+        for (unsigned i = 0; i < tags.size(); ++i)
             AddTag(tags[i]);
     }
 
     bool UIElement::RemoveTag(const String& tag)
     {
-        return tags_.Remove(tag);
+        bool removed = false;
+
+        auto foundIt = std::find(tags_.begin(), tags_.end(), tag);
+        if (foundIt != tags_.end()) {
+            tags_.erase(foundIt);
+            removed = true;
+        }
+
+        return removed;
     }
 
     void UIElement::RemoveAllTags()
     {
-        tags_.Clear();
+        tags_.clear();
     }
 
     HorizontalAlignment UIElement::GetHorizontalAlignment() const
@@ -1701,7 +1709,7 @@ namespace Urho3D
 
     bool UIElement::HasTag(const String& tag) const
     {
-        return tags_.Contains(tag);
+        return std::find(tags_.begin(), tags_.end(), tag) != tags_.end();
     }
 
     void UIElement::GetChildrenWithTag(PODVector<UIElement*>& dest, const String& tag, bool recursive) const
@@ -1892,9 +1900,9 @@ namespace Urho3D
 
     Animatable* UIElement::FindAttributeAnimationTarget(const String& name, String& outName)
     {
-        Vector<String> names = name.Split('/');
+        std::vector<String> names = name.Split('/');
         // Only attribute name
-        if (names.Size() == 1)
+        if (names.size() == 1)
         {
             outName = name;
             return this;
@@ -1903,7 +1911,7 @@ namespace Urho3D
         {
             // Name must in following format: "#0/#1/attribute"
             UIElement* element = this;
-            for (unsigned i = 0; i < names.Size() - 1; ++i)
+            for (unsigned i = 0; i < names.size() - 1; ++i)
             {
                 if (names[i].Front() != '#')
                 {
@@ -1930,7 +1938,7 @@ namespace Urho3D
                 }
             }
 
-            outName = names.Back();
+            outName = names.back();
             return element;
         }
     }

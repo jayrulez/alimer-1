@@ -59,7 +59,7 @@ struct SourceBatch2D
     /// Material.
     SharedPtr<Material> material_;
     /// Vertices.
-    Vector<Vertex2D> vertices_;
+    std::vector<Vertex2D> vertices_;
 };
 
 /// Pixel size (equal 0.01f).

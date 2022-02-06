@@ -323,7 +323,7 @@ namespace Urho3D
             case VAR_RESOURCEREF:
             {
                 StringVector values = String::Split(value, ';');
-                if (values.Size() == 2)
+                if (values.size() == 2)
                 {
                     SetType(VAR_RESOURCEREF);
                     value_.resourceRef_.type_ = values[0];
@@ -335,12 +335,12 @@ namespace Urho3D
             case VAR_RESOURCEREFLIST:
             {
                 StringVector values = String::Split(value, ';', true);
-                if (values.Size() >= 1)
+                if (values.size() >= 1)
                 {
                     SetType(VAR_RESOURCEREFLIST);
                     value_.resourceRefList_.type_ = values[0];
-                    value_.resourceRefList_.names_.Resize(values.Size() - 1);
-                    for (unsigned i = 1; i < values.Size(); ++i)
+                    value_.resourceRefList_.names_.resize(values.size() - 1);
+                    for (unsigned i = 1; i < values.size(); ++i)
                         value_.resourceRefList_.names_[i - 1] = values[i];
                 }
                 break;
@@ -566,7 +566,7 @@ namespace Urho3D
             case VAR_RESOURCEREFLIST:
             {
                 const StringVector& names = value_.resourceRefList_.names_;
-                for (StringVector::ConstIterator i = names.Begin(); i != names.End(); ++i)
+                for (StringVector::const_iterator i = names.begin(); i != names.end(); ++i)
                 {
                     if (!i->Empty())
                         return false;
@@ -578,7 +578,7 @@ namespace Urho3D
                 return value_.variantVector_.empty();
 
             case VAR_STRINGVECTOR:
-                return value_.stringVector_.Empty();
+                return value_.stringVector_.empty();
 
             case VAR_VARIANTMAP:
                 return value_.variantMap_.Empty();

@@ -134,7 +134,7 @@ private:
     /// Visible.
     bool visible_{true};
     /// Tile node or image nodes.
-    Vector<SharedPtr<Node> > nodes_;
+    std::vector<SharedPtr<Node> > nodes_;
 };
 
 }

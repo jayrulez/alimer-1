@@ -379,7 +379,7 @@ namespace Urho3D
     void StaticModel::SetMaterialsAttr(const ResourceRefList& value)
     {
         auto* cache = GetSubsystem<ResourceCache>();
-        for (unsigned i = 0; i < value.names_.Size(); ++i)
+        for (unsigned i = 0; i < value.names_.size(); ++i)
             SetMaterial(i, cache->GetResource<Material>(value.names_[i]));
     }
 
@@ -390,7 +390,7 @@ namespace Urho3D
 
     const ResourceRefList& StaticModel::GetMaterialsAttr() const
     {
-        materialsAttr_.names_.Resize(batches_.Size());
+        materialsAttr_.names_.resize(batches_.Size());
         for (unsigned i = 0; i < batches_.Size(); ++i)
             materialsAttr_.names_[i] = GetResourceName(GetMaterial(i));
 

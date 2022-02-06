@@ -953,10 +953,10 @@ void Scene::NodeAdded(Node* node)
     }
 
     // Cache tag if already tagged.
-    if (!node->GetTags().Empty())
+    if (!node->GetTags().empty())
     {
         const StringVector& tags = node->GetTags();
-        for (unsigned i = 0; i < tags.Size(); ++i)
+        for (unsigned i = 0; i < tags.size(); ++i)
             taggedNodes_[tags[i]].Push(node);
     }
 
@@ -996,10 +996,10 @@ void Scene::NodeRemoved(Node* node)
     node->ResetScene();
 
     // Remove node from tag cache
-    if (!node->GetTags().Empty())
+    if (!node->GetTags().empty())
     {
         const StringVector& tags = node->GetTags();
-        for (unsigned i = 0; i < tags.Size(); ++i)
+        for (unsigned i = 0; i < tags.size(); ++i)
             taggedNodes_[tags[i]].Remove(node);
     }
 
@@ -1069,10 +1069,10 @@ void Scene::ComponentRemoved(Component* component)
 
 void Scene::SetVarNamesAttr(const String& value)
 {
-    Vector<String> varNames = value.Split(';');
+    std::vector<String> varNames = value.Split(';');
 
     varNames_.Clear();
-    for (Vector<String>::ConstIterator i = varNames.Begin(); i != varNames.End(); ++i)
+    for (std::vector<String>::const_iterator i = varNames.begin(); i != varNames.end(); ++i)
         varNames_[*i] = *i;
 }
 
@@ -1349,7 +1349,7 @@ void Scene::PreloadResources(File* file, bool isSceneFile)
                 else if (attr.type_ == VAR_RESOURCEREFLIST)
                 {
                     const ResourceRefList& refList = varValue.GetResourceRefList();
-                    for (unsigned k = 0; k < refList.names_.Size(); ++k)
+                    for (unsigned k = 0; k < refList.names_.size(); ++k)
                     {
                         String name = cache->SanitateResourceName(refList.names_[k]);
                         bool success = cache->BackgroundLoadResource(refList.type_, name);
@@ -1413,7 +1413,7 @@ void Scene::PreloadResourcesXML(const XMLElement& element)
                         else if (attr.type_ == VAR_RESOURCEREFLIST)
                         {
                             ResourceRefList refList = attrElem.GetVariantValue(attr.type_).GetResourceRefList();
-                            for (unsigned k = 0; k < refList.names_.Size(); ++k)
+                            for (unsigned k = 0; k < refList.names_.size(); ++k)
                             {
                                 String name = cache->SanitateResourceName(refList.names_[k]);
                                 bool success = cache->BackgroundLoadResource(refList.type_, name);
@@ -1498,7 +1498,7 @@ void Scene::PreloadResourcesJSON(const JSONValue& value)
                         else if (attr.type_ == VAR_RESOURCEREFLIST)
                         {
                             ResourceRefList refList = attrVal.Get("value").GetVariantValue(attr.type_).GetResourceRefList();
-                            for (unsigned k = 0; k < refList.names_.Size(); ++k)
+                            for (unsigned k = 0; k < refList.names_.size(); ++k)
                             {
                                 String name = cache->SanitateResourceName(refList.names_[k]);
                                 bool success = cache->BackgroundLoadResource(refList.type_, name);

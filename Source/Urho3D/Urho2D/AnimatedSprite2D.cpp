@@ -422,8 +422,8 @@ namespace Urho3D
     {
         const Matrix3x4& nodeWorldTransform = GetNode()->GetWorldTransform();
 
-        Vector<Vertex2D>& vertices = sourceBatches_[0].vertices_;
-        vertices.Clear();
+        std::vector<Vertex2D>& vertices = sourceBatches_[0].vertices_;
+        vertices.clear();
 
         Rect drawRect;
         Rect textureRect;
@@ -486,10 +486,10 @@ namespace Urho3D
 
             vertex0.color_ = vertex1.color_ = vertex2.color_ = vertex3.color_ = finalColor.ToUInt();
 
-            vertices.Push(vertex0);
-            vertices.Push(vertex1);
-            vertices.Push(vertex2);
-            vertices.Push(vertex3);
+            vertices.push_back(vertex0);
+            vertices.push_back(vertex1);
+            vertices.push_back(vertex2);
+            vertices.push_back(vertex3);
         }
     }
 

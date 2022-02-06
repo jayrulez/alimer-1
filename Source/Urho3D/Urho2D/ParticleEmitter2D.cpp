@@ -132,7 +132,7 @@ void ParticleEmitter2D::SetMaxParticles(unsigned maxParticles)
     maxParticles = Max(maxParticles, 1U);
 
     particles_.Resize(maxParticles);
-    sourceBatches_[0].vertices_.Reserve(maxParticles * 4);
+    sourceBatches_[0].vertices_.reserve(maxParticles * 4);
 
     numParticles_ = Min(maxParticles, numParticles_);
 }
@@ -211,8 +211,8 @@ void ParticleEmitter2D::UpdateSourceBatches()
     if (!sourceBatchesDirty_)
         return;
 
-    Vector<Vertex2D>& vertices = sourceBatches_[0].vertices_;
-    vertices.Clear();
+    std::vector<Vertex2D>& vertices = sourceBatches_[0].vertices_;
+    vertices.clear();
 
     if (!sprite_)
         return;
@@ -257,10 +257,10 @@ void ParticleEmitter2D::UpdateSourceBatches()
 
         vertex0.color_ = vertex1.color_ = vertex2.color_ = vertex3.color_ = p.color_.ToUInt();
 
-        vertices.Push(vertex0);
-        vertices.Push(vertex1);
-        vertices.Push(vertex2);
-        vertices.Push(vertex3);
+        vertices.push_back(vertex0);
+        vertices.push_back(vertex1);
+        vertices.push_back(vertex2);
+        vertices.push_back(vertex3);
     }
 
     sourceBatchesDirty_ = false;

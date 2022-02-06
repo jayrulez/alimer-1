@@ -213,23 +213,23 @@ bool IsWhitespace(const String& string)
     return !anyNot;
 }
 
-float PopFirstFloat(Vector<String>& words)
+float PopFirstFloat(std::vector<String>& words)
 {
-    if (words.Size() > 0)
+    if (words.size() > 0)
     {
         float ret = ToFloat(words[0]);
-        words.Erase(0);
+        words.erase(words.begin());
         return ret;
     }
     return -1.0f; // is < 0 ever valid?
 }
 
-int PopFirstInt(Vector<String>& words)
+int PopFirstInt(std::vector<String>& words)
 {
-    if (words.Size() > 0)
+    if (words.size() > 0)
     {
         int ret = ToInt(words[0]);
-        words.Erase(0);
+        words.erase(words.begin());
         return ret;
     }
     return -1; // < 0 ever valid?
@@ -257,16 +257,18 @@ bool ReadIES(File* data, PODVector<float>& vertical, PODVector<float>& horizonta
     Vector<String> lines;
     while (!data->IsEof())
         lines.Push(data->ReadLine());
-    Vector<String> words;
-    for (unsigned i = 0; i < lines.Size(); ++i)
-        words.Push(lines[i].Split(' '));
+    std::vector<String> words;
+    for (unsigned i = 0; i < lines.Size(); ++i) {
+        std::vector<String> lineWords = lines[i].Split(' ');
+        words.insert(words.begin(), lineWords.begin(), lineWords.end());
+    }
 
     // Prune any 'junk' collected
-    for (unsigned i = 0; i < words.Size(); ++i)
+    for (unsigned i = 0; i < words.size(); ++i)
     {
         if (words[i].Empty() || IsWhitespace(words[i]))
         {
-            words.Erase(i);
+            words.erase(words.begin() + i);
             --i;
         }
     }

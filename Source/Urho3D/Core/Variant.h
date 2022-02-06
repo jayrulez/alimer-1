@@ -79,7 +79,7 @@ namespace Urho3D
     using VariantVector = std::vector<Variant>;
 
     /// Vector of strings.
-    using StringVector = Vector<String>;
+    using StringVector = std::vector<String>;
 
     /// Map of variants.
     using VariantMap = HashMap<StringHash, Variant>;
@@ -274,8 +274,9 @@ namespace Urho3D
     /// Make custom variant value.
     template <typename T> CustomVariantValueImpl<T> MakeCustomValue(const T& value) { return CustomVariantValueImpl<T>(value); }
 
-    /// Size of variant value. 16 bytes on 32-bit platform, 32 bytes on 64-bit platform.
-    static constexpr size_t VARIANT_VALUE_SIZE = sizeof(void*) * 4;
+    /// note: alimer - std::vector<String> is twice the size of Vector<String>
+    /// Size of variant value. 32 bytes on 32-bit platform, 64 bytes on 64-bit platform.
+    static constexpr size_t VARIANT_VALUE_SIZE = sizeof(void*) * 8;
 
     /// Union for the possible variant values. Objects exceeding the VARIANT_VALUE_SIZE are allocated on the heap.
     union VariantValue

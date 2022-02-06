@@ -185,10 +185,10 @@ namespace Urho3D
         if (vertexShaderDefineExcludes_.Empty())
             return vertexShaderDefines_;
 
-        Vector<String> vsDefines = vertexShaderDefines_.Split(' ');
-        Vector<String> vsExcludes = vertexShaderDefineExcludes_.Split(' ');
-        for (unsigned i = 0; i < vsExcludes.Size(); ++i)
-            vsDefines.Remove(vsExcludes[i]);
+        std::vector<String> vsDefines = vertexShaderDefines_.Split(' ');
+        std::vector<String> vsExcludes = vertexShaderDefineExcludes_.Split(' ');
+        for (unsigned i = 0; i < vsExcludes.size(); ++i)
+            vsDefines.erase(vsExcludes.begin() + i);
 
         return String::Joined(vsDefines, " ");
     }
@@ -199,10 +199,10 @@ namespace Urho3D
         if (pixelShaderDefineExcludes_.Empty())
             return pixelShaderDefines_;
 
-        Vector<String> psDefines = pixelShaderDefines_.Split(' ');
-        Vector<String> psExcludes = pixelShaderDefineExcludes_.Split(' ');
-        for (unsigned i = 0; i < psExcludes.Size(); ++i)
-            psDefines.Remove(psExcludes[i]);
+        std::vector<String> psDefines = pixelShaderDefines_.Split(' ');
+        std::vector<String> psExcludes = pixelShaderDefineExcludes_.Split(' ');
+        for (unsigned i = 0; i < psExcludes.size(); ++i)
+            psDefines.erase(psExcludes.begin() + i);
 
         return String::Joined(psDefines, " ");
     }

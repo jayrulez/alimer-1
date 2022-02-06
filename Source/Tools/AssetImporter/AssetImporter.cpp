@@ -433,8 +433,8 @@ void Run(const std::vector<String>& arguments)
                 includeNonSkinningBones_ = true;
                 if (value.Length() && (value[0] != '-' || value.Length() > 3))
                 {
-                    Vector<String> filters = value.Split(';');
-                    for (unsigned i = 0; i < filters.Size(); ++i)
+                    std::vector<String> filters = value.Split(';');
+                    for (unsigned i = 0; i < filters.size(); ++i)
                     {
                         if (filters[i][0] == '-')
                             nonSkinningBoneExcludes_.Push(filters[i].Substring(1));

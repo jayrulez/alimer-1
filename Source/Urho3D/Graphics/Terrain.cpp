@@ -918,8 +918,8 @@ void Terrain::CreateGeometry()
         for (PODVector<Node*>::Iterator i = oldPatchNodes.Begin(); i != oldPatchNodes.End(); ++i)
         {
             bool nodeOk = false;
-            Vector<String> coords = (*i)->GetName().Substring(6).Split('_');
-            if (coords.Size() == 2)
+            std::vector<String> coords = (*i)->GetName().Substring(6).Split('_');
+            if (coords.size() == 2)
             {
                 int x = ToInt(coords[0]);
                 int z = ToInt(coords[1]);

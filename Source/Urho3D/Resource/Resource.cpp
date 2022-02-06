@@ -139,19 +139,21 @@ void ResourceWithMetadata::AddMetadata(const String& name, const Variant& value)
     bool exists;
     metadata_.Insert(MakePair(StringHash(name), value), exists);
     if (!exists)
-        metadataKeys_.Push(name);
+        metadataKeys_.push_back(name);
 }
 
 void ResourceWithMetadata::RemoveMetadata(const String& name)
 {
     metadata_.Erase(name);
-    metadataKeys_.Remove(name);
+    auto foundIt = std::find(metadataKeys_.begin(), metadataKeys_.end(), name);
+    if(foundIt != metadataKeys_.end())
+        metadataKeys_.erase(foundIt);
 }
 
 void ResourceWithMetadata::RemoveAllMetadata()
 {
     metadata_.Clear();
-    metadataKeys_.Clear();
+    metadataKeys_.clear();
 }
 
 const Urho3D::Variant& ResourceWithMetadata::GetMetadata(const String& name) const
@@ -182,7 +184,7 @@ void ResourceWithMetadata::LoadMetadataFromJSON(const JSONArray& array)
 
 void ResourceWithMetadata::SaveMetadataToXML(XMLElement& destination) const
 {
-    for (unsigned i = 0; i < metadataKeys_.Size(); ++i)
+    for (unsigned i = 0; i < metadataKeys_.size(); ++i)
     {
         XMLElement elem = destination.CreateChild("metadata");
         elem.SetString("name", metadataKeys_[i]);

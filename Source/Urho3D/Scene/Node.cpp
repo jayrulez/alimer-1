@@ -356,7 +356,7 @@ void Node::AddTag(const String& tag)
         return;
 
     // Add tag
-    impl_->tags_.Push(tag);
+    impl_->tags_.push_back(tag);
 
     // Cache
     if (scene_)
@@ -384,13 +384,18 @@ void Node::AddTags(const String& tags, char separator)
 void Node::AddTags(const StringVector& tags)
 {
     // This is OK, as MarkNetworkUpdate() early-outs when called multiple times
-    for (unsigned i = 0; i < tags.Size(); ++i)
+    for (unsigned i = 0; i < tags.size(); ++i)
         AddTag(tags[i]);
 }
 
 bool Node::RemoveTag(const String& tag)
 {
-    bool removed = impl_->tags_.Remove(tag);
+    bool removed = false;
+    auto foundIt = std::find(impl_->tags_.begin(), impl_->tags_.end(), tag);
+    if (foundIt != impl_->tags_.end()) {
+        impl_->tags_.erase(foundIt);
+        removed = true;
+    }
 
     // Nothing to do
     if (!removed)
@@ -419,7 +424,7 @@ void Node::RemoveAllTags()
     // Clear old scene cache
     if (scene_)
     {
-        for (unsigned i = 0; i < impl_->tags_.Size(); ++i)
+        for (unsigned i = 0; i < impl_->tags_.size(); ++i)
         {
             scene_->NodeTagRemoved(this, impl_->tags_[i]);
 
@@ -433,7 +438,7 @@ void Node::RemoveAllTags()
         }
     }
 
-    impl_->tags_.Clear();
+    impl_->tags_.clear();
 
     // Sync
     MarkNetworkUpdate();
@@ -1383,7 +1388,7 @@ bool Node::IsReplicated() const
 
 bool Node::HasTag(const String& tag) const
 {
-    return impl_->tags_.Contains(tag);
+    return std::find(impl_->tags_.begin(), impl_->tags_.end(), tag) != impl_->tags_.end();
 }
 
 bool Node::IsChildOf(Node* node) const
@@ -1918,9 +1923,9 @@ void Node::OnAttributeAnimationRemoved()
 
 Animatable* Node::FindAttributeAnimationTarget(const String& name, String& outName)
 {
-    Vector<String> names = name.Split('/');
+    std::vector<String> names = name.Split('/');
     // Only attribute name
-    if (names.Size() == 1)
+    if (names.size() == 1)
     {
         outName = name;
         return this;
@@ -1930,7 +1935,7 @@ Animatable* Node::FindAttributeAnimationTarget(const String& name, String& outNa
         // Name must in following format: "#0/#1/@component#0/attribute"
         Node* node = this;
         unsigned i = 0;
-        for (; i < names.Size() - 1; ++i)
+        for (; i < names.size() - 1; ++i)
         {
             if (names[i].Front() != '#')
                 break;
@@ -1954,44 +1959,44 @@ Animatable* Node::FindAttributeAnimationTarget(const String& name, String& outNa
             }
         }
 
-        if (i == names.Size() - 1)
+        if (i == names.size() - 1)
         {
-            outName = names.Back();
+            outName = names.back();
             return node;
         }
 
-        if (i != names.Size() - 2 || names[i].Front() != '@')
+        if (i != names.size() - 2 || names[i].Front() != '@')
         {
             URHO3D_LOGERROR("Invalid name " + name);
             return nullptr;
         }
 
         String componentName = names[i].Substring(1, names[i].Length() - 1);
-        Vector<String> componentNames = componentName.Split('#');
-        if (componentNames.Size() == 1)
+        std::vector<String> componentNames = componentName.Split('#');
+        if (componentNames.size() == 1)
         {
-            Component* component = node->GetComponent(StringHash(componentNames.Front()));
+            Component* component = node->GetComponent(StringHash(componentNames.front()));
             if (!component)
             {
                 URHO3D_LOGERROR("Could not find component by name " + name);
                 return nullptr;
             }
 
-            outName = names.Back();
+            outName = names.back();
             return component;
         }
         else
         {
             unsigned index = ToUInt(componentNames[1]);
             PODVector<Component*> components;
-            node->GetComponents(components, StringHash(componentNames.Front()));
+            node->GetComponents(components, StringHash(componentNames.front()));
             if (index >= components.Size())
             {
                 URHO3D_LOGERROR("Could not find component by name " + name);
                 return nullptr;
             }
 
-            outName = names.Back();
+            outName = names.back();
             return components[index];
         }
     }

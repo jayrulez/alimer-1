@@ -461,7 +461,7 @@ namespace Urho3D
         Context* context = file_->GetContext();
 
         String str(context->GetTypeName(value.type_));
-        for (unsigned i = 0; i < value.names_.Size(); ++i)
+        for (unsigned i = 0; i < value.names_.size(); ++i)
         {
             str += ";";
             str += value.names_[i];
@@ -492,7 +492,7 @@ namespace Urho3D
         if (!RemoveChildren("string"))
             return false;
 
-        for (StringVector::ConstIterator i = value.Begin(); i != value.End(); ++i)
+        for (StringVector::const_iterator i = value.begin(); i != value.end(); ++i)
         {
             XMLElement stringElem = CreateChild("string");
             if (!stringElem)
@@ -774,12 +774,12 @@ namespace Urho3D
 
     bool XMLElement::GetBuffer(const String& name, void* dest, unsigned size) const
     {
-        Vector<String> bytes = GetAttribute(name).Split(' ');
-        if (size < bytes.Size())
+        std::vector<String> bytes = GetAttribute(name).Split(' ');
+        if (size < bytes.size())
             return false;
 
         auto* destBytes = (unsigned char*)dest;
-        for (unsigned i = 0; i < bytes.Size(); ++i)
+        for (unsigned i = 0; i < bytes.size(); ++i)
             destBytes[i] = (unsigned char)ToInt(bytes[i]);
         return true;
     }
@@ -874,8 +874,8 @@ namespace Urho3D
     {
         ResourceRef ret;
 
-        Vector<String> values = GetAttribute("value").Split(';');
-        if (values.Size() == 2)
+        std::vector<String> values = GetAttribute("value").Split(';');
+        if (values.size() == 2)
         {
             ret.type_ = values[0];
             ret.name_ = values[1];
@@ -888,12 +888,12 @@ namespace Urho3D
     {
         ResourceRefList ret;
 
-        Vector<String> values = GetAttribute("value").Split(';', true);
-        if (values.Size() >= 1)
+        std::vector<String> values = GetAttribute("value").Split(';', true);
+        if (values.size() >= 1)
         {
             ret.type_ = values[0];
-            ret.names_.Resize(values.Size() - 1);
-            for (unsigned i = 1; i < values.Size(); ++i)
+            ret.names_.resize(values.size() - 1);
+            for (unsigned i = 1; i < values.size(); ++i)
                 ret.names_[i - 1] = values[i];
         }
 
@@ -921,7 +921,7 @@ namespace Urho3D
         XMLElement stringElem = GetChild("string");
         while (stringElem)
         {
-            ret.Push(stringElem.GetAttributeCString("value"));
+            ret.push_back(stringElem.GetAttributeCString("value"));
             stringElem = stringElem.GetNext("string");
         }
 
@@ -1119,11 +1119,11 @@ namespace Urho3D
             variables_ = new pugi::xpath_variable_set();
 
             // Parse the variable string having format "name1:type1,name2:type2,..." where type is one of "Bool", "Float", "String", "ResultSet"
-            Vector<String> vars = variableString.Split(',');
-            for (Vector<String>::ConstIterator i = vars.Begin(); i != vars.End(); ++i)
+            std::vector<String> vars = variableString.Split(',');
+            for (std::vector<String>::const_iterator i = vars.begin(); i != vars.end(); ++i)
             {
-                Vector<String> tokens = i->Trimmed().Split(':');
-                if (tokens.Size() != 2)
+                std::vector<String> tokens = i->Trimmed().Split(':');
+                if (tokens.size() != 2)
                     continue;
 
                 pugi::xpath_value_type type;
