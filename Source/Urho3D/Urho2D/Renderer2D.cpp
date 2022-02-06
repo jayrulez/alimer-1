@@ -428,8 +428,8 @@ namespace Urho3D
             if (!drawables_[d]->IsInView(camera))
                 continue;
 
-            const Vector<SourceBatch2D>& batches = drawables_[d]->GetSourceBatches();
-            for (unsigned b = 0; b < batches.Size(); ++b)
+            const std::vector<SourceBatch2D>& batches = drawables_[d]->GetSourceBatches();
+            for (unsigned b = 0; b < batches.size(); ++b)
             {
                 if (batches[b].material_ && !batches[b].vertices_.empty())
                     sourceBatches.Push(&batches[b]);

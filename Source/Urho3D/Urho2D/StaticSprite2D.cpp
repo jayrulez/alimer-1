@@ -53,7 +53,7 @@ StaticSprite2D::StaticSprite2D(Context* context) :
     drawRect_(Rect::ZERO),
     textureRect_(Rect::ZERO)
 {
-    sourceBatches_.Resize(1);
+    sourceBatches_.resize(1);
     sourceBatches_[0].owner_ = this;
 }
 
@@ -280,7 +280,7 @@ void StaticSprite2D::OnWorldBoundingBoxUpdate()
     boundingBox_.Clear();
     worldBoundingBox_.Clear();
 
-    const Vector<SourceBatch2D>& sourceBatches = GetSourceBatches();
+    const std::vector<SourceBatch2D>& sourceBatches = GetSourceBatches();
     for (unsigned i = 0; i < sourceBatches[0].vertices_.size(); ++i)
         worldBoundingBox_.Merge(sourceBatches[0].vertices_[i].position_);
 

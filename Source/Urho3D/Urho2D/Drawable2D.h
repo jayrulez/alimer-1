@@ -98,7 +98,7 @@ public:
     int GetOrderInLayer() const { return orderInLayer_; }
 
     /// Return all source batches (called by Renderer2D).
-    const Vector<SourceBatch2D>& GetSourceBatches();
+    const std::vector<SourceBatch2D>& GetSourceBatches();
 
 protected:
     /// Handle scene being assigned.
@@ -118,7 +118,7 @@ protected:
     /// Order in layer.
     int orderInLayer_;
     /// Source batches.
-    Vector<SourceBatch2D> sourceBatches_;
+    std::vector<SourceBatch2D> sourceBatches_;
     /// Source batches dirty flag.
     bool sourceBatchesDirty_;
     /// Renderer2D.

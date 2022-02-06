@@ -52,7 +52,7 @@ ParticleEmitter2D::ParticleEmitter2D(Context* context) :
     boundingBoxMaxPoint_(Vector3::ZERO),
     emitting_(true)
 {
-    sourceBatches_.Resize(1);
+    sourceBatches_.resize(1);
     sourceBatches_[0].owner_ = this;
 }
 
@@ -131,7 +131,7 @@ void ParticleEmitter2D::SetMaxParticles(unsigned maxParticles)
 {
     maxParticles = Max(maxParticles, 1U);
 
-    particles_.Resize(maxParticles);
+    particles_.resize(maxParticles);
     sourceBatches_[0].vertices_.reserve(maxParticles * 4);
 
     numParticles_ = Min(maxParticles, numParticles_);
@@ -340,7 +340,7 @@ void ParticleEmitter2D::Update(float timeStep)
     {
         float worldAngle = GetNode()->GetWorldRotation().RollAngle();
 
-        float timeBetweenParticles = effect_->GetParticleLifeSpan() / particles_.Size();
+        float timeBetweenParticles = effect_->GetParticleLifeSpan() / particles_.size();
         emitParticleTime_ += timeStep;
 
         while (emitParticleTime_ > 0.0f)
@@ -362,7 +362,7 @@ void ParticleEmitter2D::Update(float timeStep)
 
 bool ParticleEmitter2D::EmitParticle(const Vector3& worldPosition, float worldAngle, float worldScale)
 {
-    if (numParticles_ >= (unsigned)effect_->GetMaxParticles() || numParticles_ >= particles_.Size())
+    if (numParticles_ >= (unsigned)effect_->GetMaxParticles() || numParticles_ >= particles_.size())
         return false;
 
     float lifespan = effect_->GetParticleLifeSpan() + effect_->GetParticleLifespanVariance() * Random(-1.0f, 1.0f);
