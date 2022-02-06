@@ -205,9 +205,9 @@ private:
     /// Box2D body.
     b2Body* body_;
     /// Collision shapes.
-    Vector<WeakPtr<CollisionShape2D> > collisionShapes_;
+    std::vector<WeakPtr<CollisionShape2D> > collisionShapes_;
     /// Constraints.
-    Vector<WeakPtr<Constraint2D> > constraints_;
+    std::vector<WeakPtr<Constraint2D> > constraints_;
 };
 
 }
