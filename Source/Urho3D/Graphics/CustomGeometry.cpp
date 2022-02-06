@@ -486,7 +486,7 @@ void CustomGeometry::SetGeometryDataAttr(const PODVector<unsigned char>& value)
 void CustomGeometry::SetMaterialsAttr(const ResourceRefList& value)
 {
     auto* cache = GetSubsystem<ResourceCache>();
-    for (unsigned i = 0; i < value.names_.Size(); ++i)
+    for (unsigned i = 0; i < value.names_.size(); ++i)
         SetMaterial(i, cache->GetResource<Material>(value.names_[i]));
 }
 
@@ -523,7 +523,7 @@ PODVector<unsigned char> CustomGeometry::GetGeometryDataAttr() const
 
 const ResourceRefList& CustomGeometry::GetMaterialsAttr() const
 {
-    materialsAttr_.names_.Resize(batches_.Size());
+    materialsAttr_.names_.resize(batches_.Size());
     for (unsigned i = 0; i < batches_.Size(); ++i)
         materialsAttr_.names_[i] = GetResourceName(batches_[i].material_);
 

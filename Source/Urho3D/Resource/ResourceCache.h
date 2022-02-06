@@ -159,11 +159,11 @@ namespace Urho3D
 
         /// Return added resource load directories.
         /// @property
-        const Vector<String>& GetResourceDirs() const { return resourceDirs_; }
+        const std::vector<String>& GetResourceDirs() const { return resourceDirs_; }
 
         /// Return added package files.
         /// @property
-        const Vector<SharedPtr<PackageFile> >& GetPackageFiles() const { return packages_; }
+        const std::vector<SharedPtr<PackageFile> >& GetPackageFiles() const { return packages_; }
 
         /// Template version of returning a resource by name.
         template <class T> T* GetResource(const String& name, bool sendEventOnFailure = true);
@@ -245,17 +245,17 @@ namespace Urho3D
         /// Resources by type.
         HashMap<StringHash, ResourceGroup> resourceGroups_;
         /// Resource load directories.
-        Vector<String> resourceDirs_;
+        std::vector<String> resourceDirs_;
         /// File watchers for resource directories, if automatic reloading enabled.
-        Vector<SharedPtr<FileWatcher> > fileWatchers_;
+        std::vector<SharedPtr<FileWatcher> > fileWatchers_;
         /// Package files.
-        Vector<SharedPtr<PackageFile> > packages_;
+        std::vector<SharedPtr<PackageFile> > packages_;
         /// Dependent resources. Only used with automatic reload to eg. trigger reload of a cube texture when any of its faces change.
         HashMap<StringHash, std::unordered_set<StringHash> > dependentResources_;
         /// Resource background loader.
         SharedPtr<BackgroundLoader> backgroundLoader_;
         /// Resource routers.
-        Vector<SharedPtr<ResourceRouter> > resourceRouters_;
+        std::vector<SharedPtr<ResourceRouter> > resourceRouters_;
         /// Automatic resource reloading flag.
         bool autoReloadResources_;
         /// Return failed resources flag.

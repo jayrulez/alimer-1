@@ -204,12 +204,12 @@ namespace Urho3D
         return false;
     }
 
-    unsigned WorkQueue::RemoveWorkItems(const Vector<SharedPtr<WorkItem> >& items)
+    unsigned WorkQueue::RemoveWorkItems(const std::vector<SharedPtr<WorkItem> >& items)
     {
         lock_guard<mutex> lock(queueMutex_);
         unsigned removed = 0;
 
-        for (Vector<SharedPtr<WorkItem> >::ConstIterator i = items.Begin(); i != items.End(); ++i)
+        for (std::vector<SharedPtr<WorkItem> >::const_iterator i = items.begin(); i != items.end(); ++i)
         {
             list<WorkItem*>::iterator j = find(queue_.begin(), queue_.end(), i->Get());
             if (j != queue_.end())

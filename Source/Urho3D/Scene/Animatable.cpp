@@ -336,14 +336,14 @@ namespace Urho3D
                 attributeInfo = &info->GetAttributeInfo();
             else
             {
-                const Vector<AttributeInfo>* attributes = GetAttributes();
+                const std::vector<AttributeInfo>* attributes = GetAttributes();
                 if (!attributes)
                 {
                     URHO3D_LOGERROR(GetTypeName() + " has no attributes");
                     return;
                 }
 
-                for (Vector<AttributeInfo>::ConstIterator i = attributes->Begin(); i != attributes->End(); ++i)
+                for (std::vector<AttributeInfo>::const_iterator i = attributes->begin(); i != attributes->end(); ++i)
                 {
                     if (name == (*i).name_)
                     {
@@ -513,7 +513,7 @@ namespace Urho3D
         // Keep weak pointer to self to check for destruction caused by event handling
         WeakPtr<Animatable> self(this);
 
-        Vector<String> finishedNames;
+        std::vector<String> finishedNames;
         for (HashMap<String, SharedPtr<AttributeAnimationInfo> >::ConstIterator i = attributeAnimationInfos_.Begin();
             i != attributeAnimationInfos_.End(); ++i)
         {
@@ -523,10 +523,10 @@ namespace Urho3D
                 return;
 
             if (finished)
-                finishedNames.Push(i->second_->GetAttributeInfo().name_);
+                finishedNames.push_back(i->second_->GetAttributeInfo().name_);
         }
 
-        for (unsigned i = 0; i < finishedNames.Size(); ++i)
+        for (unsigned i = 0; i < finishedNames.size(); ++i)
             SetAttributeAnimation(finishedNames[i], nullptr);
     }
 

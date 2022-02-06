@@ -215,8 +215,8 @@ Sprite2D* Sprite2D::LoadFromResourceRef(Object* object, const ResourceRef& value
     if (value.type_ == SpriteSheet2D::GetTypeStatic())
     {
         // value.name_ include sprite sheet name and sprite name.
-        Vector<String> names = value.name_.Split('@');
-        if (names.Size() != 2)
+        std::vector<String> names = value.name_.Split('@');
+        if (names.size() != 2)
             return nullptr;
 
         const String& spriteSheetName = names[0];

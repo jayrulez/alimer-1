@@ -47,7 +47,7 @@ const int PACKER_NUM_NODES = 4096;
 const int MAX_TEXTURE_SIZE = 2048;
 
 int main(int argc, char** argv);
-void Run(Vector<String>& arguments);
+void Run(std::vector<String>& arguments);
 
 class PackerInfo : public RefCounted
 {
@@ -91,7 +91,7 @@ void Help()
 
 int main(int argc, char** argv)
 {
-    Vector<String> arguments;
+    std::vector<String> arguments;
 
 #ifdef WIN32
     arguments = ParseArguments(GetCommandLineW());
@@ -103,9 +103,9 @@ int main(int argc, char** argv)
     return 0;
 }
 
-void Run(Vector<String>& arguments)
+void Run(std::vector<String>& arguments)
 {
-    if (arguments.Size() < 2)
+    if (arguments.size() < 2)
         Help();
 
     SharedPtr<Context> context(new Context());
@@ -126,24 +126,24 @@ void Run(Vector<String>& arguments)
     bool help = false;
     bool trim = false;
 
-    while (arguments.Size() > 0)
+    while (arguments.size() > 0)
     {
         String arg = arguments[0];
-        arguments.Erase(0);
+        arguments.erase(arguments.begin());
 
         if (arg.Empty())
             continue;
 
         if (arg.StartsWith("-"))
         {
-            if (arg == "-px")      { padX = ToUInt(arguments[0]); arguments.Erase(0); }
-            else if (arg == "-py") { padY = ToUInt(arguments[0]); arguments.Erase(0); }
-            else if (arg == "-ox") { offsetX = ToUInt(arguments[0]); arguments.Erase(0); }
-            else if (arg == "-oy") { offsetY = ToUInt(arguments[0]); arguments.Erase(0); }
-            else if (arg == "-frameWidth") { frameWidth = ToUInt(arguments[0]); arguments.Erase(0); }
-            else if (arg == "-frameHeight") { frameHeight = ToUInt(arguments[0]); arguments.Erase(0); }
+            if (arg == "-px")      { padX = ToUInt(arguments[0]); arguments.erase(arguments.begin()); }
+            else if (arg == "-py") { padY = ToUInt(arguments[0]); arguments.erase(arguments.begin()); }
+            else if (arg == "-ox") { offsetX = ToUInt(arguments[0]); arguments.erase(arguments.begin()); }
+            else if (arg == "-oy") { offsetY = ToUInt(arguments[0]); arguments.erase(arguments.begin()); }
+            else if (arg == "-frameWidth") { frameWidth = ToUInt(arguments[0]); arguments.erase(arguments.begin()); }
+            else if (arg == "-frameHeight") { frameHeight = ToUInt(arguments[0]); arguments.erase(arguments.begin()); }
             else if (arg == "-trim") { trim = true; }
-            else if (arg == "-xml")  { spriteSheetFileName = arguments[0]; arguments.Erase(0); }
+            else if (arg == "-xml")  { spriteSheetFileName = arguments[0]; arguments.erase(arguments.begin()); }
             else if (arg == "-h")  { help = true; break; }
             else if (arg == "-debug")  { debug = true; }
         }

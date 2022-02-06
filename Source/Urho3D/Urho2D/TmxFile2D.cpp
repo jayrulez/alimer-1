@@ -158,7 +158,7 @@ namespace Urho3D
         else if (encoding == CSV)
         {
             String dataValue = dataElem.GetValue();
-            Vector<String> gidVector = dataValue.Split(',');
+            std::vector<String> gidVector = dataValue.Split(',');
             int currentIndex = 0;
             for (int y = 0; y < height_; ++y)
             {
@@ -293,18 +293,18 @@ namespace Urho3D
             case OT_POLYGON:
             case OT_POLYLINE:
             {
-                Vector<String> points;
+                std::vector<String> points;
 
                 const char* name = object->objectType_ == OT_POLYGON ? "polygon" : "polyline";
                 XMLElement polygonElem = objectElem.GetChild(name);
                 points = polygonElem.GetAttribute("points").Split(' ');
 
-                if (points.Size() <= 1)
+                if (points.size() <= 1)
                     return;
 
-                object->points_.resize(points.Size());
+                object->points_.resize(points.size());
 
-                for (unsigned i = 0; i < points.Size(); ++i)
+                for (unsigned i = 0; i < points.size(); ++i)
                 {
                     points[i].Replace(',', ' ');
                     Vector2 point = position + ToVector2(points[i]);

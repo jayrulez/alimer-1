@@ -116,7 +116,7 @@ public:
     BlendMode GetBlendMode() const { return blendMode_; }
 
     /// Return max particles.
-    unsigned GetMaxParticles() const { return particles_.Size(); }
+    unsigned GetMaxParticles() const { return particles_.size(); }
 
     /// Set particle model attr.
     void SetParticleEffectAttr(const ResourceRef& value);
@@ -165,7 +165,7 @@ private:
     /// Currently emitting flag.
     bool emitting_;
     /// Particles.
-    Vector<Particle2D> particles_;
+    std::vector<Particle2D> particles_;
     /// Bounding box min point.
     Vector3 boundingBoxMinPoint_;
     /// Bounding box max point.

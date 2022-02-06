@@ -503,7 +503,7 @@ bool Scene::LoadAsyncJSON(File* file, LoadMode mode)
         asyncProgress_.jsonIndex_ = 0;
 
         // Count the amount of child nodes
-        asyncProgress_.totalNodes_ = childrenArray.Size();
+        asyncProgress_.totalNodes_ = childrenArray.size();
     }
     else
     {
@@ -683,12 +683,12 @@ void Scene::AddRequiredPackageFile(PackageFile* package)
     if (!package || !package->GetNumFiles())
         return;
 
-    requiredPackageFiles_.Push(SharedPtr<PackageFile>(package));
+    requiredPackageFiles_.push_back(SharedPtr<PackageFile>(package));
 }
 
 void Scene::ClearRequiredPackageFiles()
 {
-    requiredPackageFiles_.Clear();
+    requiredPackageFiles_.clear();
 }
 
 void Scene::RegisterVar(const String& name)
@@ -953,19 +953,19 @@ void Scene::NodeAdded(Node* node)
     }
 
     // Cache tag if already tagged.
-    if (!node->GetTags().Empty())
+    if (!node->GetTags().empty())
     {
         const StringVector& tags = node->GetTags();
-        for (unsigned i = 0; i < tags.Size(); ++i)
+        for (unsigned i = 0; i < tags.size(); ++i)
             taggedNodes_[tags[i]].Push(node);
     }
 
     // Add already created components and child nodes now
-    const Vector<SharedPtr<Component> >& components = node->GetComponents();
-    for (Vector<SharedPtr<Component> >::ConstIterator i = components.Begin(); i != components.End(); ++i)
+    const std::vector<SharedPtr<Component> >& components = node->GetComponents();
+    for (std::vector<SharedPtr<Component> >::const_iterator i = components.begin(); i != components.end(); ++i)
         ComponentAdded(*i);
-    const Vector<SharedPtr<Node> >& children = node->GetChildren();
-    for (Vector<SharedPtr<Node> >::ConstIterator i = children.Begin(); i != children.End(); ++i)
+    const std::vector<SharedPtr<Node> >& children = node->GetChildren();
+    for (std::vector<SharedPtr<Node> >::const_iterator i = children.begin(); i != children.end(); ++i)
         NodeAdded(*i);
 }
 
@@ -996,19 +996,19 @@ void Scene::NodeRemoved(Node* node)
     node->ResetScene();
 
     // Remove node from tag cache
-    if (!node->GetTags().Empty())
+    if (!node->GetTags().empty())
     {
         const StringVector& tags = node->GetTags();
-        for (unsigned i = 0; i < tags.Size(); ++i)
+        for (unsigned i = 0; i < tags.size(); ++i)
             taggedNodes_[tags[i]].Remove(node);
     }
 
     // Remove components and child nodes as well
-    const Vector<SharedPtr<Component> >& components = node->GetComponents();
-    for (Vector<SharedPtr<Component> >::ConstIterator i = components.Begin(); i != components.End(); ++i)
+    const std::vector<SharedPtr<Component> >& components = node->GetComponents();
+    for (std::vector<SharedPtr<Component> >::const_iterator i = components.begin(); i != components.end(); ++i)
         ComponentRemoved(*i);
-    const Vector<SharedPtr<Node> >& children = node->GetChildren();
-    for (Vector<SharedPtr<Node> >::ConstIterator i = children.Begin(); i != children.End(); ++i)
+    const std::vector<SharedPtr<Node> >& children = node->GetChildren();
+    for (std::vector<SharedPtr<Node> >::const_iterator i = children.begin(); i != children.end(); ++i)
         NodeRemoved(*i);
 }
 
@@ -1069,10 +1069,10 @@ void Scene::ComponentRemoved(Component* component)
 
 void Scene::SetVarNamesAttr(const String& value)
 {
-    Vector<String> varNames = value.Split(';');
+    std::vector<String> varNames = value.Split(';');
 
     varNames_.Clear();
-    for (Vector<String>::ConstIterator i = varNames.Begin(); i != varNames.End(); ++i)
+    for (std::vector<String>::const_iterator i = varNames.begin(); i != varNames.end(); ++i)
         varNames_[*i] = *i;
 }
 
@@ -1223,7 +1223,7 @@ void Scene::UpdateAsyncLoading()
         }
         else if (asyncProgress_.jsonFile_) // Load from JSON
         {
-            const JSONValue& childValue = asyncProgress_.jsonFile_->GetRoot().Get("children").GetArray().At(asyncProgress_.jsonIndex_);
+            const JSONValue& childValue = asyncProgress_.jsonFile_->GetRoot().Get("children").GetArray().at(asyncProgress_.jsonIndex_);
 
             unsigned nodeID = childValue.Get("id").GetUInt();
             Node* newNode = CreateChild(nodeID, IsReplicatedID(nodeID) ? REPLICATED : LOCAL);
@@ -1305,12 +1305,12 @@ void Scene::PreloadResources(File* file, bool isSceneFile)
     /*unsigned nodeID = */file->ReadUInt();
 
     // Read Node or Scene attributes; these do not include any resources
-    const Vector<AttributeInfo>* attributes = context_->GetAttributes(isSceneFile ? Scene::GetTypeStatic() : Node::GetTypeStatic());
+    const std::vector<AttributeInfo>* attributes = context_->GetAttributes(isSceneFile ? Scene::GetTypeStatic() : Node::GetTypeStatic());
     assert(attributes);
 
-    for (unsigned i = 0; i < attributes->Size(); ++i)
+    for (unsigned i = 0; i < attributes->size(); ++i)
     {
-        const AttributeInfo& attr = attributes->At(i);
+        const AttributeInfo& attr = attributes->at(i);
         if (!(attr.mode_ & AM_FILE))
             continue;
         /*Variant varValue = */file->ReadVariant(attr.type_);
@@ -1328,9 +1328,9 @@ void Scene::PreloadResources(File* file, bool isSceneFile)
         attributes = context_->GetAttributes(compType);
         if (attributes)
         {
-            for (unsigned j = 0; j < attributes->Size(); ++j)
+            for (unsigned j = 0; j < attributes->size(); ++j)
             {
-                const AttributeInfo& attr = attributes->At(j);
+                const AttributeInfo& attr = attributes->at(j);
                 if (!(attr.mode_ & AM_FILE))
                     continue;
                 Variant varValue = compBuffer.ReadVariant(attr.type_);
@@ -1349,7 +1349,7 @@ void Scene::PreloadResources(File* file, bool isSceneFile)
                 else if (attr.type_ == VAR_RESOURCEREFLIST)
                 {
                     const ResourceRefList& refList = varValue.GetResourceRefList();
-                    for (unsigned k = 0; k < refList.names_.Size(); ++k)
+                    for (unsigned k = 0; k < refList.names_.size(); ++k)
                     {
                         String name = cache->SanitateResourceName(refList.names_[k]);
                         bool success = cache->BackgroundLoadResource(refList.type_, name);
@@ -1382,7 +1382,7 @@ void Scene::PreloadResourcesXML(const XMLElement& element)
     while (compElem)
     {
         String typeName = compElem.GetAttribute("type");
-        const Vector<AttributeInfo>* attributes = context_->GetAttributes(StringHash(typeName));
+        const std::vector<AttributeInfo>* attributes = context_->GetAttributes(StringHash(typeName));
         if (attributes)
         {
             XMLElement attrElem = compElem.GetChild("attribute");
@@ -1392,11 +1392,11 @@ void Scene::PreloadResourcesXML(const XMLElement& element)
             {
                 String name = attrElem.GetAttribute("name");
                 unsigned i = startIndex;
-                unsigned attempts = attributes->Size();
+                unsigned attempts = attributes->size();
 
                 while (attempts)
                 {
-                    const AttributeInfo& attr = attributes->At(i);
+                    const AttributeInfo& attr = attributes->at(i);
                     if ((attr.mode_ & AM_FILE) && !attr.name_.Compare(name, true))
                     {
                         if (attr.type_ == VAR_RESOURCEREF)
@@ -1413,7 +1413,7 @@ void Scene::PreloadResourcesXML(const XMLElement& element)
                         else if (attr.type_ == VAR_RESOURCEREFLIST)
                         {
                             ResourceRefList refList = attrElem.GetVariantValue(attr.type_).GetResourceRefList();
-                            for (unsigned k = 0; k < refList.names_.Size(); ++k)
+                            for (unsigned k = 0; k < refList.names_.size(); ++k)
                             {
                                 String name = cache->SanitateResourceName(refList.names_[k]);
                                 bool success = cache->BackgroundLoadResource(refList.type_, name);
@@ -1425,12 +1425,12 @@ void Scene::PreloadResourcesXML(const XMLElement& element)
                             }
                         }
 
-                        startIndex = (i + 1) % attributes->Size();
+                        startIndex = (i + 1) % attributes->size();
                         break;
                     }
                     else
                     {
-                        i = (i + 1) % attributes->Size();
+                        i = (i + 1) % attributes->size();
                         --attempts;
                     }
                 }
@@ -1460,28 +1460,28 @@ void Scene::PreloadResourcesJSON(const JSONValue& value)
     // Node or Scene attributes do not include any resources; therefore skip to the components
     JSONArray componentArray = value.Get("components").GetArray();
 
-    for (unsigned i = 0; i < componentArray.Size(); i++)
+    for (unsigned i = 0; i < componentArray.size(); i++)
     {
-        const JSONValue& compValue = componentArray.At(i);
+        const JSONValue& compValue = componentArray.at(i);
         String typeName = compValue.Get("type").GetString();
 
-        const Vector<AttributeInfo>* attributes = context_->GetAttributes(StringHash(typeName));
+        const std::vector<AttributeInfo>* attributes = context_->GetAttributes(StringHash(typeName));
         if (attributes)
         {
             JSONArray attributesArray = compValue.Get("attributes").GetArray();
 
             unsigned startIndex = 0;
 
-            for (unsigned j = 0; j < attributesArray.Size(); j++)
+            for (unsigned j = 0; j < attributesArray.size(); j++)
             {
-                const JSONValue& attrVal = attributesArray.At(j);
+                const JSONValue& attrVal = attributesArray.at(j);
                 String name = attrVal.Get("name").GetString();
                 unsigned i = startIndex;
-                unsigned attempts = attributes->Size();
+                unsigned attempts = attributes->size();
 
                 while (attempts)
                 {
-                    const AttributeInfo& attr = attributes->At(i);
+                    const AttributeInfo& attr = attributes->at(i);
                     if ((attr.mode_ & AM_FILE) && !attr.name_.Compare(name, true))
                     {
                         if (attr.type_ == VAR_RESOURCEREF)
@@ -1498,7 +1498,7 @@ void Scene::PreloadResourcesJSON(const JSONValue& value)
                         else if (attr.type_ == VAR_RESOURCEREFLIST)
                         {
                             ResourceRefList refList = attrVal.Get("value").GetVariantValue(attr.type_).GetResourceRefList();
-                            for (unsigned k = 0; k < refList.names_.Size(); ++k)
+                            for (unsigned k = 0; k < refList.names_.size(); ++k)
                             {
                                 String name = cache->SanitateResourceName(refList.names_[k]);
                                 bool success = cache->BackgroundLoadResource(refList.type_, name);
@@ -1510,12 +1510,12 @@ void Scene::PreloadResourcesJSON(const JSONValue& value)
                             }
                         }
 
-                        startIndex = (i + 1) % attributes->Size();
+                        startIndex = (i + 1) % attributes->size();
                         break;
                     }
                     else
                     {
-                        i = (i + 1) % attributes->Size();
+                        i = (i + 1) % attributes->size();
                         --attempts;
                     }
                 }
@@ -1526,9 +1526,9 @@ void Scene::PreloadResourcesJSON(const JSONValue& value)
     }
 
     JSONArray childrenArray = value.Get("children").GetArray();
-    for (unsigned i = 0; i < childrenArray.Size(); i++)
+    for (unsigned i = 0; i < childrenArray.size(); i++)
     {
-        const JSONValue& childVal = childrenArray.At(i);
+        const JSONValue& childVal = childrenArray.at(i);
         PreloadResourcesJSON(childVal);
     }
 #endif

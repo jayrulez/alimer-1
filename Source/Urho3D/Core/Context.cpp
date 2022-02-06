@@ -100,25 +100,25 @@ namespace Urho3D
         }
     }
 
-    void RemoveNamedAttribute(HashMap<StringHash, Vector<AttributeInfo> >& attributes, StringHash objectType, const char* name)
+    void RemoveNamedAttribute(HashMap<StringHash, std::vector<AttributeInfo> >& attributes, StringHash objectType, const char* name)
     {
-        HashMap<StringHash, Vector<AttributeInfo> >::Iterator i = attributes.Find(objectType);
+        HashMap<StringHash, std::vector<AttributeInfo> >::Iterator i = attributes.Find(objectType);
         if (i == attributes.End())
             return;
 
-        Vector<AttributeInfo>& infos = i->second_;
+        std::vector<AttributeInfo>& infos = i->second_;
 
-        for (Vector<AttributeInfo>::Iterator j = infos.Begin(); j != infos.End(); ++j)
+        for (std::vector<AttributeInfo>::iterator j = infos.begin(); j != infos.end(); ++j)
         {
             if (!j->name_.Compare(name, true))
             {
-                infos.Erase(j);
+                infos.erase(j);
                 break;
             }
         }
 
         // If the vector became empty, erase the object type from the map
-        if (infos.Empty())
+        if (infos.empty())
             attributes.Erase(i);
     }
 
@@ -177,7 +177,7 @@ namespace Urho3D
 
         RegisterFactory(factory);
         if (String::CStringLength(category))
-            objectCategories_[category].Push(factory->GetType());
+            objectCategories_[category].push_back(factory->GetType());
     }
 
     void Context::RegisterSubsystem(Object* object)
@@ -208,15 +208,15 @@ namespace Urho3D
 
         AttributeHandle handle;
 
-        Vector<AttributeInfo>& objectAttributes = attributes_[objectType];
-        objectAttributes.Push(attr);
-        handle.attributeInfo_ = &objectAttributes.Back();
+        std::vector<AttributeInfo>& objectAttributes = attributes_[objectType];
+        objectAttributes.push_back(attr);
+        handle.attributeInfo_ = &objectAttributes.back();
 
         if (attr.mode_ & AM_NET)
         {
-            Vector<AttributeInfo>& objectNetworkAttributes = networkAttributes_[objectType];
-            objectNetworkAttributes.Push(attr);
-            handle.networkAttributeInfo_ = &objectNetworkAttributes.Back();
+            std::vector<AttributeInfo>& objectNetworkAttributes = networkAttributes_[objectType];
+            objectNetworkAttributes.push_back(attr);
+            handle.networkAttributeInfo_ = &objectNetworkAttributes.back();
         }
         return handle;
     }
@@ -340,15 +340,15 @@ namespace Urho3D
             return;
         }
 
-        const Vector<AttributeInfo>* baseAttributes = GetAttributes(baseType);
+        const std::vector<AttributeInfo>* baseAttributes = GetAttributes(baseType);
         if (baseAttributes)
         {
-            for (unsigned i = 0; i < baseAttributes->Size(); ++i)
+            for (unsigned i = 0; i < baseAttributes->size(); ++i)
             {
-                const AttributeInfo& attr = baseAttributes->At(i);
-                attributes_[derivedType].Push(attr);
+                const AttributeInfo& attr = baseAttributes->at(i);
+                attributes_[derivedType].push_back(attr);
                 if (attr.mode_ & AM_NET)
-                    networkAttributes_[derivedType].Push(attr);
+                    networkAttributes_[derivedType].push_back(attr);
             }
         }
     }
@@ -390,13 +390,13 @@ namespace Urho3D
 
     AttributeInfo* Context::GetAttribute(StringHash objectType, const char* name)
     {
-        HashMap<StringHash, Vector<AttributeInfo> >::Iterator i = attributes_.Find(objectType);
+        HashMap<StringHash, std::vector<AttributeInfo> >::Iterator i = attributes_.Find(objectType);
         if (i == attributes_.End())
             return nullptr;
 
-        Vector<AttributeInfo>& infos = i->second_;
+        std::vector<AttributeInfo>& infos = i->second_;
 
-        for (Vector<AttributeInfo>::Iterator j = infos.Begin(); j != infos.End(); ++j)
+        for (std::vector<AttributeInfo>::iterator j = infos.begin(); j != infos.end(); ++j)
         {
             if (!j->name_.Compare(name, true))
                 return &(*j);

@@ -76,7 +76,7 @@ public:
     /// @property
     void SetFileName(const String& fileName);
     /// Set filters.
-    void SetFilters(const Vector<String>& filters, unsigned defaultIndex);
+    void SetFilters(const std::vector<String>& filters, unsigned defaultIndex);
     /// Set directory selection mode. Default false.
     /// @property
     void SetDirectoryMode(bool enable);
@@ -199,9 +199,9 @@ private:
     /// Current directory.
     String path_;
     /// Filters.
-    Vector<String> filters_;
+    std::vector<String> filters_;
     /// File entries.
-    Vector<FileSelectorEntry> fileEntries_;
+    std::vector<FileSelectorEntry> fileEntries_;
     /// Filter used to get the file list.
     String lastUsedFilter_;
     /// Directory mode flag.

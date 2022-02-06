@@ -166,16 +166,16 @@ void Component::PrepareNetworkUpdate()
     if (!networkState_)
         AllocateNetworkState();
 
-    const Vector<AttributeInfo>* attributes = networkState_->attributes_;
+    const std::vector<AttributeInfo>* attributes = networkState_->attributes_;
     if (!attributes)
         return;
 
-    unsigned numAttributes = attributes->Size();
+    unsigned numAttributes = attributes->size();
 
     // Check for attribute changes
     for (unsigned i = 0; i < numAttributes; ++i)
     {
-        const AttributeInfo& attr = attributes->At(i);
+        const AttributeInfo& attr = attributes->at(i);
 
         if (animationEnabled_ && IsAnimatedNetworkAttribute(attr))
             continue;

@@ -1021,8 +1021,8 @@ namespace Urho3D
         unsigned numButtons = 0;
         unsigned numAxes = 0;
         unsigned numHats = 0;
-        const Vector<SharedPtr<UIElement> >& children = state.screenJoystick_->GetChildren();
-        for (Vector<SharedPtr<UIElement> >::ConstIterator iter = children.Begin(); iter != children.End(); ++iter)
+        const std::vector<SharedPtr<UIElement> >& children = state.screenJoystick_->GetChildren();
+        for (std::vector<SharedPtr<UIElement> >::const_iterator iter = children.begin(); iter != children.end(); ++iter)
         {
             UIElement* element = iter->Get();
             String name = element->GetName();
@@ -1089,16 +1089,16 @@ namespace Urho3D
                     text->SetVisible(false);
                     String keyBinding = text->GetText();
                     int mappedKeyBinding[4] = { KEY_W, KEY_S, KEY_A, KEY_D };
-                    Vector<String> keyBindings;
+                    std::vector<String> keyBindings;
                     if (keyBinding.Contains(' '))   // e.g.: "UP DOWN LEFT RIGHT"
                         keyBindings = keyBinding.Split(' ');    // Attempt to split the text using ' ' as separator
                     else if (keyBinding.Length() == 4)
                     {
-                        keyBindings.Resize(4);      // e.g.: "WSAD"
+                        keyBindings.resize(4);      // e.g.: "WSAD"
                         for (unsigned i = 0; i < 4; ++i)
                             keyBindings[i] = keyBinding.Substring(i, 1);
                     }
-                    if (keyBindings.Size() == 4)
+                    if (keyBindings.size() == 4)
                     {
                         PopulateKeyBindingMap(keyBindingMap);
 

@@ -541,9 +541,9 @@ namespace Urho3D
 
         int level = eventData[P_LEVEL].GetInt();
         // The message may be multi-line, so split to rows in that case
-        Vector<String> rows = eventData[P_MESSAGE].GetString().Split('\n');
+        std::vector<String> rows = eventData[P_MESSAGE].GetString().Split('\n');
 
-        for (unsigned i = 0; i < rows.Size(); ++i)
+        for (unsigned i = 0; i < rows.size(); ++i)
             pendingRows.push_back(std::make_pair(level, rows[i]));
 
         if (autoVisibleOnError_ && level == LOG_ERROR && !IsVisible())

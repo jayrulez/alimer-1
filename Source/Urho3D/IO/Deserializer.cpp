@@ -293,8 +293,8 @@ namespace Urho3D
     {
         ResourceRefList ret;
         ret.type_ = ReadStringHash();
-        ret.names_.Resize(ReadVLE());
-        for (unsigned i = 0; i < ret.names_.Size(); ++i)
+        ret.names_.resize(ReadVLE());
+        for (unsigned i = 0; i < ret.names_.size(); ++i)
             ret.names_[i] = ReadString();
         return ret;
     }
@@ -409,7 +409,7 @@ namespace Urho3D
     StringVector Deserializer::ReadStringVector()
     {
         StringVector ret(ReadVLE());
-        for (unsigned i = 0; i < ret.Size(); ++i)
+        for (unsigned i = 0; i < ret.size(); ++i)
             ret[i] = ReadString();
         return ret;
     }

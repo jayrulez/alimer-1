@@ -89,7 +89,7 @@ namespace Urho3D
         float GetRowHeight() const { return rowHeight_; }
 
         /// Return textures.
-        const Vector<SharedPtr<Texture2D> >& GetTextures() const { return textures_; }
+        const std::vector<SharedPtr<Texture2D> >& GetTextures() const { return textures_; }
 
     protected:
         friend class FontFaceBitmap;
@@ -105,7 +105,7 @@ namespace Urho3D
         /// Kerning mapping.
         HashMap<uint32_t, float> kerningMapping_;
         /// Glyph texture pages.
-        Vector<SharedPtr<Texture2D> > textures_;
+        std::vector<SharedPtr<Texture2D> > textures_;
         /// Point size.
         float pointSize_{};
         /// Row height.

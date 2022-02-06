@@ -54,7 +54,7 @@ unsigned numSubMeshes_ = 0;
 bool useOneBuffer_ = true;
 
 int main(int argc, char** argv);
-void Run(const Vector<String>& arguments);
+void Run(const std::vector<String>& arguments);
 void LoadSkeleton(const String& skeletonFileName);
 void LoadMesh(const String& inputFileName, bool generateTangents, bool splitSubMeshes, bool exportMorphs);
 void WriteOutput(const String& outputFileName, bool exportAnimations, bool rotationsOnly, bool saveMaterialList);
@@ -64,7 +64,7 @@ String SanitateAssetName(const String& name);
 
 int main(int argc, char** argv)
 {
-    Vector<String> arguments;
+    std::vector<String> arguments;
 
     #ifdef WIN32
     arguments = ParseArguments(GetCommandLineW());
@@ -76,9 +76,9 @@ int main(int argc, char** argv)
     return 0;
 }
 
-void Run(const Vector<String>& arguments)
+void Run(const std::vector<String>& arguments)
 {
-    if (arguments.Size() < 2)
+    if (arguments.size() < 2)
     {
         ErrorExit(
             "Usage: OgreImporter <input file> <output file> [options]\n\n"
@@ -100,9 +100,9 @@ void Run(const Vector<String>& arguments)
     bool rotationsOnly = false;
     bool saveMaterialList = false;
 
-    if (arguments.Size() > 2)
+    if (arguments.size() > 2)
     {
-        for (unsigned i = 2; i < arguments.Size(); ++i)
+        for (unsigned i = 2; i < arguments.size(); ++i)
         {
             if (arguments[i].Length() > 1 && arguments[i][0] == '-')
             {
@@ -129,7 +129,7 @@ void Run(const Vector<String>& arguments)
                     }
                     break;
                 }
-                else if (argument == "mb" && i < arguments.Size() - 1)
+                else if (argument == "mb" && i < arguments.size() - 1)
                 {
                     maxBones_ = ToUInt(arguments[i + 1]);
                     if (maxBones_ < 1)

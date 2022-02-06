@@ -235,36 +235,36 @@ bool ShaderVariation::LoadByteCode(const String& binaryShaderName)
 bool ShaderVariation::Compile()
 {
     const String& sourceCode = owner_->GetSourceCode(type_);
-    Vector<String> defines = defines_.Split(' ');
+    std::vector<String> defines = defines_.Split(' ');
 
     // Set the entrypoint, profile and flags according to the shader being compiled
     const char* entryPoint = nullptr;
     const char* profile = nullptr;
     unsigned flags = D3DCOMPILE_OPTIMIZATION_LEVEL3;
 
-    defines.Push("D3D11");
+    defines.push_back("D3D11");
 
     if (type_ == VS)
     {
         entryPoint = "VS";
-        defines.Push("COMPILEVS");
+        defines.push_back("COMPILEVS");
         profile = "vs_4_0";
     }
     else
     {
         entryPoint = "PS";
-        defines.Push("COMPILEPS");
+        defines.push_back("COMPILEPS");
         profile = "ps_4_0";
         flags |= D3DCOMPILE_PREFER_FLOW_CONTROL;
     }
 
-    defines.Push("MAXBONES=" + String(Graphics::GetMaxBones()));
+    defines.push_back("MAXBONES=" + String(Graphics::GetMaxBones()));
 
     // Collect defines into macros
     Vector<String> defineValues;
     PODVector<D3D_SHADER_MACRO> macros;
 
-    for (unsigned i = 0; i < defines.Size(); ++i)
+    for (unsigned i = 0; i < defines.size(); ++i)
     {
         unsigned equalsPos = defines[i].Find('=');
         if (equalsPos != String::NPOS)
@@ -275,7 +275,7 @@ bool ShaderVariation::Compile()
         else
             defineValues.Push("1");
     }
-    for (unsigned i = 0; i < defines.Size(); ++i)
+    for (unsigned i = 0; i < defines.size(); ++i)
     {
         D3D_SHADER_MACRO macro;
         macro.Name = defines[i].CString();

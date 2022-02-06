@@ -224,8 +224,8 @@ namespace Urho3D
         bool success = true;
 
         success &= WriteStringHash(value.type_);
-        success &= WriteVLE(value.names_.Size());
-        for (unsigned i = 0; i < value.names_.Size(); ++i)
+        success &= WriteVLE(value.names_.size());
+        for (unsigned i = 0; i < value.names_.size(); ++i)
             success &= WriteString(value.names_[i]);
 
         return success;
@@ -341,8 +341,8 @@ namespace Urho3D
     bool Serializer::WriteStringVector(const StringVector& value)
     {
         bool success = true;
-        success &= WriteVLE(value.Size());
-        for (StringVector::ConstIterator i = value.Begin(); i != value.End(); ++i)
+        success &= WriteVLE(value.size());
+        for (StringVector::const_iterator i = value.begin(); i != value.end(); ++i)
             success &= WriteString(*i);
         return success;
     }

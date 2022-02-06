@@ -41,7 +41,7 @@ public:
 
     /// Return the number of languages.
     /// @property
-    int GetNumLanguages() const { return (int)languages_.Size(); }
+    int GetNumLanguages() const { return (int)languages_.size(); }
 
     /// Return the index number of current language. The index is determined by the order of loading.
     /// @property
@@ -71,7 +71,7 @@ public:
 
 private:
     /// Language names.
-    Vector<String> languages_;
+    std::vector<String> languages_;
     /// Index of current language.
     int languageIndex_;
     /// Storage strings: <Language <StringId, Value> >.

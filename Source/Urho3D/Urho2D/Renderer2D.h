@@ -60,9 +60,9 @@ struct ViewBatchInfo2D
     /// Distances.
     PODVector<float> distances_;
     /// Materials.
-    Vector<SharedPtr<Material> > materials_;
+    std::vector<SharedPtr<Material> > materials_;
     /// Geometries.
-    Vector<SharedPtr<Geometry> > geometries_;
+    std::vector<SharedPtr<Geometry> > geometries_;
 };
 
 /// 2D renderer component.

@@ -143,7 +143,7 @@ namespace Urho3D
         const HashMap<StringHash, SharedPtr<ObjectFactory> >& GetObjectFactories() const { return factories_; }
 
         /// Return all object categories.
-        const HashMap<String, Vector<StringHash> >& GetObjectCategories() const { return objectCategories_; }
+        const HashMap<String, std::vector<StringHash> >& GetObjectCategories() const { return objectCategories_; }
 
         /// Return active event sender. Null outside event handling.
         Object* GetEventSender() const;
@@ -161,21 +161,21 @@ namespace Urho3D
         template <class T> AttributeInfo* GetAttribute(const char* name);
 
         /// Return attribute descriptions for an object type, or null if none defined.
-        const Vector<AttributeInfo>* GetAttributes(StringHash type) const
+        const std::vector<AttributeInfo>* GetAttributes(StringHash type) const
         {
-            HashMap<StringHash, Vector<AttributeInfo> >::ConstIterator i = attributes_.Find(type);
+            HashMap<StringHash, std::vector<AttributeInfo> >::ConstIterator i = attributes_.Find(type);
             return i != attributes_.End() ? &i->second_ : nullptr;
         }
 
         /// Return network replication attribute descriptions for an object type, or null if none defined.
-        const Vector<AttributeInfo>* GetNetworkAttributes(StringHash type) const
+        const std::vector<AttributeInfo>* GetNetworkAttributes(StringHash type) const
         {
-            HashMap<StringHash, Vector<AttributeInfo> >::ConstIterator i = networkAttributes_.Find(type);
+            HashMap<StringHash, std::vector<AttributeInfo> >::ConstIterator i = networkAttributes_.Find(type);
             return i != networkAttributes_.End() ? &i->second_ : nullptr;
         }
 
         /// Return all registered attributes.
-        const HashMap<StringHash, Vector<AttributeInfo> >& GetAllAttributes() const { return attributes_; }
+        const HashMap<StringHash, std::vector<AttributeInfo> >& GetAllAttributes() const { return attributes_; }
 
         /// Return event receivers for a sender and event type, or null if they do not exist.
         EventReceiverGroup* GetEventReceivers(Object* sender, StringHash eventType)
@@ -221,9 +221,9 @@ namespace Urho3D
         /// Subsystems.
         HashMap<StringHash, SharedPtr<Object> > subsystems_;
         /// Attribute descriptions per object type.
-        HashMap<StringHash, Vector<AttributeInfo> > attributes_;
+        HashMap<StringHash, std::vector<AttributeInfo> > attributes_;
         /// Network replication attribute descriptions per object type.
-        HashMap<StringHash, Vector<AttributeInfo> > networkAttributes_;
+        HashMap<StringHash, std::vector<AttributeInfo> > networkAttributes_;
         /// Event receivers for non-specific events.
         HashMap<StringHash, SharedPtr<EventReceiverGroup> > eventReceivers_;
         /// Event receivers for specific senders' events.
@@ -235,7 +235,7 @@ namespace Urho3D
         /// Active event handler. Not stored in a stack for performance reasons; is needed only in esoteric cases.
         EventHandler* eventHandler_;
         /// Object categories.
-        HashMap<String, Vector<StringHash> > objectCategories_;
+        HashMap<String, std::vector<StringHash> > objectCategories_;
         /// Variant map for global variables that can persist throughout application execution.
         VariantMap globalVars_;
     };

@@ -227,7 +227,7 @@ namespace Urho3D
 
         /// Return required package files.
         /// @property
-        const Vector<SharedPtr<PackageFile> >& GetRequiredPackageFiles() const { return requiredPackageFiles_; }
+        const std::vector<SharedPtr<PackageFile> >& GetRequiredPackageFiles() const { return requiredPackageFiles_; }
 
         /// Return a node user variable name, or empty if not registered.
         const String& GetVarName(StringHash hash) const;
@@ -317,7 +317,7 @@ namespace Urho3D
         /// Source file name.
         mutable String fileName_;
         /// Required package files for networking.
-        Vector<SharedPtr<PackageFile> > requiredPackageFiles_;
+        std::vector<SharedPtr<PackageFile> > requiredPackageFiles_;
         /// Registered node user variable reverse mappings.
         HashMap<StringHash, String> varNames_;
         /// Nodes to check for attribute changes on the next network update.

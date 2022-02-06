@@ -105,7 +105,7 @@ namespace Urho3D
     static bool consoleOpened = false;
 #endif
     static String currentLine;
-    static Vector<String> arguments;
+    static std::vector<String> arguments;
     static String miniDumpDir;
 
 #if defined(IOS)
@@ -254,9 +254,9 @@ namespace Urho3D
 #endif
     }
 
-    const Vector<String>& ParseArguments(const String& cmdLine, bool skipFirstArgument)
+    const std::vector<String>& ParseArguments(const String& cmdLine, bool skipFirstArgument)
     {
-        arguments.Clear();
+        arguments.clear();
 
         unsigned cmdStart = 0, cmdEnd = 0;
         bool inCmd = false;
@@ -274,7 +274,7 @@ namespace Urho3D
                     cmdEnd = i;
                     // Do not store the first argument (executable name)
                     if (!skipFirstArgument)
-                        arguments.Push(cmdLine.Substring(cmdStart, cmdEnd - cmdStart));
+                        arguments.push_back(cmdLine.Substring(cmdStart, cmdEnd - cmdStart));
                     skipFirstArgument = false;
                 }
             }
@@ -291,32 +291,32 @@ namespace Urho3D
         {
             cmdEnd = cmdLine.Length();
             if (!skipFirstArgument)
-                arguments.Push(cmdLine.Substring(cmdStart, cmdEnd - cmdStart));
+                arguments.push_back(cmdLine.Substring(cmdStart, cmdEnd - cmdStart));
         }
 
         // Strip double quotes from the arguments
-        for (unsigned i = 0; i < arguments.Size(); ++i)
+        for (unsigned i = 0; i < arguments.size(); ++i)
             arguments[i].Replace("\"", "");
 
         return arguments;
     }
 
-    const Vector<String>& ParseArguments(const char* cmdLine)
+    const std::vector<String>& ParseArguments(const char* cmdLine)
     {
         return ParseArguments(String(cmdLine));
     }
 
-    const Vector<String>& ParseArguments(const WString& cmdLine)
+    const std::vector<String>& ParseArguments(const WString& cmdLine)
     {
         return ParseArguments(String(cmdLine));
     }
 
-    const Vector<String>& ParseArguments(const wchar_t* cmdLine)
+    const std::vector<String>& ParseArguments(const wchar_t* cmdLine)
     {
         return ParseArguments(String(cmdLine));
     }
 
-    const Vector<String>& ParseArguments(int argc, char** argv)
+    const std::vector<String>& ParseArguments(int argc, char** argv)
     {
         String cmdLine;
 
@@ -326,7 +326,7 @@ namespace Urho3D
         return ParseArguments(cmdLine);
     }
 
-    const Vector<String>& GetArguments()
+    const std::vector<String>& GetArguments()
     {
         return arguments;
     }

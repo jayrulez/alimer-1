@@ -334,7 +334,7 @@ namespace Urho3D
                 const JSONValue& rootVal = loadJSONFile_->GetRoot();
 
                 JSONArray techniqueArray = rootVal.Get("techniques").GetArray();
-                for (unsigned i = 0; i < techniqueArray.Size(); i++)
+                for (unsigned i = 0; i < techniqueArray.size(); i++)
                 {
                     const JSONValue& techVal = techniqueArray[i];
                     cache->BackgroundLoadResource<Technique>(techVal.Get("name").GetString(), true, this);
@@ -559,9 +559,9 @@ namespace Urho3D
         // Load techniques
         JSONArray techniquesArray = source.Get("techniques").GetArray();
         techniques_.Clear();
-        techniques_.Reserve(techniquesArray.Size());
+        techniques_.Reserve(techniquesArray.size());
 
-        for (unsigned i = 0; i < techniquesArray.Size(); i++)
+        for (unsigned i = 0; i < techniquesArray.size(); i++)
         {
             const JSONValue& techVal = techniquesArray[i];
             auto* tech = cache->GetResource<Technique>(techVal.Get("name").GetString());
@@ -809,7 +809,7 @@ namespace Urho3D
     {
         // Write techniques
         JSONArray techniquesArray;
-        techniquesArray.Reserve(techniques_.Size());
+        techniquesArray.reserve(techniques_.Size());
         for (unsigned i = 0; i < techniques_.Size(); ++i)
         {
             const TechniqueEntry& entry = techniques_[i];
@@ -820,7 +820,7 @@ namespace Urho3D
             techniqueVal.Set("name", entry.technique_->GetName());
             techniqueVal.Set("quality", (int)entry.qualityLevel_);
             techniqueVal.Set("loddistance", entry.lodDistance_);
-            techniquesArray.Push(techniqueVal);
+            techniquesArray.push_back(techniqueVal);
         }
         dest.Set("techniques", techniquesArray);
 

@@ -135,10 +135,10 @@ bool FileWatcher::StartWatching(const String& pathName, bool watchSubDirs)
 
         if (watchSubDirs_)
         {
-            Vector<String> subDirs;
+            std::vector<String> subDirs;
             fileSystem_->ScanDir(subDirs, pathName, "*", SCAN_DIRS, true);
 
-            for (unsigned i = 0; i < subDirs.Size(); ++i)
+            for (unsigned i = 0; i < subDirs.size(); ++i)
             {
                 String subDirFullPath = AddTrailingSlash(path_ + subDirs[i]);
 

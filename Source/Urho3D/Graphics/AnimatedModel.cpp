@@ -353,28 +353,28 @@ namespace Urho3D
 
             // Copy the subgeometry & LOD level structure
             SetNumGeometries(model->GetNumGeometries());
-            const Vector<Vector<SharedPtr<Geometry> > >& geometries = model->GetGeometries();
+            const std::vector<std::vector<SharedPtr<Geometry> > >& geometries = model->GetGeometries();
             const PODVector<Vector3>& geometryCenters = model->GetGeometryCenters();
-            for (unsigned i = 0; i < geometries.Size(); ++i)
+            for (unsigned i = 0; i < geometries.size(); ++i)
             {
                 geometries_[i] = geometries[i];
                 geometryData_[i].center_ = geometryCenters[i];
             }
 
             // Copy geometry bone mappings
-            const Vector<PODVector<unsigned> >& geometryBoneMappings = model->GetGeometryBoneMappings();
-            geometryBoneMappings_.Clear();
-            geometryBoneMappings_.Reserve(geometryBoneMappings.Size());
-            for (unsigned i = 0; i < geometryBoneMappings.Size(); ++i)
-                geometryBoneMappings_.Push(geometryBoneMappings[i]);
+            const std::vector<PODVector<unsigned> >& geometryBoneMappings = model->GetGeometryBoneMappings();
+            geometryBoneMappings_.clear();
+            geometryBoneMappings_.reserve(geometryBoneMappings.size());
+            for (unsigned i = 0; i < geometryBoneMappings.size(); ++i)
+                geometryBoneMappings_.push_back(geometryBoneMappings[i]);
 
             // Copy morphs. Note: morph vertex buffers will be created later on-demand
-            morphVertexBuffers_.Clear();
-            morphs_.Clear();
-            const Vector<ModelMorph>& morphs = model->GetMorphs();
-            morphs_.Reserve(morphs.Size());
+            morphVertexBuffers_.clear();
+            morphs_.clear();
+            const std::vector<ModelMorph>& morphs = model->GetMorphs();
+            morphs_.reserve(morphs.size());
             morphElementMask_ = MASK_NONE;
-            for (unsigned i = 0; i < morphs.Size(); ++i)
+            for (unsigned i = 0; i < morphs.size(); ++i)
             {
                 ModelMorph newMorph;
                 newMorph.name_ = morphs[i].name_;
@@ -384,7 +384,7 @@ namespace Urho3D
                 for (HashMap<unsigned, VertexBufferMorph>::ConstIterator j = morphs[i].buffers_.Begin();
                     j != morphs[i].buffers_.End(); ++j)
                     morphElementMask_ |= j->second_.elementMask_;
-                morphs_.Push(newMorph);
+                morphs_.push_back(newMorph);
             }
 
             // Copy bounding box & skeleton
@@ -406,7 +406,7 @@ namespace Urho3D
                 {
                     batches_[i].geometryType_ = GEOM_SKINNED;
                     // Check if model has per-geometry bone mappings
-                    if (geometrySkinMatrices_.Size() && geometrySkinMatrices_[i].Size())
+                    if (geometrySkinMatrices_.size() && geometrySkinMatrices_[i].Size())
                     {
                         batches_[i].worldTransform_ = &geometrySkinMatrices_[i][0];
                         batches_[i].numWorldTransforms_ = geometrySkinMatrices_[i].Size();
@@ -430,9 +430,9 @@ namespace Urho3D
         {
             RemoveRootBone(); // Remove existing root bone if any
             SetNumGeometries(0);
-            geometryBoneMappings_.Clear();
-            morphVertexBuffers_.Clear();
-            morphs_.Clear();
+            geometryBoneMappings_.clear();
+            morphVertexBuffers_.clear();
+            morphs_.clear();
             morphElementMask_ = MASK_NONE;
             SetBoundingBox(BoundingBox());
             SetSkeleton(Skeleton(), false);
@@ -458,7 +458,7 @@ namespace Urho3D
             return existing;
 
         SharedPtr<AnimationState> newState(new AnimationState(this, animation));
-        animationStates_.Push(newState);
+        animationStates_.push_back(newState);
         MarkAnimationOrderDirty();
         return newState;
     }
@@ -469,12 +469,12 @@ namespace Urho3D
             RemoveAnimationState(animation->GetNameHash());
         else
         {
-            for (Vector<SharedPtr<AnimationState> >::Iterator i = animationStates_.Begin(); i != animationStates_.End(); ++i)
+            for (std::vector<SharedPtr<AnimationState> >::iterator i = animationStates_.begin(); i != animationStates_.end(); ++i)
             {
                 AnimationState* state = *i;
                 if (!state->GetAnimation())
                 {
-                    animationStates_.Erase(i);
+                    animationStates_.erase(i);
                     MarkAnimationDirty();
                     return;
                 }
@@ -489,7 +489,7 @@ namespace Urho3D
 
     void AnimatedModel::RemoveAnimationState(StringHash animationNameHash)
     {
-        for (Vector<SharedPtr<AnimationState> >::Iterator i = animationStates_.Begin(); i != animationStates_.End(); ++i)
+        for (std::vector<SharedPtr<AnimationState> >::iterator i = animationStates_.begin(); i != animationStates_.end(); ++i)
         {
             AnimationState* state = *i;
             Animation* animation = state->GetAnimation();
@@ -498,7 +498,7 @@ namespace Urho3D
                 // Check both the animation and the resource name
                 if (animation->GetNameHash() == animationNameHash || animation->GetAnimationNameHash() == animationNameHash)
                 {
-                    animationStates_.Erase(i);
+                    animationStates_.erase(i);
                     MarkAnimationDirty();
                     return;
                 }
@@ -508,11 +508,11 @@ namespace Urho3D
 
     void AnimatedModel::RemoveAnimationState(AnimationState* state)
     {
-        for (Vector<SharedPtr<AnimationState> >::Iterator i = animationStates_.Begin(); i != animationStates_.End(); ++i)
+        for (std::vector<SharedPtr<AnimationState> >::iterator i = animationStates_.begin(); i != animationStates_.end(); ++i)
         {
             if (*i == state)
             {
-                animationStates_.Erase(i);
+                animationStates_.erase(i);
                 MarkAnimationDirty();
                 return;
             }
@@ -521,18 +521,19 @@ namespace Urho3D
 
     void AnimatedModel::RemoveAnimationState(unsigned index)
     {
-        if (index < animationStates_.Size())
+        if (index < animationStates_.size())
         {
-            animationStates_.Erase(index);
+
+            animationStates_.erase(animationStates_.begin() + index);
             MarkAnimationDirty();
         }
     }
 
     void AnimatedModel::RemoveAllAnimationStates()
     {
-        if (animationStates_.Size())
+        if (animationStates_.size())
         {
-            animationStates_.Clear();
+            animationStates_.clear();
             MarkAnimationDirty();
         }
     }
@@ -552,11 +553,11 @@ namespace Urho3D
 
     void AnimatedModel::SetMorphWeight(unsigned index, float weight)
     {
-        if (index >= morphs_.Size())
+        if (index >= morphs_.size())
             return;
 
         // If morph vertex buffers have not been created yet, create now
-        if (weight != 0.0f && morphVertexBuffers_.Empty())
+        if (weight != 0.0f && morphVertexBuffers_.empty())
             CloneGeometries();
 
         if (weight != morphs_[index].weight_)
@@ -584,7 +585,7 @@ namespace Urho3D
 
     void AnimatedModel::SetMorphWeight(const String& name, float weight)
     {
-        for (unsigned i = 0; i < morphs_.Size(); ++i)
+        for (unsigned i = 0; i < morphs_.size(); ++i)
         {
             if (morphs_[i].name_ == name)
             {
@@ -596,7 +597,7 @@ namespace Urho3D
 
     void AnimatedModel::SetMorphWeight(StringHash nameHash, float weight)
     {
-        for (unsigned i = 0; i < morphs_.Size(); ++i)
+        for (unsigned i = 0; i < morphs_.size(); ++i)
         {
             if (morphs_[i].nameHash_ == nameHash)
             {
@@ -608,7 +609,7 @@ namespace Urho3D
 
     void AnimatedModel::ResetMorphWeights()
     {
-        for (Vector<ModelMorph>::Iterator i = morphs_.Begin(); i != morphs_.End(); ++i)
+        for (std::vector<ModelMorph>::iterator i = morphs_.begin(); i != morphs_.end(); ++i)
             i->weight_ = 0.0f;
 
         // For a master model, reset weights on non-master models
@@ -630,12 +631,12 @@ namespace Urho3D
 
     float AnimatedModel::GetMorphWeight(unsigned index) const
     {
-        return index < morphs_.Size() ? morphs_[index].weight_ : 0.0f;
+        return index < morphs_.size() ? morphs_[index].weight_ : 0.0f;
     }
 
     float AnimatedModel::GetMorphWeight(const String& name) const
     {
-        for (Vector<ModelMorph>::ConstIterator i = morphs_.Begin(); i != morphs_.End(); ++i)
+        for (std::vector<ModelMorph>::const_iterator i = morphs_.begin(); i != morphs_.end(); ++i)
         {
             if (i->name_ == name)
                 return i->weight_;
@@ -646,7 +647,7 @@ namespace Urho3D
 
     float AnimatedModel::GetMorphWeight(StringHash nameHash) const
     {
-        for (Vector<ModelMorph>::ConstIterator i = morphs_.Begin(); i != morphs_.End(); ++i)
+        for (std::vector<ModelMorph>::const_iterator i = morphs_.begin(); i != morphs_.end(); ++i)
         {
             if (i->nameHash_ == nameHash)
                 return i->weight_;
@@ -657,7 +658,7 @@ namespace Urho3D
 
     AnimationState* AnimatedModel::GetAnimationState(Animation* animation) const
     {
-        for (Vector<SharedPtr<AnimationState> >::ConstIterator i = animationStates_.Begin(); i != animationStates_.End(); ++i)
+        for (std::vector<SharedPtr<AnimationState> >::const_iterator i = animationStates_.begin(); i != animationStates_.end(); ++i)
         {
             if ((*i)->GetAnimation() == animation)
                 return *i;
@@ -673,7 +674,7 @@ namespace Urho3D
 
     AnimationState* AnimatedModel::GetAnimationState(StringHash animationNameHash) const
     {
-        for (Vector<SharedPtr<AnimationState> >::ConstIterator i = animationStates_.Begin(); i != animationStates_.End(); ++i)
+        for (std::vector<SharedPtr<AnimationState> >::const_iterator i = animationStates_.begin(); i != animationStates_.end(); ++i)
         {
             Animation* animation = (*i)->GetAnimation();
             if (animation)
@@ -689,7 +690,7 @@ namespace Urho3D
 
     AnimationState* AnimatedModel::GetAnimationState(unsigned index) const
     {
-        return index < animationStates_.Size() ? animationStates_[index].Get() : nullptr;
+        return index < animationStates_.size() ? animationStates_[index].Get() : nullptr;
     }
 
     void AnimatedModel::SetSkeleton(const Skeleton& skeleton, bool createBones)
@@ -823,7 +824,7 @@ namespace Urho3D
         if (numStates > MAX_ANIMATION_STATES)
             numStates = MAX_ANIMATION_STATES;
 
-        animationStates_.Reserve(numStates);
+        animationStates_.reserve(numStates);
         while (numStates--)
         {
             if (index + 5 < value.size())
@@ -831,7 +832,7 @@ namespace Urho3D
                 // Note: null animation is allowed here for editing
                 const ResourceRef& animRef = value[index++].GetResourceRef();
                 SharedPtr<AnimationState> newState(new AnimationState(this, cache->GetResource<Animation>(animRef.name_)));
-                animationStates_.Push(newState);
+                animationStates_.push_back(newState);
 
                 newState->SetStartBone(skeleton_.GetBone(value[index++].GetString()));
                 newState->SetLooped(value[index++].GetBool());
@@ -843,11 +844,11 @@ namespace Urho3D
             {
                 // If not enough data, just add an empty animation state
                 SharedPtr<AnimationState> newState(new AnimationState(this, nullptr));
-                animationStates_.Push(newState);
+                animationStates_.push_back(newState);
             }
         }
 
-        if (animationStates_.Size())
+        if (animationStates_.size())
         {
             MarkAnimationDirty();
             MarkAnimationOrderDirty();
@@ -878,9 +879,9 @@ namespace Urho3D
     VariantVector AnimatedModel::GetAnimationStatesAttr() const
     {
         VariantVector ret;
-        ret.reserve(animationStates_.Size() * 6 + 1);
-        ret.push_back(animationStates_.Size());
-        for (Vector<SharedPtr<AnimationState> >::ConstIterator i = animationStates_.Begin(); i != animationStates_.End(); ++i)
+        ret.reserve(animationStates_.size() * 6 + 1);
+        ret.push_back(animationStates_.size());
+        for (std::vector<SharedPtr<AnimationState> >::const_iterator i = animationStates_.begin(); i != animationStates_.end(); ++i)
         {
             AnimationState* state = *i;
             Animation* animation = state->GetAnimation();
@@ -898,7 +899,7 @@ namespace Urho3D
     const PODVector<unsigned char>& AnimatedModel::GetMorphsAttr() const
     {
         attrBuffer_.Clear();
-        for (Vector<ModelMorph>::ConstIterator i = morphs_.Begin(); i != morphs_.End(); ++i)
+        for (std::vector<ModelMorph>::const_iterator i = morphs_.begin(); i != morphs_.end(); ++i)
             attrBuffer_.WriteUByte((unsigned char)(i->weight_ * 255.0f));
 
         return attrBuffer_.GetBuffer();
@@ -1004,7 +1005,7 @@ namespace Urho3D
             SetSkeleton(model_->GetSkeleton(), true);
 
         // Re-assign the same start bone to animations to get the proper bone node this time
-        for (Vector<SharedPtr<AnimationState> >::Iterator i = animationStates_.Begin(); i != animationStates_.End(); ++i)
+        for (std::vector<SharedPtr<AnimationState> >::iterator i = animationStates_.begin(); i != animationStates_.end(); ++i)
         {
             AnimationState* state = *i;
             state->SetStartBone(state->GetStartBone());
@@ -1105,11 +1106,11 @@ namespace Urho3D
 
     void AnimatedModel::CloneGeometries()
     {
-        const Vector<SharedPtr<VertexBuffer> >& originalVertexBuffers = model_->GetVertexBuffers();
+        const std::vector<SharedPtr<VertexBuffer> >& originalVertexBuffers = model_->GetVertexBuffers();
         HashMap<VertexBuffer*, SharedPtr<VertexBuffer> > clonedVertexBuffers;
-        morphVertexBuffers_.Resize(originalVertexBuffers.Size());
+        morphVertexBuffers_.resize(originalVertexBuffers.size());
 
-        for (unsigned i = 0; i < originalVertexBuffers.Size(); ++i)
+        for (unsigned i = 0; i < originalVertexBuffers.size(); ++i)
         {
             VertexBuffer* original = originalVertexBuffers[i];
             if (model_->GetMorphRangeCount(i))
@@ -1131,9 +1132,9 @@ namespace Urho3D
         }
 
         // Geometries will always be cloned fully. They contain only references to buffer, so they are relatively light
-        for (unsigned i = 0; i < geometries_.Size(); ++i)
+        for (unsigned i = 0; i < geometries_.size(); ++i)
         {
-            for (unsigned j = 0; j < geometries_[i].Size(); ++j)
+            for (unsigned j = 0; j < geometries_[i].size(); ++j)
             {
                 SharedPtr<Geometry> original = geometries_[i][j];
                 SharedPtr<Geometry> clone(new Geometry(context_));
@@ -1223,15 +1224,15 @@ namespace Urho3D
 
     void AnimatedModel::SetGeometryBoneMappings()
     {
-        geometrySkinMatrices_.Clear();
-        geometrySkinMatrixPtrs_.Clear();
+        geometrySkinMatrices_.clear();
+        geometrySkinMatrixPtrs_.clear();
 
-        if (!geometryBoneMappings_.Size())
+        if (!geometryBoneMappings_.size())
             return;
 
         // Check if all mappings are empty, then we do not need to use mapped skinning
         bool allEmpty = true;
-        for (unsigned i = 0; i < geometryBoneMappings_.Size(); ++i)
+        for (unsigned i = 0; i < geometryBoneMappings_.size(); ++i)
             if (geometryBoneMappings_[i].Size())
                 allEmpty = false;
 
@@ -1239,14 +1240,14 @@ namespace Urho3D
             return;
 
         // Reserve space for per-geometry skinning matrices
-        geometrySkinMatrices_.Resize(geometryBoneMappings_.Size());
-        for (unsigned i = 0; i < geometryBoneMappings_.Size(); ++i)
+        geometrySkinMatrices_.resize(geometryBoneMappings_.size());
+        for (unsigned i = 0; i < geometryBoneMappings_.size(); ++i)
             geometrySkinMatrices_[i].Resize(geometryBoneMappings_[i].Size());
 
         // Build original-to-skinindex matrix pointer mapping for fast copying
         // Note: at this point layout of geometrySkinMatrices_ cannot be modified or pointers become invalid
-        geometrySkinMatrixPtrs_.Resize(skeleton_.GetNumBones());
-        for (unsigned i = 0; i < geometryBoneMappings_.Size(); ++i)
+        geometrySkinMatrixPtrs_.resize(skeleton_.GetNumBones());
+        for (unsigned i = 0; i < geometryBoneMappings_.size(); ++i)
         {
             for (unsigned j = 0; j < geometryBoneMappings_[i].Size(); ++j)
                 geometrySkinMatrixPtrs_[geometryBoneMappings_[i][j]].Push(&geometrySkinMatrices_[i][j]);
@@ -1279,7 +1280,7 @@ namespace Urho3D
         // Make sure animations are in ascending priority order
         if (animationOrderDirty_)
         {
-            Sort(animationStates_.Begin(), animationStates_.End(), CompareAnimationOrder);
+            std::sort(animationStates_.begin(), animationStates_.end(), CompareAnimationOrder);
             animationOrderDirty_ = false;
         }
 
@@ -1288,7 +1289,7 @@ namespace Urho3D
         if (isMaster_)
         {
             skeleton_.ResetSilent();
-            for (Vector<SharedPtr<AnimationState> >::Iterator i = animationStates_.Begin(); i != animationStates_.End(); ++i)
+            for (std::vector<SharedPtr<AnimationState> >::iterator i = animationStates_.begin(); i != animationStates_.end(); ++i)
                 (*i)->Apply();
 
             // Skeleton reset and animations apply the node transforms "silently" to avoid repeated marking dirty. Mark dirty now
@@ -1309,7 +1310,7 @@ namespace Urho3D
         const Matrix3x4& worldTransform = node_->GetWorldTransform();
 
         // Skinning with global matrices only
-        if (!geometrySkinMatrices_.Size())
+        if (!geometrySkinMatrices_.size())
         {
             for (size_t i = 0; i < bones.size(); ++i)
             {
@@ -1346,10 +1347,10 @@ namespace Urho3D
         if (!graphics)
             return;
 
-        if (morphs_.Size())
+        if (morphs_.size())
         {
             // Reset the morph data range from all morphable vertex buffers, then apply morphs
-            for (unsigned i = 0; i < morphVertexBuffers_.Size(); ++i)
+            for (unsigned i = 0; i < morphVertexBuffers_.size(); ++i)
             {
                 VertexBuffer* buffer = morphVertexBuffers_[i];
                 if (buffer)
@@ -1365,7 +1366,7 @@ namespace Urho3D
                         CopyMorphVertices(dest, originalBuffer->GetShadowData() + morphStart * originalBuffer->GetVertexSize(),
                             morphCount, buffer, originalBuffer);
 
-                        for (unsigned j = 0; j < morphs_.Size(); ++j)
+                        for (unsigned j = 0; j < morphs_.size(); ++j)
                         {
                             if (morphs_[j].weight_ != 0.0f)
                             {

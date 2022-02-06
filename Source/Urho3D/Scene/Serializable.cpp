@@ -37,14 +37,14 @@
 namespace Urho3D
 {
 
-static unsigned RemapAttributeIndex(const Vector<AttributeInfo>* attributes, const AttributeInfo& netAttr, unsigned netAttrIndex)
+static unsigned RemapAttributeIndex(const std::vector<AttributeInfo>* attributes, const AttributeInfo& netAttr, unsigned netAttrIndex)
 {
     if (!attributes)
         return netAttrIndex; // Could not remap
 
-    for (unsigned i = 0; i < attributes->Size(); ++i)
+    for (unsigned i = 0; i < attributes->size(); ++i)
     {
-        const AttributeInfo& attr = attributes->At(i);
+        const AttributeInfo& attr = attributes->at(i);
         // Compare accessor to avoid name string compare
         if (attr.accessor_.Get() && attr.accessor_.Get() == netAttr.accessor_.Get())
             return i;
@@ -280,25 +280,25 @@ void Serializable::OnGetAttribute(const AttributeInfo& attr, Variant& dest) cons
     }
 }
 
-const Vector<AttributeInfo>* Serializable::GetAttributes() const
+const std::vector<AttributeInfo>* Serializable::GetAttributes() const
 {
     return context_->GetAttributes(GetType());
 }
 
-const Vector<AttributeInfo>* Serializable::GetNetworkAttributes() const
+const std::vector<AttributeInfo>* Serializable::GetNetworkAttributes() const
 {
     return networkState_ ? networkState_->attributes_ : context_->GetNetworkAttributes(GetType());
 }
 
 bool Serializable::Load(Deserializer& source)
 {
-    const Vector<AttributeInfo>* attributes = GetAttributes();
+    const std::vector<AttributeInfo>* attributes = GetAttributes();
     if (!attributes)
         return true;
 
-    for (unsigned i = 0; i < attributes->Size(); ++i)
+    for (unsigned i = 0; i < attributes->size(); ++i)
     {
-        const AttributeInfo& attr = attributes->At(i);
+        const AttributeInfo& attr = attributes->at(i);
         if (!(attr.mode_ & AM_FILE))
             continue;
 
@@ -317,15 +317,15 @@ bool Serializable::Load(Deserializer& source)
 
 bool Serializable::Save(Serializer& dest) const
 {
-    const Vector<AttributeInfo>* attributes = GetAttributes();
+    const std::vector<AttributeInfo>* attributes = GetAttributes();
     if (!attributes)
         return true;
 
     Variant value;
 
-    for (unsigned i = 0; i < attributes->Size(); ++i)
+    for (unsigned i = 0; i < attributes->size(); ++i)
     {
-        const AttributeInfo& attr = attributes->At(i);
+        const AttributeInfo& attr = attributes->at(i);
         if (!(attr.mode_ & AM_FILE) || (attr.mode_ & AM_FILEREADONLY) == AM_FILEREADONLY)
             continue;
 
@@ -349,7 +349,7 @@ bool Serializable::LoadXML(const XMLElement& source)
         return false;
     }
 
-    const Vector<AttributeInfo>* attributes = GetAttributes();
+    const std::vector<AttributeInfo>* attributes = GetAttributes();
     if (!attributes)
         return true;
 
@@ -360,11 +360,11 @@ bool Serializable::LoadXML(const XMLElement& source)
     {
         String name = attrElem.GetAttribute("name");
         unsigned i = startIndex;
-        unsigned attempts = attributes->Size();
+        unsigned attempts = attributes->size();
 
         while (attempts)
         {
-            const AttributeInfo& attr = attributes->At(i);
+            const AttributeInfo& attr = attributes->at(i);
             if ((attr.mode_ & AM_FILE) && !attr.name_.Compare(name, true))
             {
                 Variant varValue;
@@ -397,12 +397,12 @@ bool Serializable::LoadXML(const XMLElement& source)
                 if (!varValue.IsEmpty())
                     OnSetAttribute(attr, varValue);
 
-                startIndex = (i + 1) % attributes->Size();
+                startIndex = (i + 1) % attributes->size();
                 break;
             }
             else
             {
-                i = (i + 1) % attributes->Size();
+                i = (i + 1) % attributes->size();
                 --attempts;
             }
         }
@@ -424,7 +424,7 @@ bool Serializable::LoadJSON(const JSONValue& source)
         return false;
     }
 
-    const Vector<AttributeInfo>* attributes = GetAttributes();
+    const std::vector<AttributeInfo>* attributes = GetAttributes();
     if (!attributes)
         return true;
 
@@ -448,11 +448,11 @@ bool Serializable::LoadJSON(const JSONValue& source)
         String name = it->first_;
         const JSONValue& value = it->second_;
         unsigned i = startIndex;
-        unsigned attempts = attributes->Size();
+        unsigned attempts = attributes->size();
 
         while (attempts)
         {
-            const AttributeInfo& attr = attributes->At(i);
+            const AttributeInfo& attr = attributes->at(i);
             if ((attr.mode_ & AM_FILE) && !attr.name_.Compare(name, true))
             {
                 Variant varValue;
@@ -485,12 +485,12 @@ bool Serializable::LoadJSON(const JSONValue& source)
                 if (!varValue.IsEmpty())
                     OnSetAttribute(attr, varValue);
 
-                startIndex = (i + 1) % attributes->Size();
+                startIndex = (i + 1) % attributes->size();
                 break;
             }
             else
             {
-                i = (i + 1) % attributes->Size();
+                i = (i + 1) % attributes->size();
                 --attempts;
             }
         }
@@ -512,15 +512,15 @@ bool Serializable::SaveXML(XMLElement& dest) const
         return false;
     }
 
-    const Vector<AttributeInfo>* attributes = GetAttributes();
+    const std::vector<AttributeInfo>* attributes = GetAttributes();
     if (!attributes)
         return true;
 
     Variant value;
 
-    for (unsigned i = 0; i < attributes->Size(); ++i)
+    for (unsigned i = 0; i < attributes->size(); ++i)
     {
-        const AttributeInfo& attr = attributes->At(i);
+        const AttributeInfo& attr = attributes->at(i);
         if (!(attr.mode_ & AM_FILE) || (attr.mode_ & AM_FILEREADONLY) == AM_FILEREADONLY)
             continue;
 
@@ -548,16 +548,16 @@ bool Serializable::SaveXML(XMLElement& dest) const
 
 bool Serializable::SaveJSON(JSONValue& dest) const
 {
-    const Vector<AttributeInfo>* attributes = GetAttributes();
+    const std::vector<AttributeInfo>* attributes = GetAttributes();
     if (!attributes)
         return true;
 
     Variant value;
     JSONValue attributesValue;
 
-    for (unsigned i = 0; i < attributes->Size(); ++i)
+    for (unsigned i = 0; i < attributes->size(); ++i)
     {
-        const AttributeInfo& attr = attributes->At(i);
+        const AttributeInfo& attr = attributes->at(i);
         if (!(attr.mode_ & AM_FILE) || (attr.mode_ & AM_FILEREADONLY) == AM_FILEREADONLY)
             continue;
 
@@ -587,19 +587,19 @@ bool Serializable::SaveJSON(JSONValue& dest) const
 
 bool Serializable::SetAttribute(unsigned index, const Variant& value)
 {
-    const Vector<AttributeInfo>* attributes = GetAttributes();
+    const std::vector<AttributeInfo>* attributes = GetAttributes();
     if (!attributes)
     {
         URHO3D_LOGERROR(GetTypeName() + " has no attributes");
         return false;
     }
-    if (index >= attributes->Size())
+    if (index >= attributes->size())
     {
         URHO3D_LOGERROR("Attribute index out of bounds");
         return false;
     }
 
-    const AttributeInfo& attr = attributes->At(index);
+    const AttributeInfo& attr = attributes->at(index);
 
     // Check that the new value's type matches the attribute type
     if (value.GetType() == attr.type_)
@@ -617,14 +617,14 @@ bool Serializable::SetAttribute(unsigned index, const Variant& value)
 
 bool Serializable::SetAttribute(const String& name, const Variant& value)
 {
-    const Vector<AttributeInfo>* attributes = GetAttributes();
+    const std::vector<AttributeInfo>* attributes = GetAttributes();
     if (!attributes)
     {
         URHO3D_LOGERROR(GetTypeName() + " has no attributes");
         return false;
     }
 
-    for (Vector<AttributeInfo>::ConstIterator i = attributes->Begin(); i != attributes->End(); ++i)
+    for (std::vector<AttributeInfo>::const_iterator i = attributes->begin(); i != attributes->end(); ++i)
     {
         if (!i->name_.Compare(name, true))
         {
@@ -649,13 +649,13 @@ bool Serializable::SetAttribute(const String& name, const Variant& value)
 
 void Serializable::ResetToDefault()
 {
-    const Vector<AttributeInfo>* attributes = GetAttributes();
+    const std::vector<AttributeInfo>* attributes = GetAttributes();
     if (!attributes)
         return;
 
-    for (unsigned i = 0; i < attributes->Size(); ++i)
+    for (unsigned i = 0; i < attributes->size(); ++i)
     {
-        const AttributeInfo& attr = attributes->At(i);
+        const AttributeInfo& attr = attributes->at(i);
         if (attr.mode_ & (AM_NOEDIT | AM_NODEID | AM_COMPONENTID | AM_NODEIDVECTOR))
             continue;
 
@@ -691,13 +691,13 @@ void Serializable::SetInterceptNetworkUpdate(const String& attributeName, bool e
 {
     AllocateNetworkState();
 
-    const Vector<AttributeInfo>* attributes = networkState_->attributes_;
+    const std::vector<AttributeInfo>* attributes = networkState_->attributes_;
     if (!attributes)
         return;
 
-    for (unsigned i = 0; i < attributes->Size(); ++i)
+    for (unsigned i = 0; i < attributes->size(); ++i)
     {
-        const AttributeInfo& attr = attributes->At(i);
+        const AttributeInfo& attr = attributes->at(i);
         if (!attr.name_.Compare(attributeName, true))
         {
             if (enable)
@@ -714,23 +714,23 @@ void Serializable::AllocateNetworkState()
     if (networkState_)
         return;
 
-    const Vector<AttributeInfo>* networkAttributes = GetNetworkAttributes();
+    const std::vector<AttributeInfo>* networkAttributes = GetNetworkAttributes();
     networkState_ = new NetworkState();
     networkState_->attributes_ = networkAttributes;
 
     if (!networkAttributes)
         return;
 
-    unsigned numAttributes = networkAttributes->Size();
+    unsigned numAttributes = networkAttributes->size();
 
-    if (networkState_->currentValues_.Size() != numAttributes)
+    if (networkState_->currentValues_.size() != numAttributes)
     {
-        networkState_->currentValues_.Resize(numAttributes);
-        networkState_->previousValues_.Resize(numAttributes);
+        networkState_->currentValues_.resize(numAttributes);
+        networkState_->previousValues_.resize(numAttributes);
 
         // Copy the default attribute values to the previous state as a starting point
         for (unsigned i = 0; i < numAttributes; ++i)
-            networkState_->previousValues_[i] = networkAttributes->At(i).defaultValue_;
+            networkState_->previousValues_[i] = networkAttributes->at(i).defaultValue_;
     }
 }
 
@@ -742,17 +742,17 @@ void Serializable::WriteInitialDeltaUpdate(Serializer& dest, unsigned char timeS
         return;
     }
 
-    const Vector<AttributeInfo>* attributes = networkState_->attributes_;
+    const std::vector<AttributeInfo>* attributes = networkState_->attributes_;
     if (!attributes)
         return;
 
-    unsigned numAttributes = attributes->Size();
+    unsigned numAttributes = attributes->size();
     DirtyBits attributeBits;
 
     // Compare against defaults
     for (unsigned i = 0; i < numAttributes; ++i)
     {
-        const AttributeInfo& attr = attributes->At(i);
+        const AttributeInfo& attr = attributes->at(i);
         if (networkState_->currentValues_[i] != attr.defaultValue_)
             attributeBits.Set(i);
     }
@@ -776,11 +776,11 @@ void Serializable::WriteDeltaUpdate(Serializer& dest, const DirtyBits& attribute
         return;
     }
 
-    const Vector<AttributeInfo>* attributes = networkState_->attributes_;
+    const std::vector<AttributeInfo>* attributes = networkState_->attributes_;
     if (!attributes)
         return;
 
-    unsigned numAttributes = attributes->Size();
+    unsigned numAttributes = attributes->size();
 
     // First write the change bitfield, then attribute data for changed attributes
     // Note: the attribute bits should not contain LATESTDATA attributes
@@ -802,28 +802,28 @@ void Serializable::WriteLatestDataUpdate(Serializer& dest, unsigned char timeSta
         return;
     }
 
-    const Vector<AttributeInfo>* attributes = networkState_->attributes_;
+    const std::vector<AttributeInfo>* attributes = networkState_->attributes_;
     if (!attributes)
         return;
 
-    unsigned numAttributes = attributes->Size();
+    unsigned numAttributes = attributes->size();
 
     dest.WriteUByte(timeStamp);
 
     for (unsigned i = 0; i < numAttributes; ++i)
     {
-        if (attributes->At(i).mode_ & AM_LATESTDATA)
+        if (attributes->at(i).mode_ & AM_LATESTDATA)
             dest.WriteVariantData(networkState_->currentValues_[i]);
     }
 }
 
 bool Serializable::ReadDeltaUpdate(Deserializer& source)
 {
-    const Vector<AttributeInfo>* attributes = GetNetworkAttributes();
+    const std::vector<AttributeInfo>* attributes = GetNetworkAttributes();
     if (!attributes)
         return false;
 
-    unsigned numAttributes = attributes->Size();
+    unsigned numAttributes = attributes->size();
     DirtyBits attributeBits;
     bool changed = false;
 
@@ -835,7 +835,7 @@ bool Serializable::ReadDeltaUpdate(Deserializer& source)
     {
         if (attributeBits.IsSet(i))
         {
-            const AttributeInfo& attr = attributes->At(i);
+            const AttributeInfo& attr = attributes->at(i);
             if (!(interceptMask & (1ULL << i)))
             {
                 OnSetAttribute(attr, source.ReadVariant(attr.type_));
@@ -861,11 +861,11 @@ bool Serializable::ReadDeltaUpdate(Deserializer& source)
 
 bool Serializable::ReadLatestDataUpdate(Deserializer& source)
 {
-    const Vector<AttributeInfo>* attributes = GetNetworkAttributes();
+    const std::vector<AttributeInfo>* attributes = GetNetworkAttributes();
     if (!attributes)
         return false;
 
-    unsigned numAttributes = attributes->Size();
+    unsigned numAttributes = attributes->size();
     bool changed = false;
 
     unsigned long long interceptMask = networkState_ ? networkState_->interceptMask_ : 0;
@@ -873,7 +873,7 @@ bool Serializable::ReadLatestDataUpdate(Deserializer& source)
 
     for (unsigned i = 0; i < numAttributes && !source.IsEof(); ++i)
     {
-        const AttributeInfo& attr = attributes->At(i);
+        const AttributeInfo& attr = attributes->at(i);
         if (attr.mode_ & AM_LATESTDATA)
         {
             if (!(interceptMask & (1ULL << i)))
@@ -903,19 +903,19 @@ Variant Serializable::GetAttribute(unsigned index) const
 {
     Variant ret;
 
-    const Vector<AttributeInfo>* attributes = GetAttributes();
+    const std::vector<AttributeInfo>* attributes = GetAttributes();
     if (!attributes)
     {
         URHO3D_LOGERROR(GetTypeName() + " has no attributes");
         return ret;
     }
-    if (index >= attributes->Size())
+    if (index >= attributes->size())
     {
         URHO3D_LOGERROR("Attribute index out of bounds");
         return ret;
     }
 
-    OnGetAttribute(attributes->At(index), ret);
+    OnGetAttribute(attributes->at(index), ret);
     return ret;
 }
 
@@ -923,14 +923,14 @@ Variant Serializable::GetAttribute(const String& name) const
 {
     Variant ret;
 
-    const Vector<AttributeInfo>* attributes = GetAttributes();
+    const std::vector<AttributeInfo>* attributes = GetAttributes();
     if (!attributes)
     {
         URHO3D_LOGERROR(GetTypeName() + " has no attributes");
         return ret;
     }
 
-    for (Vector<AttributeInfo>::ConstIterator i = attributes->Begin(); i != attributes->End(); ++i)
+    for (std::vector<AttributeInfo>::const_iterator i = attributes->begin(); i != attributes->end(); ++i)
     {
         if (!i->name_.Compare(name, true))
         {
@@ -945,19 +945,19 @@ Variant Serializable::GetAttribute(const String& name) const
 
 Variant Serializable::GetAttributeDefault(unsigned index) const
 {
-    const Vector<AttributeInfo>* attributes = GetAttributes();
+    const std::vector<AttributeInfo>* attributes = GetAttributes();
     if (!attributes)
     {
         URHO3D_LOGERROR(GetTypeName() + " has no attributes");
         return Variant::EMPTY;
     }
-    if (index >= attributes->Size())
+    if (index >= attributes->size())
     {
         URHO3D_LOGERROR("Attribute index out of bounds");
         return Variant::EMPTY;
     }
 
-    AttributeInfo attr = attributes->At(index);
+    AttributeInfo attr = attributes->at(index);
     Variant defaultValue = GetInstanceDefault(attr.name_);
     return defaultValue.IsEmpty() ? attr.defaultValue_ : defaultValue;
 }
@@ -968,14 +968,14 @@ Variant Serializable::GetAttributeDefault(const String& name) const
     if (!defaultValue.IsEmpty())
         return defaultValue;
 
-    const Vector<AttributeInfo>* attributes = GetAttributes();
+    const std::vector<AttributeInfo>* attributes = GetAttributes();
     if (!attributes)
     {
         URHO3D_LOGERROR(GetTypeName() + " has no attributes");
         return Variant::EMPTY;
     }
 
-    for (Vector<AttributeInfo>::ConstIterator i = attributes->Begin(); i != attributes->End(); ++i)
+    for (std::vector<AttributeInfo>::const_iterator i = attributes->begin(); i != attributes->end(); ++i)
     {
         if (!i->name_.Compare(name, true))
             return i->defaultValue_;
@@ -987,28 +987,28 @@ Variant Serializable::GetAttributeDefault(const String& name) const
 
 unsigned Serializable::GetNumAttributes() const
 {
-    const Vector<AttributeInfo>* attributes = GetAttributes();
-    return attributes ? attributes->Size() : 0;
+    const std::vector<AttributeInfo>* attributes = GetAttributes();
+    return attributes ? attributes->size() : 0;
 }
 
 unsigned Serializable::GetNumNetworkAttributes() const
 {
-    const Vector<AttributeInfo>* attributes = networkState_ ? networkState_->attributes_ :
+    const std::vector<AttributeInfo>* attributes = networkState_ ? networkState_->attributes_ :
         context_->GetNetworkAttributes(GetType());
-    return attributes ? attributes->Size() : 0;
+    return attributes ? attributes->size() : 0;
 }
 
 bool Serializable::GetInterceptNetworkUpdate(const String& attributeName) const
 {
-    const Vector<AttributeInfo>* attributes = GetNetworkAttributes();
+    const std::vector<AttributeInfo>* attributes = GetNetworkAttributes();
     if (!attributes)
         return false;
 
     unsigned long long interceptMask = networkState_ ? networkState_->interceptMask_ : 0;
 
-    for (unsigned i = 0; i < attributes->Size(); ++i)
+    for (unsigned i = 0; i < attributes->size(); ++i)
     {
-        const AttributeInfo& attr = attributes->At(i);
+        const AttributeInfo& attr = attributes->at(i);
         if (!attr.name_.Compare(attributeName, true))
             return interceptMask & (1ULL << i) ? true : false;
     }

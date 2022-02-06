@@ -197,8 +197,8 @@ void Connection::SetScene(Scene* newScene)
         sceneState_.Clear();
 
         // When scene is assigned on the server, instruct the client to load it. This may require downloading packages
-        const Vector<SharedPtr<PackageFile> >& packages = scene_->GetRequiredPackageFiles();
-        unsigned numPackages = packages.Size();
+        const std::vector<SharedPtr<PackageFile> >& packages = scene_->GetRequiredPackageFiles();
+        unsigned numPackages = packages.size();
         msg_.Clear();
         msg_.WriteString(scene_->GetFileName());
         msg_.WriteVLE(numPackages);
@@ -554,8 +554,8 @@ void Connection::ProcessLoadScene(int msgID, MemoryBuffer& msg)
     auto* cache = GetSubsystem<ResourceCache>();
     const String& packageCacheDir = GetSubsystem<Network>()->GetPackageCacheDir();
 
-    Vector<SharedPtr<PackageFile> > packages = cache->GetPackageFiles();
-    for (unsigned i = 0; i < packages.Size(); ++i)
+    std::vector<SharedPtr<PackageFile>> packages = cache->GetPackageFiles();
+    for (unsigned i = 0; i < packages.size(); ++i)
     {
         PackageFile* package = packages[i];
         if (!package->GetName().Find(packageCacheDir))
@@ -816,8 +816,8 @@ void Connection::ProcessPackageDownload(int msgID, MemoryBuffer& msg)
                 }
 
                 // The package must be one of those required by the scene
-                const Vector<SharedPtr<PackageFile> >& packages = scene_->GetRequiredPackageFiles();
-                for (unsigned i = 0; i < packages.Size(); ++i)
+                const std::vector<SharedPtr<PackageFile> >& packages = scene_->GetRequiredPackageFiles();
+                for (unsigned i = 0; i < packages.size(); ++i)
                 {
                     PackageFile* package = packages[i];
                     const String& packageFullName = package->GetName();
@@ -1272,8 +1272,8 @@ void Connection::ProcessNewNode(Node* node)
 
     // Write node's components
     msg_.WriteVLE(node->GetNumNetworkComponents());
-    const Vector<SharedPtr<Component> >& components = node->GetComponents();
-    for (unsigned i = 0; i < components.Size(); ++i)
+    const std::vector<SharedPtr<Component> >& components = node->GetComponents();
+    for (unsigned i = 0; i < components.size(); ++i)
     {
         Component* component = components[i];
         // Check if component is not to be replicated
@@ -1321,13 +1321,13 @@ void Connection::ProcessExistingNode(Node* node, NodeReplicationState& nodeState
     // Check if attributes have changed
     if (nodeState.dirtyAttributes_.Count() || nodeState.dirtyVars_.size())
     {
-        const Vector<AttributeInfo>* attributes = node->GetNetworkAttributes();
-        unsigned numAttributes = attributes->Size();
+        const std::vector<AttributeInfo>* attributes = node->GetNetworkAttributes();
+        unsigned numAttributes = attributes->size();
         bool hasLatestData = false;
 
         for (unsigned i = 0; i < numAttributes; ++i)
         {
-            if (nodeState.dirtyAttributes_.IsSet(i) && (attributes->At(i).mode_ & AM_LATESTDATA))
+            if (nodeState.dirtyAttributes_.IsSet(i) && (attributes->at(i).mode_ & AM_LATESTDATA))
             {
                 hasLatestData = true;
                 nodeState.dirtyAttributes_.Clear(i);
@@ -1399,13 +1399,13 @@ void Connection::ProcessExistingNode(Node* node, NodeReplicationState& nodeState
             // Existing component. Check if attributes have changed
             if (componentState.dirtyAttributes_.Count())
             {
-                const Vector<AttributeInfo>* attributes = component->GetNetworkAttributes();
-                unsigned numAttributes = attributes->Size();
+                const std::vector<AttributeInfo>* attributes = component->GetNetworkAttributes();
+                unsigned numAttributes = attributes->size();
                 bool hasLatestData = false;
 
                 for (unsigned i = 0; i < numAttributes; ++i)
                 {
-                    if (componentState.dirtyAttributes_.IsSet(i) && (attributes->At(i).mode_ & AM_LATESTDATA))
+                    if (componentState.dirtyAttributes_.IsSet(i) && (attributes->at(i).mode_ & AM_LATESTDATA))
                     {
                         hasLatestData = true;
                         componentState.dirtyAttributes_.Clear(i);
@@ -1440,8 +1440,8 @@ void Connection::ProcessExistingNode(Node* node, NodeReplicationState& nodeState
     // Check for new components
     if (nodeState.componentStates_.Size() != node->GetNumNetworkComponents())
     {
-        const Vector<SharedPtr<Component> >& components = node->GetComponents();
-        for (unsigned i = 0; i < components.Size(); ++i)
+        const std::vector<SharedPtr<Component> >& components = node->GetComponents();
+        for (unsigned i = 0; i < components.size(); ++i)
         {
             Component* component = components[i];
             // Check if component is not to be replicated
@@ -1478,8 +1478,8 @@ bool Connection::RequestNeededPackages(unsigned numPackages, MemoryBuffer& msg)
     auto* cache = GetSubsystem<ResourceCache>();
     const String& packageCacheDir = GetSubsystem<Network>()->GetPackageCacheDir();
 
-    Vector<SharedPtr<PackageFile> > packages = cache->GetPackageFiles();
-    Vector<String> downloadedPackages;
+    std::vector<SharedPtr<PackageFile>> packages = cache->GetPackageFiles();
+    std::vector<String> downloadedPackages;
     bool packagesScanned = false;
 
     for (unsigned i = 0; i < numPackages; ++i)
@@ -1491,7 +1491,7 @@ bool Connection::RequestNeededPackages(unsigned numPackages, MemoryBuffer& msg)
         bool found = false;
 
         // Check first the resource cache
-        for (unsigned j = 0; j < packages.Size(); ++j)
+        for (unsigned j = 0; j < packages.size(); ++j)
         {
             PackageFile* package = packages[j];
             if (!GetFileNameAndExtension(package->GetName()).Compare(name, false) && package->GetTotalSize() == fileSize &&
@@ -1518,7 +1518,7 @@ bool Connection::RequestNeededPackages(unsigned numPackages, MemoryBuffer& msg)
         }
 
         // Then the download cache
-        for (unsigned j = 0; j < downloadedPackages.Size(); ++j)
+        for (unsigned j = 0; j < downloadedPackages.size(); ++j)
         {
             const String& fileName = downloadedPackages[j];
             // In download cache, package file name format is checksum_packagename

@@ -155,11 +155,11 @@ namespace Urho3D
 
     Geometry* StaticModel::GetLodGeometry(unsigned batchIndex, unsigned level)
     {
-        if (batchIndex >= geometries_.Size())
+        if (batchIndex >= geometries_.size())
             return nullptr;
 
         // If level is out of range, use visible geometry
-        if (level < geometries_[batchIndex].Size())
+        if (level < geometries_[batchIndex].size())
             return geometries_[batchIndex][level];
         else
             return batches_[batchIndex].geometry_;
@@ -250,10 +250,10 @@ namespace Urho3D
 
             // Copy the subgeometry & LOD level structure
             SetNumGeometries(model->GetNumGeometries());
-            const Vector<Vector<SharedPtr<Geometry> > >& geometries = model->GetGeometries();
+            const std::vector<std::vector<SharedPtr<Geometry> > >& geometries = model->GetGeometries();
             const PODVector<Vector3>& geometryCenters = model->GetGeometryCenters();
             const Matrix3x4* worldTransform = node_ ? &node_->GetWorldTransform() : nullptr;
-            for (unsigned i = 0; i < geometries.Size(); ++i)
+            for (unsigned i = 0; i < geometries.size(); ++i)
             {
                 batches_[i].worldTransform_ = worldTransform;
                 geometries_[i] = geometries[i];
@@ -365,7 +365,7 @@ namespace Urho3D
     void StaticModel::SetNumGeometries(unsigned num)
     {
         batches_.Resize(num);
-        geometries_.Resize(num);
+        geometries_.resize(num);
         geometryData_.Resize(num);
         ResetLodLevels();
     }
@@ -379,7 +379,7 @@ namespace Urho3D
     void StaticModel::SetMaterialsAttr(const ResourceRefList& value)
     {
         auto* cache = GetSubsystem<ResourceCache>();
-        for (unsigned i = 0; i < value.names_.Size(); ++i)
+        for (unsigned i = 0; i < value.names_.size(); ++i)
             SetMaterial(i, cache->GetResource<Material>(value.names_[i]));
     }
 
@@ -390,7 +390,7 @@ namespace Urho3D
 
     const ResourceRefList& StaticModel::GetMaterialsAttr() const
     {
-        materialsAttr_.names_.Resize(batches_.Size());
+        materialsAttr_.names_.resize(batches_.Size());
         for (unsigned i = 0; i < batches_.Size(); ++i)
             materialsAttr_.names_[i] = GetResourceName(GetMaterial(i));
 
@@ -407,8 +407,8 @@ namespace Urho3D
         // Ensure that each subgeometry has at least one LOD level, and reset the current LOD level
         for (unsigned i = 0; i < batches_.Size(); ++i)
         {
-            if (!geometries_[i].Size())
-                geometries_[i].Resize(1);
+            if (!geometries_[i].size())
+                geometries_[i].resize(1);
             batches_[i].geometry_ = geometries_[i][0];
             geometryData_[i].lodLevel_ = 0;
         }
@@ -421,14 +421,14 @@ namespace Urho3D
     {
         for (unsigned i = 0; i < batches_.Size(); ++i)
         {
-            const Vector<SharedPtr<Geometry> >& batchGeometries = geometries_[i];
+            const std::vector<SharedPtr<Geometry> >& batchGeometries = geometries_[i];
             // If only one LOD geometry, no reason to go through the LOD calculation
-            if (batchGeometries.Size() <= 1)
+            if (batchGeometries.size() <= 1)
                 continue;
 
             unsigned j;
 
-            for (j = 1; j < batchGeometries.Size(); ++j)
+            for (j = 1; j < batchGeometries.size(); ++j)
             {
                 if (batchGeometries[j] && lodDistance_ <= batchGeometries[j]->GetLodDistance())
                     break;

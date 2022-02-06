@@ -889,15 +889,15 @@ namespace Urho3D
             return false;
 
         // Check whether target is using global or per-geometry skinning
-        const Vector<PODVector<Matrix3x4> >& geometrySkinMatrices = animatedModel->GetGeometrySkinMatrices();
-        const Vector<PODVector<unsigned> >& geometryBoneMappings = animatedModel->GetGeometryBoneMappings();
+        const std::vector<PODVector<Matrix3x4> >& geometrySkinMatrices = animatedModel->GetGeometrySkinMatrices();
+        const std::vector<PODVector<unsigned> >& geometryBoneMappings = animatedModel->GetGeometryBoneMappings();
 
         for (unsigned i = 0; i < 4; ++i)
         {
             if (blendWeights[i] > 0.0f)
             {
                 Bone* bone = nullptr;
-                if (geometrySkinMatrices.Empty())
+                if (geometrySkinMatrices.empty())
                     bone = animatedModel->GetSkeleton().GetBone(blendIndices[i]);
                 else if (blendIndices[i] < geometryBoneMappings[batchIndex].Size())
                     bone = animatedModel->GetSkeleton().GetBone(geometryBoneMappings[batchIndex][blendIndices[i]]);

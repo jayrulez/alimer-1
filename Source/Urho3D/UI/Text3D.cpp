@@ -636,7 +636,7 @@ namespace Urho3D
         bool isSDFFont = font ? font->IsSDFFont() : false;
 
         batches_.Resize(uiBatches_.Size());
-        geometries_.Resize(uiBatches_.Size());
+        geometries_.resize(uiBatches_.Size());
 
         for (unsigned i = 0; i < batches_.Size(); ++i)
         {

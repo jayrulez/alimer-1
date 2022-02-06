@@ -689,9 +689,9 @@ namespace Urho3D
         return true;
     }
 
-    void FileSystem::ScanDir(Vector<String>& result, const String& pathName, const String& filter, unsigned flags, bool recursive) const
+    void FileSystem::ScanDir(std::vector<String>& result, const String& pathName, const String& filter, unsigned flags, bool recursive) const
     {
-        result.Clear();
+        result.clear();
 
         if (CheckAccess(pathName))
         {
@@ -799,7 +799,7 @@ namespace Urho3D
 #endif
     }
 
-    void FileSystem::ScanDirInternal(Vector<String>& result, String path, const String& startPath,
+    void FileSystem::ScanDirInternal(std::vector<String>& result, String path, const String& startPath,
         const String& filter, unsigned flags, bool recursive) const
     {
         path = AddTrailingSlash(path);
@@ -831,7 +831,7 @@ namespace Urho3D
                 {
                     fileName.Resize(fileName.Length() - sizeof(ASSET_DIR_INDICATOR) / sizeof(char) + 1);
                     if (flags & SCAN_DIRS)
-                        result.Push(deltaPath + fileName);
+                        result.push_back(deltaPath + fileName);
                     if (recursive)
                         ScanDirInternal(result, path + fileName, startPath, filter, flags, recursive);
                 }
@@ -839,7 +839,7 @@ namespace Urho3D
 #endif
                 {
                     if (filterExtension.Empty() || fileName.EndsWith(filterExtension))
-                        result.Push(deltaPath + fileName);
+                        result.push_back(deltaPath + fileName);
                 }
             }
             SDL_Android_FreeFileList(&list, &count);
@@ -861,14 +861,14 @@ namespace Urho3D
                     if (info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
                     {
                         if (flags & SCAN_DIRS)
-                            result.Push(deltaPath + fileName);
+                            result.push_back(deltaPath + fileName);
                         if (recursive && fileName != "." && fileName != "..")
                             ScanDirInternal(result, path + fileName, startPath, filter, flags, recursive);
                     }
                     else if (flags & SCAN_FILES)
                     {
                         if (filterExtension.Empty() || fileName.EndsWith(filterExtension))
-                            result.Push(deltaPath + fileName);
+                            result.push_back(deltaPath + fileName);
                     }
                 }
             } while (FindNextFileW(handle, &info));
@@ -895,14 +895,14 @@ namespace Urho3D
                     if (st.st_mode & S_IFDIR)
                     {
                         if (flags & SCAN_DIRS)
-                            result.Push(deltaPath + fileName);
+                            result.push_back(deltaPath + fileName);
                         if (recursive && normalEntry)
                             ScanDirInternal(result, path + fileName, startPath, filter, flags, recursive);
                     }
                     else if (flags & SCAN_FILES)
                     {
                         if (filterExtension.Empty() || fileName.EndsWith(filterExtension))
-                            result.Push(deltaPath + fileName);
+                            result.push_back(deltaPath + fileName);
                     }
                 }
             }

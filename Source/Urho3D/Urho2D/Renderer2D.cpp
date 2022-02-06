@@ -202,10 +202,10 @@ namespace Urho3D
                     const PODVector<const SourceBatch2D*>& sourceBatches = viewBatchInfo.sourceBatches_;
                     for (unsigned b = 0; b < sourceBatches.Size(); ++b)
                     {
-                        const Vector<Vertex2D>& vertices = sourceBatches[b]->vertices_;
-                        for (unsigned i = 0; i < vertices.Size(); ++i)
+                        const std::vector<Vertex2D>& vertices = sourceBatches[b]->vertices_;
+                        for (unsigned i = 0; i < vertices.size(); ++i)
                             dest[i] = vertices[i];
-                        dest += vertices.Size();
+                        dest += vertices.size();
                     }
 
                     vertexBuffer->Unlock();
@@ -388,16 +388,16 @@ namespace Urho3D
         if (!node || !node->IsEnabled())
             return;
 
-        const Vector<SharedPtr<Component> >& components = node->GetComponents();
-        for (Vector<SharedPtr<Component> >::ConstIterator i = components.Begin(); i != components.End(); ++i)
+        const std::vector<SharedPtr<Component> >& components = node->GetComponents();
+        for (std::vector<SharedPtr<Component> >::const_iterator i = components.begin(); i != components.end(); ++i)
         {
             auto* drawable = dynamic_cast<Drawable2D*>(i->Get());
             if (drawable && drawable->IsEnabled())
                 drawables.Push(drawable);
         }
 
-        const Vector<SharedPtr<Node> >& children = node->GetChildren();
-        for (Vector<SharedPtr<Node> >::ConstIterator i = children.Begin(); i != children.End(); ++i)
+        const std::vector<SharedPtr<Node> >& children = node->GetChildren();
+        for (std::vector<SharedPtr<Node> >::const_iterator i = children.begin(); i != children.end(); ++i)
             GetDrawables(drawables, i->Get());
     }
 
@@ -428,10 +428,10 @@ namespace Urho3D
             if (!drawables_[d]->IsInView(camera))
                 continue;
 
-            const Vector<SourceBatch2D>& batches = drawables_[d]->GetSourceBatches();
-            for (unsigned b = 0; b < batches.Size(); ++b)
+            const std::vector<SourceBatch2D>& batches = drawables_[d]->GetSourceBatches();
+            for (unsigned b = 0; b < batches.size(); ++b)
             {
-                if (batches[b].material_ && !batches[b].vertices_.Empty())
+                if (batches[b].material_ && !batches[b].vertices_.empty())
                     sourceBatches.Push(&batches[b]);
             }
         }
@@ -457,7 +457,7 @@ namespace Urho3D
         {
             distance = Min(distance, sourceBatches[b]->distance_);
             Material* material = sourceBatches[b]->material_;
-            const Vector<Vertex2D>& vertices = sourceBatches[b]->vertices_;
+            const std::vector<Vertex2D>& vertices = sourceBatches[b]->vertices_;
 
             // When new material encountered, finish the current batch and start new
             if (currMaterial != material)
@@ -475,8 +475,8 @@ namespace Urho3D
                 currMaterial = material;
             }
 
-            iCount += vertices.Size() * 6 / 4;
-            vCount += vertices.Size();
+            iCount += vertices.size() * 6 / 4;
+            vCount += vertices.size();
         }
 
         // Add the final batch if necessary
@@ -498,18 +498,18 @@ namespace Urho3D
             viewBatchInfo.distances_.Resize(viewBatchInfo.batchCount_ + 1);
         viewBatchInfo.distances_[viewBatchInfo.batchCount_] = distance;
 
-        if (viewBatchInfo.materials_.Size() <= viewBatchInfo.batchCount_)
-            viewBatchInfo.materials_.Resize(viewBatchInfo.batchCount_ + 1);
+        if (viewBatchInfo.materials_.size() <= viewBatchInfo.batchCount_)
+            viewBatchInfo.materials_.resize(viewBatchInfo.batchCount_ + 1);
         viewBatchInfo.materials_[viewBatchInfo.batchCount_] = material;
 
         // Allocate new geometry if necessary
-        if (viewBatchInfo.geometries_.Size() <= viewBatchInfo.batchCount_)
+        if (viewBatchInfo.geometries_.size() <= viewBatchInfo.batchCount_)
         {
             SharedPtr<Geometry> geometry(new Geometry(context_));
             geometry->SetIndexBuffer(indexBuffer_);
             geometry->SetVertexBuffer(0, viewBatchInfo.vertexBuffer_);
 
-            viewBatchInfo.geometries_.Push(geometry);
+            viewBatchInfo.geometries_.push_back(geometry);
         }
 
         Geometry* geometry = viewBatchInfo.geometries_[viewBatchInfo.batchCount_];
