@@ -143,7 +143,7 @@ namespace Urho3D
         shaderCode += "#define MAXBONES " + String(Graphics::GetMaxBones()) + "\n";
 
         // Prepend the defines to the shader code
-        Vector<String> defineVec = defines_.Split(' ');
+        std::vector<String> defineVec = defines_.Split(' ');
         for (unsigned i = 0; i < defineVec.Size(); ++i)
         {
             // Add extra space for the checking code below
