@@ -683,12 +683,12 @@ void Scene::AddRequiredPackageFile(PackageFile* package)
     if (!package || !package->GetNumFiles())
         return;
 
-    requiredPackageFiles_.Push(SharedPtr<PackageFile>(package));
+    requiredPackageFiles_.push_back(SharedPtr<PackageFile>(package));
 }
 
 void Scene::ClearRequiredPackageFiles()
 {
-    requiredPackageFiles_.Clear();
+    requiredPackageFiles_.clear();
 }
 
 void Scene::RegisterVar(const String& name)

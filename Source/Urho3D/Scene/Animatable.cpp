@@ -513,7 +513,7 @@ namespace Urho3D
         // Keep weak pointer to self to check for destruction caused by event handling
         WeakPtr<Animatable> self(this);
 
-        Vector<String> finishedNames;
+        std::vector<String> finishedNames;
         for (HashMap<String, SharedPtr<AttributeAnimationInfo> >::ConstIterator i = attributeAnimationInfos_.Begin();
             i != attributeAnimationInfos_.End(); ++i)
         {
@@ -523,10 +523,10 @@ namespace Urho3D
                 return;
 
             if (finished)
-                finishedNames.Push(i->second_->GetAttributeInfo().name_);
+                finishedNames.push_back(i->second_->GetAttributeInfo().name_);
         }
 
-        for (unsigned i = 0; i < finishedNames.Size(); ++i)
+        for (unsigned i = 0; i < finishedNames.size(); ++i)
             SetAttributeAnimation(finishedNames[i], nullptr);
     }
 

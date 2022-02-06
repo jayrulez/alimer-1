@@ -733,18 +733,18 @@ namespace Urho3D
         return String(GetAttribute(name)).ToUpper();
     }
 
-    Vector<String> XMLElement::GetAttributeNames() const
+    std::vector<String> XMLElement::GetAttributeNames() const
     {
         if (!file_ || (!node_ && !xpathNode_))
-            return Vector<String>();
+            return std::vector<String>();
 
         const pugi::xml_node& node = xpathNode_ ? xpathNode_->node() : pugi::xml_node(node_);
-        Vector<String> ret;
+        std::vector<String> ret;
 
         pugi::xml_attribute attr = node.first_attribute();
         while (!attr.empty())
         {
-            ret.Push(String(attr.name()));
+            ret.push_back(String(attr.name()));
             attr = attr.next_attribute();
         }
 

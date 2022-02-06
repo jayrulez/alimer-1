@@ -197,8 +197,8 @@ void Connection::SetScene(Scene* newScene)
         sceneState_.Clear();
 
         // When scene is assigned on the server, instruct the client to load it. This may require downloading packages
-        const Vector<SharedPtr<PackageFile> >& packages = scene_->GetRequiredPackageFiles();
-        unsigned numPackages = packages.Size();
+        const std::vector<SharedPtr<PackageFile> >& packages = scene_->GetRequiredPackageFiles();
+        unsigned numPackages = packages.size();
         msg_.Clear();
         msg_.WriteString(scene_->GetFileName());
         msg_.WriteVLE(numPackages);
@@ -554,8 +554,8 @@ void Connection::ProcessLoadScene(int msgID, MemoryBuffer& msg)
     auto* cache = GetSubsystem<ResourceCache>();
     const String& packageCacheDir = GetSubsystem<Network>()->GetPackageCacheDir();
 
-    Vector<SharedPtr<PackageFile> > packages = cache->GetPackageFiles();
-    for (unsigned i = 0; i < packages.Size(); ++i)
+    std::vector<SharedPtr<PackageFile>> packages = cache->GetPackageFiles();
+    for (unsigned i = 0; i < packages.size(); ++i)
     {
         PackageFile* package = packages[i];
         if (!package->GetName().Find(packageCacheDir))
@@ -816,8 +816,8 @@ void Connection::ProcessPackageDownload(int msgID, MemoryBuffer& msg)
                 }
 
                 // The package must be one of those required by the scene
-                const Vector<SharedPtr<PackageFile> >& packages = scene_->GetRequiredPackageFiles();
-                for (unsigned i = 0; i < packages.Size(); ++i)
+                const std::vector<SharedPtr<PackageFile> >& packages = scene_->GetRequiredPackageFiles();
+                for (unsigned i = 0; i < packages.size(); ++i)
                 {
                     PackageFile* package = packages[i];
                     const String& packageFullName = package->GetName();
@@ -1478,7 +1478,7 @@ bool Connection::RequestNeededPackages(unsigned numPackages, MemoryBuffer& msg)
     auto* cache = GetSubsystem<ResourceCache>();
     const String& packageCacheDir = GetSubsystem<Network>()->GetPackageCacheDir();
 
-    Vector<SharedPtr<PackageFile> > packages = cache->GetPackageFiles();
+    std::vector<SharedPtr<PackageFile>> packages = cache->GetPackageFiles();
     std::vector<String> downloadedPackages;
     bool packagesScanned = false;
 
@@ -1491,7 +1491,7 @@ bool Connection::RequestNeededPackages(unsigned numPackages, MemoryBuffer& msg)
         bool found = false;
 
         // Check first the resource cache
-        for (unsigned j = 0; j < packages.Size(); ++j)
+        for (unsigned j = 0; j < packages.size(); ++j)
         {
             PackageFile* package = packages[j];
             if (!GetFileNameAndExtension(package->GetName()).Compare(name, false) && package->GetTotalSize() == fileSize &&

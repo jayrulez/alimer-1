@@ -113,23 +113,23 @@ bool ResourceCache::AddResourceDir(const String& pathName, unsigned priority)
     String fixedPath = SanitateResourceDirName(pathName);
 
     // Check that the same path does not already exist
-    for (unsigned i = 0; i < resourceDirs_.Size(); ++i)
+    for (unsigned i = 0; i < resourceDirs_.size(); ++i)
     {
         if (!resourceDirs_[i].Compare(fixedPath, false))
             return true;
     }
 
-    if (priority < resourceDirs_.Size())
-        resourceDirs_.Insert(priority, fixedPath);
+    if (priority < resourceDirs_.size())
+        resourceDirs_.insert(resourceDirs_.begin() + std::min(priority, (unsigned)resourceDirs_.size()), fixedPath);
     else
-        resourceDirs_.Push(fixedPath);
+        resourceDirs_.push_back(fixedPath);
 
     // If resource auto-reloading active, create a file watcher for the directory
     if (autoReloadResources_)
     {
         SharedPtr<FileWatcher> watcher(new FileWatcher(context_));
         watcher->StartWatching(fixedPath, true);
-        fileWatchers_.Push(watcher);
+        fileWatchers_.push_back(watcher);
     }
 
     URHO3D_LOGINFO("Added resource path " + fixedPath);
@@ -147,10 +147,10 @@ bool ResourceCache::AddPackageFile(PackageFile* package, unsigned priority)
         return false;
     }
 
-    if (priority < packages_.Size())
-        packages_.Insert(priority, SharedPtr<PackageFile>(package));
+    if (priority < packages_.size())
+        packages_.insert(packages_.begin() + std::min(priority, (unsigned)packages_.size()), SharedPtr<PackageFile>(package));
     else
-        packages_.Push(SharedPtr<PackageFile>(package));
+        packages_.push_back(SharedPtr<PackageFile>(package));
 
     URHO3D_LOGINFO("Added resource package " + package->GetName());
     return true;
@@ -189,17 +189,17 @@ void ResourceCache::RemoveResourceDir(const String& pathName)
 
     String fixedPath = SanitateResourceDirName(pathName);
 
-    for (unsigned i = 0; i < resourceDirs_.Size(); ++i)
+    for (unsigned i = 0; i < resourceDirs_.size(); ++i)
     {
         if (!resourceDirs_[i].Compare(fixedPath, false))
         {
-            resourceDirs_.Erase(i);
+            resourceDirs_.erase(resourceDirs_.begin() + i);
             // Remove the filewatcher with the matching path
-            for (unsigned j = 0; j < fileWatchers_.Size(); ++j)
+            for (unsigned j = 0; j < fileWatchers_.size(); ++j)
             {
                 if (!fileWatchers_[j]->GetPath().Compare(fixedPath, false))
                 {
-                    fileWatchers_.Erase(j);
+                    fileWatchers_.erase(fileWatchers_.begin() + j);
                     break;
                 }
             }
@@ -213,14 +213,14 @@ void ResourceCache::RemovePackageFile(PackageFile* package, bool releaseResource
 {
     lock_guard<mutex> lock(resourceMutex_);
 
-    for (Vector<SharedPtr<PackageFile> >::Iterator i = packages_.Begin(); i != packages_.End(); ++i)
+    for (std::vector<SharedPtr<PackageFile> >::iterator i = packages_.begin(); i != packages_.end(); ++i)
     {
         if (*i == package)
         {
             if (releaseResources)
                 ReleasePackageResources(*i, forceRelease);
             URHO3D_LOGINFO("Removed resource package " + (*i)->GetName());
-            packages_.Erase(i);
+            packages_.erase(i);
             return;
         }
     }
@@ -233,14 +233,14 @@ void ResourceCache::RemovePackageFile(const String& fileName, bool releaseResour
     // Compare the name and extension only, not the path
     String fileNameNoPath = GetFileNameAndExtension(fileName);
 
-    for (Vector<SharedPtr<PackageFile> >::Iterator i = packages_.Begin(); i != packages_.End(); ++i)
+    for (std::vector<SharedPtr<PackageFile> >::iterator i = packages_.begin(); i != packages_.end(); ++i)
     {
         if (!GetFileNameAndExtension((*i)->GetName()).Compare(fileNameNoPath, false))
         {
             if (releaseResources)
                 ReleasePackageResources(*i, forceRelease);
             URHO3D_LOGINFO("Removed resource package " + (*i)->GetName());
-            packages_.Erase(i);
+            packages_.erase(i);
             return;
         }
     }
@@ -417,17 +417,17 @@ void ResourceCache::ReloadResourceWithDependencies(const String& fileName)
         {
             // Reloading a resource may modify the dependency tracking structure. Therefore collect the
             // resources we need to reload first
-            Vector<SharedPtr<Resource> > dependents;
-            dependents.Reserve(j->second_.size());
+            std::vector<SharedPtr<Resource> > dependents;
+            dependents.reserve(j->second_.size());
 
             for (std::unordered_set<StringHash>::const_iterator k = j->second_.begin(); k != j->second_.end(); ++k)
             {
                 const SharedPtr<Resource>& dependent = FindResource(*k);
                 if (dependent)
-                    dependents.Push(dependent);
+                    dependents.push_back(dependent);
             }
 
-            for (unsigned k = 0; k < dependents.Size(); ++k)
+            for (unsigned k = 0; k < dependents.size(); ++k)
             {
                 URHO3D_LOGDEBUG("Reloading resource " + dependents[k]->GetName() + " depending on " + fileName);
                 ReloadResource(dependents[k]);
@@ -447,15 +447,15 @@ void ResourceCache::SetAutoReloadResources(bool enable)
     {
         if (enable)
         {
-            for (unsigned i = 0; i < resourceDirs_.Size(); ++i)
+            for (unsigned i = 0; i < resourceDirs_.size(); ++i)
             {
                 SharedPtr<FileWatcher> watcher(new FileWatcher(context_));
                 watcher->StartWatching(resourceDirs_[i], true);
-                fileWatchers_.Push(watcher);
+                fileWatchers_.push_back(watcher);
             }
         }
         else
-            fileWatchers_.Clear();
+            fileWatchers_.clear();
 
         autoReloadResources_ = enable;
     }
@@ -464,25 +464,25 @@ void ResourceCache::SetAutoReloadResources(bool enable)
 void ResourceCache::AddResourceRouter(ResourceRouter* router, bool addAsFirst)
 {
     // Check for duplicate
-    for (unsigned i = 0; i < resourceRouters_.Size(); ++i)
+    for (unsigned i = 0; i < resourceRouters_.size(); ++i)
     {
         if (resourceRouters_[i] == router)
             return;
     }
 
     if (addAsFirst)
-        resourceRouters_.Insert(0, SharedPtr<ResourceRouter>(router));
+        resourceRouters_.insert(resourceRouters_.begin(), SharedPtr<ResourceRouter>(router));
     else
-        resourceRouters_.Push(SharedPtr<ResourceRouter>(router));
+        resourceRouters_.push_back(SharedPtr<ResourceRouter>(router));
 }
 
 void ResourceCache::RemoveResourceRouter(ResourceRouter* router)
 {
-    for (unsigned i = 0; i < resourceRouters_.Size(); ++i)
+    for (unsigned i = 0; i < resourceRouters_.size(); ++i)
     {
         if (resourceRouters_[i] == router)
         {
-            resourceRouters_.Erase(i);
+            resourceRouters_.erase(resourceRouters_.begin() + i);
             return;
         }
     }
@@ -496,7 +496,7 @@ SharedPtr<File> ResourceCache::GetFile(const String& name, bool sendEventOnFailu
     if (!isRouting_)
     {
         isRouting_ = true;
-        for (unsigned i = 0; i < resourceRouters_.Size(); ++i)
+        for (unsigned i = 0; i < resourceRouters_.size(); ++i)
             resourceRouters_[i]->Route(sanitatedName, RESOURCE_GETFILE);
         isRouting_ = false;
     }
@@ -524,7 +524,7 @@ SharedPtr<File> ResourceCache::GetFile(const String& name, bool sendEventOnFailu
 
     if (sendEventOnFailure)
     {
-        if (resourceRouters_.Size() && sanitatedName.Empty() && !name.Empty())
+        if (resourceRouters_.size() && sanitatedName.Empty() && !name.Empty())
             URHO3D_LOGERROR("Resource request " + name + " was blocked");
         else
             URHO3D_LOGERROR("Could not find resource " + sanitatedName);
@@ -740,7 +740,7 @@ bool ResourceCache::Exists(const String& name) const
     if (!isRouting_)
     {
         isRouting_ = true;
-        for (unsigned i = 0; i < resourceRouters_.Size(); ++i)
+        for (unsigned i = 0; i < resourceRouters_.size(); ++i)
             resourceRouters_[i]->Route(sanitatedName, RESOURCE_CHECKEXISTS);
         isRouting_ = false;
     }
@@ -748,14 +748,14 @@ bool ResourceCache::Exists(const String& name) const
     if (sanitatedName.Empty())
         return false;
 
-    for (unsigned i = 0; i < packages_.Size(); ++i)
+    for (unsigned i = 0; i < packages_.size(); ++i)
     {
         if (packages_[i]->Exists(sanitatedName))
             return true;
     }
 
     auto* fileSystem = GetSubsystem<FileSystem>();
-    for (unsigned i = 0; i < resourceDirs_.Size(); ++i)
+    for (unsigned i = 0; i < resourceDirs_.size(); ++i)
     {
         if (fileSystem->FileExists(resourceDirs_[i] + sanitatedName))
             return true;
@@ -788,7 +788,7 @@ unsigned long long ResourceCache::GetTotalMemoryUse() const
 String ResourceCache::GetResourceFileName(const String& name) const
 {
     auto* fileSystem = GetSubsystem<FileSystem>();
-    for (unsigned i = 0; i < resourceDirs_.Size(); ++i)
+    for (unsigned i = 0; i < resourceDirs_.size(); ++i)
     {
         if (fileSystem->FileExists(resourceDirs_[i] + name))
             return resourceDirs_[i] + name;
@@ -802,7 +802,7 @@ String ResourceCache::GetResourceFileName(const String& name) const
 
 ResourceRouter* ResourceCache::GetResourceRouter(unsigned index) const
 {
-    return index < resourceRouters_.Size() ? resourceRouters_[index] : nullptr;
+    return index < resourceRouters_.size() ? resourceRouters_[index] : nullptr;
 }
 
 String ResourceCache::GetPreferredResourceDir(const String& path) const
@@ -850,11 +850,11 @@ String ResourceCache::SanitateResourceName(const String& name) const
 
     // If the path refers to one of the resource directories, normalize the resource name
     auto* fileSystem = GetSubsystem<FileSystem>();
-    if (resourceDirs_.Size())
+    if (resourceDirs_.size())
     {
         String namePath = GetPath(sanitatedName);
         String exePath = fileSystem->GetProgramDir().Replaced("/./", "/");
-        for (unsigned i = 0; i < resourceDirs_.Size(); ++i)
+        for (unsigned i = 0; i < resourceDirs_.size(); ++i)
         {
             String relativeResourcePath = resourceDirs_[i];
             if (relativeResourcePath.StartsWith(exePath))
@@ -1077,7 +1077,7 @@ void ResourceCache::UpdateResourceGroup(StringHash type)
 
 void ResourceCache::HandleBeginFrame(StringHash eventType, VariantMap& eventData)
 {
-    for (unsigned i = 0; i < fileWatchers_.Size(); ++i)
+    for (unsigned i = 0; i < fileWatchers_.size(); ++i)
     {
         String fileName;
         while (fileWatchers_[i]->GetNextChange(fileName))
@@ -1106,7 +1106,7 @@ void ResourceCache::HandleBeginFrame(StringHash eventType, VariantMap& eventData
 File* ResourceCache::SearchResourceDirs(const String& name)
 {
     auto* fileSystem = GetSubsystem<FileSystem>();
-    for (unsigned i = 0; i < resourceDirs_.Size(); ++i)
+    for (unsigned i = 0; i < resourceDirs_.size(); ++i)
     {
         if (fileSystem->FileExists(resourceDirs_[i] + name))
         {
@@ -1127,7 +1127,7 @@ File* ResourceCache::SearchResourceDirs(const String& name)
 
 File* ResourceCache::SearchPackages(const String& name)
 {
-    for (unsigned i = 0; i < packages_.Size(); ++i)
+    for (unsigned i = 0; i < packages_.size(); ++i)
     {
         if (packages_[i]->Exists(name))
             return new File(context_, packages_[i], name);

@@ -225,7 +225,7 @@ public:
     /// Return attribute in lowercase, or empty if missing.
     String GetAttributeUpper(const char* name) const;
     /// Return names of all attributes.
-    Vector<String> GetAttributeNames() const;
+    std::vector<String> GetAttributeNames() const;
     /// Return bool attribute, or false if missing.
     bool GetBool(const String& name) const;
     /// Return buffer attribute, or empty if missing.
