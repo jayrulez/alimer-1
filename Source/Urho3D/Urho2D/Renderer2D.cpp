@@ -388,16 +388,16 @@ namespace Urho3D
         if (!node || !node->IsEnabled())
             return;
 
-        const Vector<SharedPtr<Component> >& components = node->GetComponents();
-        for (Vector<SharedPtr<Component> >::ConstIterator i = components.Begin(); i != components.End(); ++i)
+        const std::vector<SharedPtr<Component> >& components = node->GetComponents();
+        for (std::vector<SharedPtr<Component> >::const_iterator i = components.begin(); i != components.end(); ++i)
         {
             auto* drawable = dynamic_cast<Drawable2D*>(i->Get());
             if (drawable && drawable->IsEnabled())
                 drawables.Push(drawable);
         }
 
-        const Vector<SharedPtr<Node> >& children = node->GetChildren();
-        for (Vector<SharedPtr<Node> >::ConstIterator i = children.Begin(); i != children.End(); ++i)
+        const std::vector<SharedPtr<Node> >& children = node->GetChildren();
+        for (std::vector<SharedPtr<Node> >::const_iterator i = children.begin(); i != children.end(); ++i)
             GetDrawables(drawables, i->Get());
     }
 

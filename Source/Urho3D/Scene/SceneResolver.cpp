@@ -61,16 +61,16 @@ void SceneResolver::Resolve()
             continue;
 
         bool hasIDAttributes = false;
-        const Vector<AttributeInfo>* attributes = component->GetAttributes();
+        const std::vector<AttributeInfo>* attributes = component->GetAttributes();
         if (!attributes)
         {
             noIDAttributes.insert(component->GetType());
             continue;
         }
 
-        for (uint32_t j = 0; j < attributes->Size(); ++j)
+        for (uint32_t j = 0; j < attributes->size(); ++j)
         {
-            const AttributeInfo& info = attributes->At(j);
+            const AttributeInfo& info = attributes->at(j);
             if (info.mode_ & AM_NODEID)
             {
                 hasIDAttributes = true;

@@ -1272,8 +1272,8 @@ void Connection::ProcessNewNode(Node* node)
 
     // Write node's components
     msg_.WriteVLE(node->GetNumNetworkComponents());
-    const Vector<SharedPtr<Component> >& components = node->GetComponents();
-    for (unsigned i = 0; i < components.Size(); ++i)
+    const std::vector<SharedPtr<Component> >& components = node->GetComponents();
+    for (unsigned i = 0; i < components.size(); ++i)
     {
         Component* component = components[i];
         // Check if component is not to be replicated
@@ -1321,13 +1321,13 @@ void Connection::ProcessExistingNode(Node* node, NodeReplicationState& nodeState
     // Check if attributes have changed
     if (nodeState.dirtyAttributes_.Count() || nodeState.dirtyVars_.size())
     {
-        const Vector<AttributeInfo>* attributes = node->GetNetworkAttributes();
-        unsigned numAttributes = attributes->Size();
+        const std::vector<AttributeInfo>* attributes = node->GetNetworkAttributes();
+        unsigned numAttributes = attributes->size();
         bool hasLatestData = false;
 
         for (unsigned i = 0; i < numAttributes; ++i)
         {
-            if (nodeState.dirtyAttributes_.IsSet(i) && (attributes->At(i).mode_ & AM_LATESTDATA))
+            if (nodeState.dirtyAttributes_.IsSet(i) && (attributes->at(i).mode_ & AM_LATESTDATA))
             {
                 hasLatestData = true;
                 nodeState.dirtyAttributes_.Clear(i);
@@ -1399,13 +1399,13 @@ void Connection::ProcessExistingNode(Node* node, NodeReplicationState& nodeState
             // Existing component. Check if attributes have changed
             if (componentState.dirtyAttributes_.Count())
             {
-                const Vector<AttributeInfo>* attributes = component->GetNetworkAttributes();
-                unsigned numAttributes = attributes->Size();
+                const std::vector<AttributeInfo>* attributes = component->GetNetworkAttributes();
+                unsigned numAttributes = attributes->size();
                 bool hasLatestData = false;
 
                 for (unsigned i = 0; i < numAttributes; ++i)
                 {
-                    if (componentState.dirtyAttributes_.IsSet(i) && (attributes->At(i).mode_ & AM_LATESTDATA))
+                    if (componentState.dirtyAttributes_.IsSet(i) && (attributes->at(i).mode_ & AM_LATESTDATA))
                     {
                         hasLatestData = true;
                         componentState.dirtyAttributes_.Clear(i);
@@ -1440,8 +1440,8 @@ void Connection::ProcessExistingNode(Node* node, NodeReplicationState& nodeState
     // Check for new components
     if (nodeState.componentStates_.Size() != node->GetNumNetworkComponents())
     {
-        const Vector<SharedPtr<Component> >& components = node->GetComponents();
-        for (unsigned i = 0; i < components.Size(); ++i)
+        const std::vector<SharedPtr<Component> >& components = node->GetComponents();
+        for (unsigned i = 0; i < components.size(); ++i)
         {
             Component* component = components[i];
             // Check if component is not to be replicated

@@ -85,7 +85,7 @@ namespace Urho3D
         /// Remove a work item before it has started executing. Return true if successfully removed.
         bool RemoveWorkItem(SharedPtr<WorkItem> item);
         /// Remove a number of work items before they have started executing. Return the number of items successfully removed.
-        unsigned RemoveWorkItems(const Vector<SharedPtr<WorkItem> >& items);
+        unsigned RemoveWorkItems(const std::vector<SharedPtr<WorkItem> >& items);
         /// Pause worker threads.
         void Pause();
         /// Resume worker threads.

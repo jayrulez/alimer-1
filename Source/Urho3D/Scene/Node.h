@@ -558,7 +558,7 @@ namespace Urho3D
         unsigned GetNumChildren(bool recursive = false) const;
 
         /// Return immediate child scene nodes.
-        const Vector<SharedPtr<Node> >& GetChildren() const { return children_; }
+        const std::vector<SharedPtr<Node> >& GetChildren() const { return children_; }
 
         /// Return child scene nodes, optionally recursive.
         void GetChildren(PODVector<Node*>& dest, bool recursive = false) const;
@@ -584,13 +584,13 @@ namespace Urho3D
 
         /// Return number of components.
         /// @property
-        unsigned GetNumComponents() const { return components_.Size(); }
+        unsigned GetNumComponents() const { return components_.size(); }
 
         /// Return number of non-local components.
         unsigned GetNumNetworkComponents() const;
 
         /// Return all components.
-        const Vector<SharedPtr<Component> >& GetComponents() const { return components_; }
+        const std::vector<SharedPtr<Component> >& GetComponents() const { return components_; }
 
         /// Return all components of type. Optionally recursive.
         void GetComponents(PODVector<Component*>& dest, StringHash type, bool recursive = false) const;
@@ -601,7 +601,7 @@ namespace Urho3D
         /// Return whether has a specific component.
         bool HasComponent(StringHash type) const;
         /// Return listener components.
-        const Vector<WeakPtr<Component> > GetListeners() const { return listeners_; }
+        const std::vector<WeakPtr<Component> > GetListeners() const { return listeners_; }
 
         /// Return a user variable.
         const Variant& GetVar(StringHash key) const;
@@ -701,7 +701,7 @@ namespace Urho3D
         /// Recalculate the world transform.
         void UpdateWorldTransform() const;
         /// Remove child node by iterator.
-        void RemoveChild(Vector<SharedPtr<Node> >::Iterator i);
+        void RemoveChild(std::vector<SharedPtr<Node> >::iterator i);
         /// Return child nodes recursively.
         void GetChildrenRecursive(PODVector<Node*>& dest) const;
         /// Return child nodes with a specific component recursively.
@@ -713,7 +713,7 @@ namespace Urho3D
         /// Clone node recursively.
         Node* CloneRecursive(Node* parent, SceneResolver& resolver, CreateMode mode);
         /// Remove a component from this node with the specified iterator.
-        void RemoveComponent(Vector<SharedPtr<Component> >::Iterator i);
+        void RemoveComponent(std::vector<SharedPtr<Component> >::iterator i);
         /// Handle attribute animation update event.
         void HandleAttributeAnimationUpdate(StringHash eventType, VariantMap& eventData);
 
@@ -746,11 +746,11 @@ namespace Urho3D
         /// World-space rotation.
         mutable Quaternion worldRotation_;
         /// Components.
-        Vector<SharedPtr<Component> > components_;
+        std::vector<SharedPtr<Component> > components_;
         /// Child scene nodes.
-        Vector<SharedPtr<Node> > children_;
+        std::vector<SharedPtr<Node> > children_;
         /// Node listeners.
-        Vector<WeakPtr<Component> > listeners_;
+        std::vector<WeakPtr<Component> > listeners_;
         /// Pointer to implementation.
         std::unique_ptr<NodeImpl> impl_;
 
@@ -791,7 +791,7 @@ namespace Urho3D
 
     template <class T> T* Node::GetDerivedComponent(bool recursive) const
     {
-        for (Vector<SharedPtr<Component> >::ConstIterator i = components_.Begin(); i != components_.End(); ++i)
+        for (std::vector<SharedPtr<Component> >::const_iterator i = components_.begin(); i != components_.end(); ++i)
         {
             auto* component = dynamic_cast<T*>(i->Get());
             if (component)
@@ -800,7 +800,7 @@ namespace Urho3D
 
         if (recursive)
         {
-            for (Vector<SharedPtr<Node> >::ConstIterator i = children_.Begin(); i != children_.End(); ++i)
+            for (std::vector<SharedPtr<Node> >::const_iterator i = children_.begin(); i != children_.end(); ++i)
             {
                 T* component = (*i)->GetDerivedComponent<T>(true);
                 if (component)
@@ -833,7 +833,7 @@ namespace Urho3D
         if (clearVector)
             dest.Clear();
 
-        for (Vector<SharedPtr<Component> >::ConstIterator i = components_.Begin(); i != components_.End(); ++i)
+        for (std::vector<SharedPtr<Component> >::const_iterator i = components_.begin(); i != components_.end(); ++i)
         {
             auto* component = dynamic_cast<T*>(i->Get());
             if (component)
@@ -842,7 +842,7 @@ namespace Urho3D
 
         if (recursive)
         {
-            for (Vector<SharedPtr<Node> >::ConstIterator i = children_.Begin(); i != children_.End(); ++i)
+            for (std::vector<SharedPtr<Node> >::const_iterator i = children_.begin(); i != children_.end(); ++i)
                 (*i)->GetDerivedComponents<T>(dest, true, false);
         }
     }

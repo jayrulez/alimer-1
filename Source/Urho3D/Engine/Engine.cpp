@@ -795,7 +795,7 @@ void Engine::ApplyFrameLimit()
         timeStep_ = lastTimeSteps_.Back();
 }
 
-VariantMap Engine::ParseParameters(const Vector<String>& arguments)
+VariantMap Engine::ParseParameters(const std::vector<String>& arguments)
 {
     VariantMap ret;
 
@@ -803,12 +803,12 @@ VariantMap Engine::ParseParameters(const Vector<String>& arguments)
     if (const char* paths = getenv("URHO3D_PREFIX_PATH"))
         ret[EP_RESOURCE_PREFIX_PATHS] = paths;
 
-    for (unsigned i = 0; i < arguments.Size(); ++i)
+    for (unsigned i = 0; i < arguments.size(); ++i)
     {
         if (arguments[i].Length() > 1 && arguments[i][0] == '-')
         {
             String argument = arguments[i].Substring(1).ToLower();
-            String value = i + 1 < arguments.Size() ? arguments[i + 1] : String::EMPTY;
+            String value = i + 1 < arguments.size() ? arguments[i + 1] : String::EMPTY;
 
             if (argument == "headless")
                 ret[EP_HEADLESS] = true;

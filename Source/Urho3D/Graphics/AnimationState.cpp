@@ -221,8 +221,8 @@ namespace Urho3D
             Node* boneNode = stateTracks_[index].node_;
             if (boneNode)
             {
-                const Vector<SharedPtr<Node> >& children = boneNode->GetChildren();
-                for (unsigned i = 0; i < children.Size(); ++i)
+                const std::vector<SharedPtr<Node> >& children = boneNode->GetChildren();
+                for (unsigned i = 0; i < children.size(); ++i)
                 {
                     unsigned childTrackIndex = GetTrackIndex(children[i]);
                     if (childTrackIndex != M_MAX_UNSIGNED)

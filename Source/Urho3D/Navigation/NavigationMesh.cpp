@@ -1077,8 +1077,8 @@ namespace Urho3D
 
         if (recursive)
         {
-            const Vector<SharedPtr<Node> >& children = node->GetChildren();
-            for (unsigned i = 0; i < children.Size(); ++i)
+            const std::vector<SharedPtr<Node> >& children = node->GetChildren();
+            for (unsigned i = 0; i < children.size(); ++i)
                 CollectGeometries(geometryList, children[i], processedNodes, recursive);
         }
     }

@@ -64,14 +64,14 @@ String ignoreExtensions_[] = {
 };
 
 int main(int argc, char** argv);
-void Run(const Vector<String>& arguments);
+void Run(const std::vector<String>& arguments);
 void ProcessFile(const String& fileName, const String& rootDir);
 void WritePackageFile(const String& fileName, const String& rootDir);
 void WriteHeader(File& dest);
 
 int main(int argc, char** argv)
 {
-    Vector<String> arguments;
+    std::vector<String> arguments;
 
     #ifdef WIN32
     arguments = ParseArguments(GetCommandLineW());
@@ -83,9 +83,9 @@ int main(int argc, char** argv)
     return 0;
 }
 
-void Run(const Vector<String>& arguments)
+void Run(const std::vector<String>& arguments)
 {
-    if (arguments.Size() < 2)
+    if (arguments.size() < 2)
         ErrorExit(
             "Usage: PackageTool <directory to process> <package name> [basepath] [options]\n"
             "\n"
@@ -104,9 +104,9 @@ void Run(const Vector<String>& arguments)
     const String& dirName = arguments[0];
     const String& packageName = arguments[1];
     bool isOutputMode = arguments[0].Length() == 2 && arguments[0][0] == '-';
-    if (arguments.Size() > 2)
+    if (arguments.size() > 2)
     {
-        for (unsigned i = 2; i < arguments.Size(); ++i)
+        for (unsigned i = 2; i < arguments.size(); ++i)
         {
             if (arguments[i][0] != '-')
                 basePath_ = AddTrailingSlash(arguments[i]);

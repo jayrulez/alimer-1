@@ -120,11 +120,11 @@ namespace Urho3D
     struct URHO3D_API NetworkState
     {
         /// Cached network attribute infos.
-        const Vector<AttributeInfo>* attributes_{};
+        const std::vector<AttributeInfo>* attributes_{};
         /// Current network attribute values.
-        Vector<Variant> currentValues_;
+        std::vector<Variant> currentValues_;
         /// Previous network attribute values.
-        Vector<Variant> previousValues_;
+        std::vector<Variant> previousValues_;
         /// Replication states that are tracking this object.
         PODVector<ReplicationState*> replicationStates_;
         /// Previous user variables.

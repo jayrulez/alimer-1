@@ -128,7 +128,7 @@ public:
     void ApplyFrameLimit();
 
     /// Parse the engine startup parameters map from command line arguments.
-    static VariantMap ParseParameters(const Vector<String>& arguments);
+    static VariantMap ParseParameters(const std::vector<String>& arguments);
     /// Return whether startup parameters contains a specific parameter.
     static bool HasParameter(const VariantMap& parameters, const String& parameter);
     /// Get an engine startup parameter, with default value if missing.

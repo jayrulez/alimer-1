@@ -95,8 +95,8 @@ void UnknownComponent::RegisterObject(Context* context)
 bool UnknownComponent::Load(Deserializer& source)
 {
     useXML_ = false;
-    xmlAttributes_.Clear();
-    xmlAttributeInfos_.Clear();
+    xmlAttributes_.clear();
+    xmlAttributeInfos_.clear();
 
     // Assume we are reading from a component data buffer, and the type has already been read
     unsigned dataSize = source.GetSize() - source.GetPosition();
@@ -107,8 +107,8 @@ bool UnknownComponent::Load(Deserializer& source)
 bool UnknownComponent::LoadXML(const XMLElement& source)
 {
     useXML_ = true;
-    xmlAttributes_.Clear();
-    xmlAttributeInfos_.Clear();
+    xmlAttributes_.clear();
+    xmlAttributeInfos_.clear();
     binaryAttributes_.Clear();
 
     XMLElement attrElem = source.GetChild("attribute");
@@ -123,15 +123,15 @@ bool UnknownComponent::LoadXML(const XMLElement& source)
         {
             String attrValue = attrElem.GetAttribute("value");
             attr.defaultValue_ = String::EMPTY;
-            xmlAttributeInfos_.Push(attr);
-            xmlAttributes_.Push(attrValue);
+            xmlAttributeInfos_.push_back(attr);
+            xmlAttributes_.push_back(attrValue);
         }
 
         attrElem = attrElem.GetNext("attribute");
     }
 
     // Fix up pointers to the attributes after all have been read
-    for (unsigned i = 0; i < xmlAttributeInfos_.Size(); ++i)
+    for (unsigned i = 0; i < xmlAttributeInfos_.size(); ++i)
         xmlAttributeInfos_[i].ptr_ = &xmlAttributes_[i];
 
     return true;
@@ -141,8 +141,8 @@ bool UnknownComponent::LoadXML(const XMLElement& source)
 bool UnknownComponent::LoadJSON(const JSONValue& source)
 {
     useXML_ = true;
-    xmlAttributes_.Clear();
-    xmlAttributeInfos_.Clear();
+    xmlAttributes_.clear();
+    xmlAttributeInfos_.clear();
     binaryAttributes_.Clear();
 
     JSONArray attributesArray = source.Get("attributes").GetArray();
@@ -159,13 +159,13 @@ bool UnknownComponent::LoadJSON(const JSONValue& source)
         {
             String attrValue = attrVal.Get("value").GetString();
             attr.defaultValue_ = String::EMPTY;
-            xmlAttributeInfos_.Push(attr);
-            xmlAttributes_.Push(attrValue);
+            xmlAttributeInfos_.push_back(attr);
+            xmlAttributes_.push_back(attrValue);
         }
     }
 
     // Fix up pointers to the attributes after all have been read
-    for (unsigned i = 0; i < xmlAttributeInfos_.Size(); ++i)
+    for (unsigned i = 0; i < xmlAttributeInfos_.size(); ++i)
         xmlAttributeInfos_[i].ptr_ = &xmlAttributes_[i];
 
     return true;
@@ -206,7 +206,7 @@ bool UnknownComponent::SaveXML(XMLElement& dest) const
     if (!dest.SetInt("id", id_))
         return false;
 
-    for (unsigned i = 0; i < xmlAttributeInfos_.Size(); ++i)
+    for (unsigned i = 0; i < xmlAttributeInfos_.size(); ++i)
     {
         XMLElement attrElem = dest.CreateChild("attribute");
         attrElem.SetAttribute("name", xmlAttributeInfos_[i].name_);
@@ -226,8 +226,8 @@ bool UnknownComponent::SaveJSON(JSONValue& dest) const
     dest.Set("id", (int) id_);
 
     JSONArray attributesArray;
-    attributesArray.Reserve(xmlAttributeInfos_.Size());
-    for (unsigned i = 0; i < xmlAttributeInfos_.Size(); ++i)
+    attributesArray.Reserve(xmlAttributeInfos_.size());
+    for (unsigned i = 0; i < xmlAttributeInfos_.size(); ++i)
     {
         JSONValue attrVal;
         attrVal.Set("name", xmlAttributeInfos_[i].name_);

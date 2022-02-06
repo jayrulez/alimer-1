@@ -178,7 +178,7 @@ float importEndTime_ = 0.0f;
 bool suppressFbxPivotNodes_ = true;
 
 int main(int argc, char** argv);
-void Run(const Vector<String>& arguments);
+void Run(const std::vector<String>& arguments);
 void DumpNodes(aiNode* rootNode, unsigned level);
 
 void ExportModel(const String& outName, bool animationOnly);
@@ -244,7 +244,7 @@ void CollectSceneNodesAsBones(OutModel &model, aiNode* rootNode);
 
 int main(int argc, char** argv)
 {
-    Vector<String> arguments;
+    std::vector<String> arguments;
 
     #ifdef WIN32
     arguments = ParseArguments(GetCommandLineW());
@@ -256,9 +256,9 @@ int main(int argc, char** argv)
     return 0;
 }
 
-void Run(const Vector<String>& arguments)
+void Run(const std::vector<String>& arguments)
 {
-    if (arguments.Size() < 2)
+    if (arguments.size() < 2)
     {
         ErrorExit(
             "Usage: AssetImporter <command> <input file> <output file> [options]\n"
@@ -336,12 +336,12 @@ void Run(const Vector<String>& arguments)
         aiProcess_FindInstances |
         aiProcess_OptimizeMeshes;
 
-    for (unsigned i = 2; i < arguments.Size(); ++i)
+    for (unsigned i = 2; i < arguments.size(); ++i)
     {
         if (arguments[i].Length() > 1 && arguments[i][0] == '-')
         {
             String argument = arguments[i].Substring(1).ToLower();
-            String value = i + 1 < arguments.Size() ? arguments[i + 1] : String::EMPTY;
+            String value = i + 1 < arguments.size() ? arguments[i + 1] : String::EMPTY;
 
             if (argument == "b")
                 saveBinary_ = true;
@@ -459,7 +459,7 @@ void Run(const Vector<String>& arguments)
                 moveToBindPose_ = true;
             else if (argument == "split")
             {
-                String value2 = i + 2 < arguments.Size() ? arguments[i + 2] : String::EMPTY;
+                String value2 = i + 2 < arguments.size() ? arguments[i + 2] : String::EMPTY;
                 if (value.Length() && value2.Length() && (value[0] != '-') && (value2[0] != '-'))
                 {
                     importStartTime_ = ToFloat(value);
@@ -473,7 +473,7 @@ void Run(const Vector<String>& arguments)
     {
         String inFile = arguments[1];
         String outFile;
-        if (arguments.Size() > 2 && arguments[2][0] != '-')
+        if (arguments.size() > 2 && arguments[2][0] != '-')
             outFile = GetInternalPath(arguments[2]);
 
         inputName_ = GetFileName(inFile);
@@ -581,7 +581,7 @@ void Run(const Vector<String>& arguments)
         String outFile;
 
         unsigned numLodArguments = 0;
-        for (unsigned i = 1; i < arguments.Size(); ++i)
+        for (unsigned i = 1; i < arguments.size(); ++i)
         {
             if (arguments[i][0] == '-')
                 break;

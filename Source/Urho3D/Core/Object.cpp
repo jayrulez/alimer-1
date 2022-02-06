@@ -456,10 +456,10 @@ bool Object::HasSubscribedToEvent(Object* sender, StringHash eventType) const
 
 const String& Object::GetCategory() const
 {
-    const HashMap<String, Vector<StringHash> >& objectCategories = context_->GetObjectCategories();
-    for (HashMap<String, Vector<StringHash> >::ConstIterator i = objectCategories.Begin(); i != objectCategories.End(); ++i)
+    const HashMap<String, std::vector<StringHash> >& objectCategories = context_->GetObjectCategories();
+    for (HashMap<String, std::vector<StringHash> >::ConstIterator i = objectCategories.Begin(); i != objectCategories.End(); ++i)
     {
-        if (i->second_.Contains(GetType()))
+        if (std::find(i->second_.begin(), i->second_.end(), GetType()) != i->second_.end())
             return i->first_;
     }
 

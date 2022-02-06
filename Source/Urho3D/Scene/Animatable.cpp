@@ -336,14 +336,14 @@ namespace Urho3D
                 attributeInfo = &info->GetAttributeInfo();
             else
             {
-                const Vector<AttributeInfo>* attributes = GetAttributes();
+                const std::vector<AttributeInfo>* attributes = GetAttributes();
                 if (!attributes)
                 {
                     URHO3D_LOGERROR(GetTypeName() + " has no attributes");
                     return;
                 }
 
-                for (Vector<AttributeInfo>::ConstIterator i = attributes->Begin(); i != attributes->End(); ++i)
+                for (std::vector<AttributeInfo>::const_iterator i = attributes->begin(); i != attributes->end(); ++i)
                 {
                     if (name == (*i).name_)
                     {

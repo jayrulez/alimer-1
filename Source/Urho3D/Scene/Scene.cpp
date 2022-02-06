@@ -961,11 +961,11 @@ void Scene::NodeAdded(Node* node)
     }
 
     // Add already created components and child nodes now
-    const Vector<SharedPtr<Component> >& components = node->GetComponents();
-    for (Vector<SharedPtr<Component> >::ConstIterator i = components.Begin(); i != components.End(); ++i)
+    const std::vector<SharedPtr<Component> >& components = node->GetComponents();
+    for (std::vector<SharedPtr<Component> >::const_iterator i = components.begin(); i != components.end(); ++i)
         ComponentAdded(*i);
-    const Vector<SharedPtr<Node> >& children = node->GetChildren();
-    for (Vector<SharedPtr<Node> >::ConstIterator i = children.Begin(); i != children.End(); ++i)
+    const std::vector<SharedPtr<Node> >& children = node->GetChildren();
+    for (std::vector<SharedPtr<Node> >::const_iterator i = children.begin(); i != children.end(); ++i)
         NodeAdded(*i);
 }
 
@@ -1004,11 +1004,11 @@ void Scene::NodeRemoved(Node* node)
     }
 
     // Remove components and child nodes as well
-    const Vector<SharedPtr<Component> >& components = node->GetComponents();
-    for (Vector<SharedPtr<Component> >::ConstIterator i = components.Begin(); i != components.End(); ++i)
+    const std::vector<SharedPtr<Component> >& components = node->GetComponents();
+    for (std::vector<SharedPtr<Component> >::const_iterator i = components.begin(); i != components.end(); ++i)
         ComponentRemoved(*i);
-    const Vector<SharedPtr<Node> >& children = node->GetChildren();
-    for (Vector<SharedPtr<Node> >::ConstIterator i = children.Begin(); i != children.End(); ++i)
+    const std::vector<SharedPtr<Node> >& children = node->GetChildren();
+    for (std::vector<SharedPtr<Node> >::const_iterator i = children.begin(); i != children.end(); ++i)
         NodeRemoved(*i);
 }
 
@@ -1305,12 +1305,12 @@ void Scene::PreloadResources(File* file, bool isSceneFile)
     /*unsigned nodeID = */file->ReadUInt();
 
     // Read Node or Scene attributes; these do not include any resources
-    const Vector<AttributeInfo>* attributes = context_->GetAttributes(isSceneFile ? Scene::GetTypeStatic() : Node::GetTypeStatic());
+    const std::vector<AttributeInfo>* attributes = context_->GetAttributes(isSceneFile ? Scene::GetTypeStatic() : Node::GetTypeStatic());
     assert(attributes);
 
-    for (unsigned i = 0; i < attributes->Size(); ++i)
+    for (unsigned i = 0; i < attributes->size(); ++i)
     {
-        const AttributeInfo& attr = attributes->At(i);
+        const AttributeInfo& attr = attributes->at(i);
         if (!(attr.mode_ & AM_FILE))
             continue;
         /*Variant varValue = */file->ReadVariant(attr.type_);
@@ -1328,9 +1328,9 @@ void Scene::PreloadResources(File* file, bool isSceneFile)
         attributes = context_->GetAttributes(compType);
         if (attributes)
         {
-            for (unsigned j = 0; j < attributes->Size(); ++j)
+            for (unsigned j = 0; j < attributes->size(); ++j)
             {
-                const AttributeInfo& attr = attributes->At(j);
+                const AttributeInfo& attr = attributes->at(j);
                 if (!(attr.mode_ & AM_FILE))
                     continue;
                 Variant varValue = compBuffer.ReadVariant(attr.type_);
@@ -1382,7 +1382,7 @@ void Scene::PreloadResourcesXML(const XMLElement& element)
     while (compElem)
     {
         String typeName = compElem.GetAttribute("type");
-        const Vector<AttributeInfo>* attributes = context_->GetAttributes(StringHash(typeName));
+        const std::vector<AttributeInfo>* attributes = context_->GetAttributes(StringHash(typeName));
         if (attributes)
         {
             XMLElement attrElem = compElem.GetChild("attribute");
@@ -1392,11 +1392,11 @@ void Scene::PreloadResourcesXML(const XMLElement& element)
             {
                 String name = attrElem.GetAttribute("name");
                 unsigned i = startIndex;
-                unsigned attempts = attributes->Size();
+                unsigned attempts = attributes->size();
 
                 while (attempts)
                 {
-                    const AttributeInfo& attr = attributes->At(i);
+                    const AttributeInfo& attr = attributes->at(i);
                     if ((attr.mode_ & AM_FILE) && !attr.name_.Compare(name, true))
                     {
                         if (attr.type_ == VAR_RESOURCEREF)
@@ -1425,12 +1425,12 @@ void Scene::PreloadResourcesXML(const XMLElement& element)
                             }
                         }
 
-                        startIndex = (i + 1) % attributes->Size();
+                        startIndex = (i + 1) % attributes->size();
                         break;
                     }
                     else
                     {
-                        i = (i + 1) % attributes->Size();
+                        i = (i + 1) % attributes->size();
                         --attempts;
                     }
                 }
@@ -1465,7 +1465,7 @@ void Scene::PreloadResourcesJSON(const JSONValue& value)
         const JSONValue& compValue = componentArray.At(i);
         String typeName = compValue.Get("type").GetString();
 
-        const Vector<AttributeInfo>* attributes = context_->GetAttributes(StringHash(typeName));
+        const std::vector<AttributeInfo>* attributes = context_->GetAttributes(StringHash(typeName));
         if (attributes)
         {
             JSONArray attributesArray = compValue.Get("attributes").GetArray();
@@ -1477,11 +1477,11 @@ void Scene::PreloadResourcesJSON(const JSONValue& value)
                 const JSONValue& attrVal = attributesArray.At(j);
                 String name = attrVal.Get("name").GetString();
                 unsigned i = startIndex;
-                unsigned attempts = attributes->Size();
+                unsigned attempts = attributes->size();
 
                 while (attempts)
                 {
-                    const AttributeInfo& attr = attributes->At(i);
+                    const AttributeInfo& attr = attributes->at(i);
                     if ((attr.mode_ & AM_FILE) && !attr.name_.Compare(name, true))
                     {
                         if (attr.type_ == VAR_RESOURCEREF)
@@ -1510,12 +1510,12 @@ void Scene::PreloadResourcesJSON(const JSONValue& value)
                             }
                         }
 
-                        startIndex = (i + 1) % attributes->Size();
+                        startIndex = (i + 1) % attributes->size();
                         break;
                     }
                     else
                     {
-                        i = (i + 1) % attributes->Size();
+                        i = (i + 1) % attributes->size();
                         --attempts;
                     }
                 }
