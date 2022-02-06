@@ -73,14 +73,14 @@ namespace Urho3D
 
         // Remove all old instance nodes before searching for new. Can not call RemoveAllInstances() as that would modify
         // the ID list on its own
-        for (unsigned i = 0; i < controlPoints_.Size(); ++i)
+        for (unsigned i = 0; i < controlPoints_.size(); ++i)
         {
             Node* node = controlPoints_[i];
             if (node)
                 node->RemoveListener(this);
         }
 
-        controlPoints_.Clear();
+        controlPoints_.clear();
         spline_.Clear();
 
         Scene* scene = GetScene();
@@ -95,7 +95,7 @@ namespace Urho3D
                 {
                     WeakPtr<Node> controlPoint(node);
                     node->AddListener(this);
-                    controlPoints_.Push(controlPoint);
+                    controlPoints_.push_back(controlPoint);
                     spline_.AddKnot(node->GetWorldPosition());
                 }
             }
@@ -127,7 +127,7 @@ namespace Urho3D
                 }
             }
 
-            for (Vector<WeakPtr<Node> >::ConstIterator i = controlPoints_.Begin(); i != controlPoints_.End(); ++i)
+            for (std::vector<WeakPtr<Node> >::const_iterator i = controlPoints_.begin(); i != controlPoints_.end(); ++i)
                 debug->AddNode(*i);
 
             if (controlledNode_)
@@ -143,7 +143,8 @@ namespace Urho3D
         WeakPtr<Node> controlPoint(point);
 
         point->AddListener(this);
-        controlPoints_.Insert(index, controlPoint);
+        index = std::min(index, (unsigned)controlPoints_.size());
+        controlPoints_.insert(controlPoints_.begin() + index, controlPoint);
         spline_.AddKnot(point->GetWorldPosition(), index);
 
         UpdateNodeIds();
@@ -159,11 +160,11 @@ namespace Urho3D
 
         point->RemoveListener(this);
 
-        for (unsigned i = 0; i < controlPoints_.Size(); ++i)
+        for (unsigned i = 0; i < controlPoints_.size(); ++i)
         {
             if (controlPoints_[i] == controlPoint)
             {
-                controlPoints_.Erase(i);
+                controlPoints_.erase(controlPoints_.begin() + i);
                 spline_.RemoveKnot(i);
                 break;
             }
@@ -175,14 +176,14 @@ namespace Urho3D
 
     void SplinePath::ClearControlPoints()
     {
-        for (unsigned i = 0; i < controlPoints_.Size(); ++i)
+        for (unsigned i = 0; i < controlPoints_.size(); ++i)
         {
             Node* node = controlPoints_[i];
             if (node)
                 node->RemoveListener(this);
         }
 
-        controlPoints_.Clear();
+        controlPoints_.clear();
         spline_.Clear();
 
         UpdateNodeIds();
@@ -288,7 +289,7 @@ namespace Urho3D
 
         WeakPtr<Node> controlPoint(point);
 
-        for (unsigned i = 0; i < controlPoints_.Size(); ++i)
+        for (unsigned i = 0; i < controlPoints_.size(); ++i)
         {
             if (controlPoints_[i] == controlPoint)
             {
@@ -307,7 +308,7 @@ namespace Urho3D
 
         WeakPtr<Node> controlPoint(point);
 
-        for (unsigned i = 0; i < controlPoints_.Size(); ++i)
+        for (unsigned i = 0; i < controlPoints_.size(); ++i)
         {
             if (controlPoints_[i] == controlPoint)
             {
@@ -325,7 +326,7 @@ namespace Urho3D
 
     void SplinePath::UpdateNodeIds()
     {
-        unsigned numInstances = controlPoints_.Size();
+        unsigned numInstances = controlPoints_.size();
 
         controlPointIdsAttr_.clear();
         controlPointIdsAttr_.push_back(numInstances);
