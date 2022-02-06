@@ -36,8 +36,6 @@
 
 #include "../DebugNew.h"
 
-#include <vector>
-
 namespace Urho3D
 {
 
