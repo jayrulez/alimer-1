@@ -1001,7 +1001,7 @@ void BuildAndSaveModel(OutModel& model)
     PrintLine("Writing model " + rootNodeName);
 
     SharedPtr<Model> outModel(new Model(context_));
-    Vector<PODVector<unsigned> > allBoneMappings;
+    std::vector<PODVector<unsigned> > allBoneMappings;
     BoundingBox box;
 
     unsigned numValidGeometries = 0;
@@ -1037,8 +1037,8 @@ void BuildAndSaveModel(OutModel& model)
 
     SharedPtr<IndexBuffer> ib;
     SharedPtr<VertexBuffer> vb;
-    Vector<SharedPtr<VertexBuffer> > vbVector;
-    Vector<SharedPtr<IndexBuffer> > ibVector;
+    std::vector<SharedPtr<VertexBuffer>> vbVector;
+    std::vector<SharedPtr<IndexBuffer>> ibVector;
     unsigned startVertexOffset = 0;
     unsigned startIndexOffset = 0;
     unsigned destGeomIndex = 0;
@@ -1061,7 +1061,7 @@ void BuildAndSaveModel(OutModel& model)
             largeIndices = mesh->mNumVertices > 65535;
 
         // Create new buffers if necessary
-        if (!combineBuffers || vbVector.Empty())
+        if (!combineBuffers || vbVector.empty())
         {
             vb = new VertexBuffer(context_);
             ib = new IndexBuffer(context_);
@@ -1077,8 +1077,8 @@ void BuildAndSaveModel(OutModel& model)
                 vb->SetSize(mesh->mNumVertices, elements);
             }
 
-            vbVector.Push(vb);
-            ibVector.Push(ib);
+            vbVector.push_back(vb);
+            ibVector.push_back(ib);
             startVertexOffset = 0;
             startIndexOffset = 0;
         }
@@ -1154,7 +1154,7 @@ void BuildAndSaveModel(OutModel& model)
         outModel->SetGeometry(destGeomIndex, 0, geom);
         outModel->SetGeometryCenter(destGeomIndex, center);
         if (model.bones_.Size() > maxBones_)
-            allBoneMappings.Push(boneMappings);
+            allBoneMappings.push_back(boneMappings);
 
         startVertexOffset += mesh->mNumVertices;
         startIndexOffset += validFaces * 3;
@@ -2095,8 +2095,8 @@ void CombineLods(const PODVector<float>& lodDistances, const Vector<String>& mod
             ErrorExit(modelNames[i] + " has different per-geometry bone mappings than " + modelNames[0]);
     }
 
-    Vector<SharedPtr<VertexBuffer> > vbVector;
-    Vector<SharedPtr<IndexBuffer> > ibVector;
+    std::vector<SharedPtr<VertexBuffer>> vbVector;
+    std::vector<SharedPtr<IndexBuffer>> ibVector;
     PODVector<unsigned> emptyMorphRange;
 
     // Create the final model
@@ -2114,13 +2114,13 @@ void CombineLods(const PODVector<float>& lodDistances, const Vector<String>& mod
             for (unsigned k = 0; k < geometry->GetNumVertexBuffers(); ++k)
             {
                 SharedPtr<VertexBuffer> vb(geometry->GetVertexBuffer(k));
-                if (!vbVector.Contains(vb))
-                    vbVector.Push(vb);
+                if (std::find(vbVector.begin(), vbVector.end(), vb) == vbVector.end())
+                    vbVector.push_back(vb);
             }
 
             SharedPtr<IndexBuffer> ib(geometry->GetIndexBuffer());
-            if (!ibVector.Contains(ib))
-                ibVector.Push(ib);
+            if (std::find(ibVector.begin(), ibVector.end(), ib) == ibVector.end())
+                ibVector.push_back(ib);
         }
     }
 

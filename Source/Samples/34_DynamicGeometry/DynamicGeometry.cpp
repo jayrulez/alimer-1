@@ -244,10 +244,10 @@ void DynamicGeometry::CreateScene()
         fromScratchModel->SetBoundingBox(BoundingBox(Vector3(-0.5f, -0.5f, -0.5f), Vector3(0.5f, 0.5f, 0.5f)));
 
         // Though not necessary to render, the vertex & index buffers must be listed in the model so that it can be saved properly
-        Vector<SharedPtr<VertexBuffer> > vertexBuffers;
-        Vector<SharedPtr<IndexBuffer> > indexBuffers;
-        vertexBuffers.Push(vb);
-        indexBuffers.Push(ib);
+        std::vector<SharedPtr<VertexBuffer> > vertexBuffers;
+        std::vector<SharedPtr<IndexBuffer> > indexBuffers;
+        vertexBuffers.push_back(vb);
+        indexBuffers.push_back(ib);
         // Morph ranges could also be not defined. Here we simply define a zero range (no morphing) for the vertex buffer
         PODVector<unsigned> morphRangeStarts;
         PODVector<unsigned> morphRangeCounts;

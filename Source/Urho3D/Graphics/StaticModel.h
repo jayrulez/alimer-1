@@ -84,7 +84,7 @@ public:
 
     /// Return number of geometries.
     /// @property
-    unsigned GetNumGeometries() const { return geometries_.Size(); }
+    unsigned GetNumGeometries() const { return geometries_.size(); }
 
     /// Return material from the first geometry, assuming all the geometries use the same material.
     /// @property
@@ -126,7 +126,7 @@ protected:
     /// Extra per-geometry data.
     PODVector<StaticModelGeometryData> geometryData_;
     /// All geometries.
-    Vector<Vector<SharedPtr<Geometry> > > geometries_;
+    std::vector<std::vector<SharedPtr<Geometry> > > geometries_;
     /// Model.
     SharedPtr<Model> model_;
     /// Occlusion LOD level.
