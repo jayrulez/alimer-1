@@ -136,26 +136,26 @@ void Run(const std::vector<String>& arguments)
             PrintLine("Scanning directory " + dirName + " for files");
 
         // Get the file list recursively
-        Vector<String> fileNames;
+        std::vector<String> fileNames;
         fileSystem_->ScanDir(fileNames, dirName, "*.*", SCAN_FILES, true);
-        if (!fileNames.Size())
+        if (!fileNames.size())
             ErrorExit("No files found");
 
         // Check for extensions to ignore
-        for (unsigned i = fileNames.Size() - 1; i < fileNames.Size(); --i)
+        for (unsigned i = fileNames.size() - 1; i < fileNames.size(); --i)
         {
             String extension = GetExtension(fileNames[i]);
             for (unsigned j = 0; ignoreExtensions_[j].Length(); ++j)
             {
                 if (extension == ignoreExtensions_[j])
                 {
-                    fileNames.Erase(fileNames.Begin() + i);
+                    fileNames.erase(fileNames.begin() + i);
                     break;
                 }
             }
         }
 
-        for (unsigned i = 0; i < fileNames.Size(); ++i)
+        for (unsigned i = 0; i < fileNames.size(); ++i)
             ProcessFile(fileNames[i], dirName);
 
         WritePackageFile(packageName, dirName);

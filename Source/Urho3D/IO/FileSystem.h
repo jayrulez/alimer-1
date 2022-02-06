@@ -97,7 +97,7 @@ namespace Urho3D
         /// Check if a directory exists.
         bool DirExists(const String& pathName) const;
         /// Scan a directory for specified files.
-        void ScanDir(Vector<String>& result, const String& pathName, const String& filter, unsigned flags, bool recursive) const;
+        void ScanDir(std::vector<String>& result, const String& pathName, const String& filter, unsigned flags, bool recursive) const;
         /// Return the program's directory.
         /// @property
         String GetProgramDir() const;
@@ -113,7 +113,7 @@ namespace Urho3D
     private:
         /// Scan directory, called internally.
         void ScanDirInternal
-        (Vector<String>& result, String path, const String& startPath, const String& filter, unsigned flags, bool recursive) const;
+        (std::vector<String>& result, String path, const String& startPath, const String& filter, unsigned flags, bool recursive) const;
         /// Handle begin frame event to check for completed async executions.
         void HandleBeginFrame(StringHash eventType, VariantMap& eventData);
         /// Handle a console command event.

@@ -216,11 +216,11 @@ bool FontFaceBitmap::Load(FontFace* fontFace, bool usedGlyphs)
     unsigned components = ConvertFormatToNumComponents(fontFace->textures_[0]->GetFormat());
 
     // Save the existing textures as image resources
-    Vector<SharedPtr<Image> > oldImages;
+    std::vector<SharedPtr<Image> > oldImages;
     for (unsigned i = 0; i < fontFace->textures_.size(); ++i)
-        oldImages.Push(SaveFaceTexture(fontFace->textures_[i]));
+        oldImages.push_back(SaveFaceTexture(fontFace->textures_[i]));
 
-    Vector<SharedPtr<Image> > newImages(numPages);
+    std::vector<SharedPtr<Image> > newImages(numPages);
     for (unsigned i = 0; i < numPages; ++i)
     {
         SharedPtr<Image> image(new Image(font_->GetContext()));
@@ -247,8 +247,8 @@ bool FontFaceBitmap::Load(FontFace* fontFace, bool usedGlyphs)
             oldGlyph.x_, oldGlyph.y_, components);
     }
 
-    textures_.resize(newImages.Size());
-    for (unsigned i = 0; i < newImages.Size(); ++i)
+    textures_.resize(newImages.size());
+    for (unsigned i = 0; i < newImages.size(); ++i)
         textures_[i] = LoadFaceTexture(newImages[i]);
 
     for (HashMap<unsigned, float>::ConstIterator i = fontFace->kerningMapping_.Begin(); i != fontFace->kerningMapping_.End(); ++i)

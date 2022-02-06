@@ -63,7 +63,7 @@ private:
     /// The element that is being tracked for hovering. Normally the parent element.
     WeakPtr<UIElement> target_;
     /// Alternative targets. Primarily targets parent.
-    Vector<WeakPtr<UIElement> > altTargets_;
+    std::vector<WeakPtr<UIElement> > altTargets_;
     /// Delay from hover start to displaying the tooltip.
     float delay_;
     /// Hover countdown has started.

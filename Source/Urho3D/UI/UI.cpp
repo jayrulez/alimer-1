@@ -882,10 +882,10 @@ UIElement* UI::GetFrontElement() const
     return front;
 }
 
-const Vector<UIElement*> UI::GetDragElements()
+const std::vector<UIElement*> UI::GetDragElements()
 {
     // Do not return the element until drag begin event has actually been posted
-    if (!dragElementsConfirmed_.Empty())
+    if (!dragElementsConfirmed_.empty())
         return dragElementsConfirmed_;
 
     for (HashMap<WeakPtr<UIElement>, UI::DragData*>::Iterator i = dragElements_.Begin(); i != dragElements_.End();)
@@ -900,7 +900,7 @@ const Vector<UIElement*> UI::GetDragElements()
         }
 
         if (!dragData->dragBeginPending)
-            dragElementsConfirmed_.Push(dragElement);
+            dragElementsConfirmed_.push_back(dragElement);
 
         ++i;
     }
@@ -911,7 +911,7 @@ const Vector<UIElement*> UI::GetDragElements()
 UIElement* UI::GetDragElement(unsigned index)
 {
     GetDragElements();
-    if (index >= dragElementsConfirmed_.Size())
+    if (index >= dragElementsConfirmed_.size())
         return nullptr;
 
     return dragElementsConfirmed_[index];
@@ -2097,7 +2097,7 @@ HashMap<WeakPtr<UIElement>, UI::DragData*>::Iterator UI::DragElementErase(HashMa
     if (dragElements_.Empty())
         return dragElements_.End();
 
-    dragElementsConfirmed_.Clear();
+    dragElementsConfirmed_.clear();
 
     DragData* dragData = i->second_;
 

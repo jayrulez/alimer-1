@@ -72,11 +72,11 @@ void ToolTip::Update(float timeStep)
     bool hovering = target_->IsHovering() && target_->IsVisibleEffective();
     if (!hovering)
     {
-        for (auto it = altTargets_.Begin(); it != altTargets_.End();)
+        for (auto it = altTargets_.begin(); it != altTargets_.end();)
         {
             SharedPtr<UIElement> target = it->Lock();
             if (!target)
-                it = altTargets_.Erase(it);
+                it = altTargets_.erase(it);
             else
             {
                 hovering = target->IsHovering() && target->IsVisibleEffective();
@@ -130,7 +130,7 @@ void ToolTip::Reset()
 
 void ToolTip::AddAltTarget(UIElement* target)
 {
-    altTargets_.Push(WeakPtr<UIElement>(target));
+    altTargets_.push_back(WeakPtr<UIElement>(target));
 }
 
 void ToolTip::SetDelay(float delay)

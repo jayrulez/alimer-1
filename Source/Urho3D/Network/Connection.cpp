@@ -1479,7 +1479,7 @@ bool Connection::RequestNeededPackages(unsigned numPackages, MemoryBuffer& msg)
     const String& packageCacheDir = GetSubsystem<Network>()->GetPackageCacheDir();
 
     Vector<SharedPtr<PackageFile> > packages = cache->GetPackageFiles();
-    Vector<String> downloadedPackages;
+    std::vector<String> downloadedPackages;
     bool packagesScanned = false;
 
     for (unsigned i = 0; i < numPackages; ++i)
@@ -1518,7 +1518,7 @@ bool Connection::RequestNeededPackages(unsigned numPackages, MemoryBuffer& msg)
         }
 
         // Then the download cache
-        for (unsigned j = 0; j < downloadedPackages.Size(); ++j)
+        for (unsigned j = 0; j < downloadedPackages.size(); ++j)
         {
             const String& fileName = downloadedPackages[j];
             // In download cache, package file name format is checksum_packagename

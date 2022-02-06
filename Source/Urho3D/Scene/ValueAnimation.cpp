@@ -89,7 +89,7 @@ namespace Urho3D
     bool ValueAnimation::LoadXML(const XMLElement& source)
     {
         valueType_ = VAR_NONE;
-        eventFrames_.Clear();
+        eventFrames_.clear();
 
         String interpMethodString = source.GetAttribute("interpolationmethod");
         auto method = (InterpMethod)GetStringListIndex(interpMethodString.CString(), interpMethodNames, IM_LINEAR);
@@ -128,7 +128,7 @@ namespace Urho3D
         if (interpolationMethod_ == IM_SPLINE)
             dest.SetFloat("splinetension", splineTension_);
 
-        for (unsigned i = 0; i < keyFrames_.Size(); ++i)
+        for (unsigned i = 0; i < keyFrames_.size(); ++i)
         {
             const VAnimKeyFrame& keyFrame = keyFrames_[i];
             XMLElement keyFrameEleme = dest.CreateChild("keyframe");
@@ -136,7 +136,7 @@ namespace Urho3D
             keyFrameEleme.SetVariant(keyFrame.value_);
         }
 
-        for (unsigned i = 0; i < eventFrames_.Size(); ++i)
+        for (unsigned i = 0; i < eventFrames_.size(); ++i)
         {
             const VAnimEventFrame& eventFrame = eventFrames_[i];
             XMLElement eventFrameElem = dest.CreateChild("eventframe");
@@ -151,7 +151,7 @@ namespace Urho3D
     bool ValueAnimation::LoadJSON(const JSONValue& source)
     {
         valueType_ = VAR_NONE;
-        eventFrames_.Clear();
+        eventFrames_.clear();
 
         String interpMethodString = source.Get("interpolationmethod").GetString();
         auto method = (InterpMethod)GetStringListIndex(interpMethodString.CString(), interpMethodNames, IM_LINEAR);
@@ -191,8 +191,8 @@ namespace Urho3D
             dest.Set("splinetension", (float)splineTension_);
 
         JSONArray keyFramesArray;
-        keyFramesArray.Reserve(keyFrames_.Size());
-        for (unsigned i = 0; i < keyFrames_.Size(); ++i)
+        keyFramesArray.Reserve(keyFrames_.size());
+        for (unsigned i = 0; i < keyFrames_.size(); ++i)
         {
             const VAnimKeyFrame& keyFrame = keyFrames_[i];
             JSONValue keyFrameVal;
@@ -205,8 +205,8 @@ namespace Urho3D
         dest.Set("keyframes", keyFramesArray);
 
         JSONArray eventFramesArray;
-        eventFramesArray.Reserve(eventFrames_.Size());
-        for (unsigned i = 0; i < eventFrames_.Size(); ++i)
+        eventFramesArray.Reserve(eventFrames_.size());
+        for (unsigned i = 0; i < eventFrames_.size(); ++i)
         {
             const VAnimEventFrame& eventFrame = eventFrames_[i];
             JSONValue eventFrameVal;
@@ -241,8 +241,8 @@ namespace Urho3D
                 interpolationMethod_ = IM_LINEAR;
         }
 
-        keyFrames_.Clear();
-        eventFrames_.Clear();
+        keyFrames_.clear();
+        eventFrames_.clear();
         beginTime_ = M_INFINITY;
         endTime_ = -M_INFINITY;
     }
@@ -282,18 +282,18 @@ namespace Urho3D
         keyFrame.time_ = time;
         keyFrame.value_ = value;
 
-        if (keyFrames_.Empty() || time > keyFrames_.Back().time_)
-            keyFrames_.Push(keyFrame);
+        if (keyFrames_.empty() || time > keyFrames_.back().time_)
+            keyFrames_.push_back(keyFrame);
         else
         {
-            for (unsigned i = 0; i < keyFrames_.Size(); ++i)
+            for (unsigned i = 0; i < keyFrames_.size(); ++i)
             {
                 // Guard against interpolation error caused by division by error due to 0 delta time between two key frames
                 if (time == keyFrames_[i].time_)
                     return false;
                 if (time < keyFrames_[i].time_)
                 {
-                    keyFrames_.Insert(i, keyFrame);
+                    keyFrames_.insert(keyFrames_.begin() + i, keyFrame);
                     break;
                 }
             }
@@ -313,15 +313,15 @@ namespace Urho3D
         eventFrame.eventType_ = eventType;
         eventFrame.eventData_ = eventData;
 
-        if (eventFrames_.Empty() || time >= eventFrames_.Back().time_)
-            eventFrames_.Push(eventFrame);
+        if (eventFrames_.empty() || time >= eventFrames_.back().time_)
+            eventFrames_.push_back(eventFrame);
         else
         {
-            for (unsigned i = 0; i < eventFrames_.Size(); ++i)
+            for (unsigned i = 0; i < eventFrames_.size(); ++i)
             {
                 if (time < eventFrames_[i].time_)
                 {
-                    eventFrames_.Insert(i, eventFrame);
+                    eventFrames_.insert(eventFrames_.begin() + i, eventFrame);
                     break;
                 }
             }
@@ -334,20 +334,20 @@ namespace Urho3D
     bool ValueAnimation::IsValid() const
     {
         return (interpolationMethod_ == IM_NONE) ||
-            (interpolationMethod_ == IM_LINEAR && keyFrames_.Size() > 1) ||
-            (interpolationMethod_ == IM_SPLINE && keyFrames_.Size() > 2);
+            (interpolationMethod_ == IM_LINEAR && keyFrames_.size() > 1) ||
+            (interpolationMethod_ == IM_SPLINE && keyFrames_.size() > 2);
     }
 
     Variant ValueAnimation::GetAnimationValue(float scaledTime) const
     {
         unsigned index = 1;
-        for (; index < keyFrames_.Size(); ++index)
+        for (; index < keyFrames_.size(); ++index)
         {
             if (scaledTime < keyFrames_[index].time_)
                 break;
         }
 
-        if (index >= keyFrames_.Size() || !interpolatable_ || interpolationMethod_ == IM_NONE)
+        if (index >= keyFrames_.size() || !interpolatable_ || interpolationMethod_ == IM_NONE)
             return keyFrames_[index - 1].value_;
         else
         {
@@ -360,7 +360,7 @@ namespace Urho3D
 
     void ValueAnimation::GetEventFrames(float beginTime, float endTime, PODVector<const VAnimEventFrame*>& eventFrames) const
     {
-        for (unsigned i = 0; i < eventFrames_.Size(); ++i)
+        for (unsigned i = 0; i < eventFrames_.size(); ++i)
         {
             const VAnimEventFrame& eventFrame = eventFrames_[i];
             if (eventFrame.time_ > endTime)
@@ -493,7 +493,7 @@ namespace Urho3D
         if (!IsValid())
             return;
 
-        unsigned size = keyFrames_.Size();
+        unsigned size = keyFrames_.size();
         splineTangents_.resize(size);
 
         for (unsigned i = 1; i < size - 1; ++i)

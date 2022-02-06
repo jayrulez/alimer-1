@@ -423,9 +423,9 @@ bool Engine::InitializeResourceCache(const VariantMap& parameters, bool removeOl
                 autoLoadPathExist = true;
 
                 // Add all the subdirs (non-recursive) as resource directory
-                Vector<String> subdirs;
+                std::vector<String> subdirs;
                 fileSystem->ScanDir(subdirs, autoLoadPath, "*", SCAN_DIRS, false);
-                for (unsigned y = 0; y < subdirs.Size(); ++y)
+                for (unsigned y = 0; y < subdirs.size(); ++y)
                 {
                     String dir = subdirs[y];
                     if (dir.StartsWith("."))
@@ -437,9 +437,9 @@ bool Engine::InitializeResourceCache(const VariantMap& parameters, bool removeOl
                 }
 
                 // Add all the found package files (non-recursive)
-                Vector<String> paks;
+                std::vector<String> paks;
                 fileSystem->ScanDir(paks, autoLoadPath, "*.pak", SCAN_FILES, false);
-                for (unsigned y = 0; y < paks.Size(); ++y)
+                for (unsigned y = 0; y < paks.size(); ++y)
                 {
                     String pak = paks[y];
                     if (pak.StartsWith("."))
