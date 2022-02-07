@@ -24,6 +24,7 @@
 
 #include "../Core/Context.h"
 #include "../Graphics/DebugRenderer.h"
+#include "../Graphics/Material.h"
 #include "../Resource/ResourceCache.h"
 #include "../Scene/Node.h"
 #include "../Urho2D/StaticSprite2D.h"

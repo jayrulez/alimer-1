@@ -48,8 +48,6 @@ using namespace std;
 
 namespace Urho3D
 {
-    extern const char* GEOMETRY_CATEGORY;
-
     static const StringVector animationStatesStructureElementNames =
     {
         "Anim State Count",
@@ -362,11 +360,13 @@ namespace Urho3D
             }
 
             // Copy geometry bone mappings
-            const std::vector<PODVector<unsigned> >& geometryBoneMappings = model->GetGeometryBoneMappings();
+            const vector<vector<u32> >& geometryBoneMappings = model->GetGeometryBoneMappings();
             geometryBoneMappings_.clear();
             geometryBoneMappings_.reserve(geometryBoneMappings.size());
-            for (unsigned i = 0; i < geometryBoneMappings.size(); ++i)
+            for (size_t i = 0; i < geometryBoneMappings.size(); ++i)
+            {
                 geometryBoneMappings_.push_back(geometryBoneMappings[i]);
+            }
 
             // Copy morphs. Note: morph vertex buffers will be created later on-demand
             morphVertexBuffers_.clear();
@@ -396,26 +396,26 @@ namespace Urho3D
             ResetLodLevels();
 
             // Reserve space for skinning matrices
-            skinMatrices_.Resize(skeleton_.GetNumBones());
+            skinMatrices_.resize(skeleton_.GetNumBones());
             SetGeometryBoneMappings();
 
             // Enable skinning in batches
             for (unsigned i = 0; i < batches_.Size(); ++i)
             {
-                if (skinMatrices_.Size())
+                if (skinMatrices_.size())
                 {
                     batches_[i].geometryType_ = GEOM_SKINNED;
                     // Check if model has per-geometry bone mappings
-                    if (geometrySkinMatrices_.size() && geometrySkinMatrices_[i].Size())
+                    if (geometrySkinMatrices_.size() && geometrySkinMatrices_[i].size())
                     {
                         batches_[i].worldTransform_ = &geometrySkinMatrices_[i][0];
-                        batches_[i].numWorldTransforms_ = geometrySkinMatrices_[i].Size();
+                        batches_[i].numWorldTransforms_ = (uint32_t)geometrySkinMatrices_[i].size();
                     }
                     // If not, use the global skin matrices
                     else
                     {
-                        batches_[i].worldTransform_ = &skinMatrices_[0];
-                        batches_[i].numWorldTransforms_ = skinMatrices_.Size();
+                        batches_[i].worldTransform_ = skinMatrices_.data();
+                        batches_[i].numWorldTransforms_ = (uint32_t)skinMatrices_.size();
                     }
                 }
                 else
@@ -896,11 +896,11 @@ namespace Urho3D
         return ret;
     }
 
-    const PODVector<unsigned char>& AnimatedModel::GetMorphsAttr() const
+    const PODVector<u8>& AnimatedModel::GetMorphsAttr() const
     {
         attrBuffer_.Clear();
         for (std::vector<ModelMorph>::const_iterator i = morphs_.begin(); i != morphs_.end(); ++i)
-            attrBuffer_.WriteUByte((unsigned char)(i->weight_ * 255.0f));
+            attrBuffer_.WriteUByte((u8)(i->weight_ * 255.0f));
 
         return attrBuffer_.GetBuffer();
     }
@@ -1232,25 +1232,33 @@ namespace Urho3D
 
         // Check if all mappings are empty, then we do not need to use mapped skinning
         bool allEmpty = true;
-        for (unsigned i = 0; i < geometryBoneMappings_.size(); ++i)
-            if (geometryBoneMappings_[i].Size())
+        for (size_t i = 0; i < geometryBoneMappings_.size(); ++i)
+        {
+            if (geometryBoneMappings_[i].size())
+            {
                 allEmpty = false;
+            }
+        }
 
         if (allEmpty)
             return;
 
         // Reserve space for per-geometry skinning matrices
         geometrySkinMatrices_.resize(geometryBoneMappings_.size());
-        for (unsigned i = 0; i < geometryBoneMappings_.size(); ++i)
-            geometrySkinMatrices_[i].Resize(geometryBoneMappings_[i].Size());
+        for (size_t i = 0; i < geometryBoneMappings_.size(); ++i)
+        {
+            geometrySkinMatrices_[i].resize(geometryBoneMappings_[i].size());
+        }
 
         // Build original-to-skinindex matrix pointer mapping for fast copying
         // Note: at this point layout of geometrySkinMatrices_ cannot be modified or pointers become invalid
         geometrySkinMatrixPtrs_.resize(skeleton_.GetNumBones());
-        for (unsigned i = 0; i < geometryBoneMappings_.size(); ++i)
+        for (size_t i = 0; i < geometryBoneMappings_.size(); ++i)
         {
-            for (unsigned j = 0; j < geometryBoneMappings_[i].Size(); ++j)
-                geometrySkinMatrixPtrs_[geometryBoneMappings_[i][j]].Push(&geometrySkinMatrices_[i][j]);
+            for (size_t j = 0; j < geometryBoneMappings_[i].size(); ++j)
+            {
+                geometrySkinMatrixPtrs_[geometryBoneMappings_[i][j]].push_back(&geometrySkinMatrices_[i][j]);
+            }
         }
     }
 
@@ -1333,8 +1341,10 @@ namespace Urho3D
                     skinMatrices_[i] = worldTransform;
 
                 // Copy the skin matrix to per-geometry matrices as needed
-                for (unsigned j = 0; j < geometrySkinMatrixPtrs_[i].Size(); ++j)
+                for (size_t j = 0; j < geometrySkinMatrixPtrs_[i].size(); ++j)
+                {
                     *geometrySkinMatrixPtrs_[i][j] = skinMatrices_[i];
+                }
             }
         }
 

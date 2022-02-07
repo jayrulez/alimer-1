@@ -45,8 +45,6 @@ using namespace Urho3D;
 
 namespace Urho3D
 {
-    extern const char* GEOMETRY_CATEGORY;
-
     static const Vector3 DEFAULT_SPACING(1.0f, 0.25f, 1.0f);
     static const unsigned MIN_LOD_LEVELS = 1;
     static const unsigned MAX_LOD_LEVELS = 4;

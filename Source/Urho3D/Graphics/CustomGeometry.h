@@ -53,8 +53,6 @@ class URHO3D_API CustomGeometry : public Drawable
 public:
     /// Construct.
     explicit CustomGeometry(Context* context);
-    /// Destruct.
-    ~CustomGeometry() override;
     /// Register object factory. Drawable must be registered first.
     /// @nobind
     static void RegisterObject(Context* context);

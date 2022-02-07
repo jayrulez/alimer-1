@@ -37,8 +37,6 @@
 
 namespace Urho3D
 {
-    extern const char* GEOMETRY_CATEGORY;
-
     static const StringVector instanceNodesStructureElementNames =
     {
         "Instance Count",

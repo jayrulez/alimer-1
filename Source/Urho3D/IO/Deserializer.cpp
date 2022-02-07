@@ -95,10 +95,10 @@ namespace Urho3D
         return ret;
     }
 
-    unsigned Deserializer::ReadUInt()
+    u32 Deserializer::ReadUInt()
     {
-        unsigned ret;
-        Read(&ret, sizeof ret);
+        u32 ret;
+        Read(&ret, sizeof(u32));
         return ret;
     }
 

@@ -27,6 +27,7 @@
 #include "../Graphics/Octree.h"
 #include "../Graphics/TextureCube.h"
 #include "../Graphics/Zone.h"
+#include "../Graphics/Material.h"
 #include "../Resource/ResourceCache.h"
 #include "../Scene/Node.h"
 #include "../Scene/Scene.h"

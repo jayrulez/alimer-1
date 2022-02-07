@@ -84,7 +84,7 @@ public:
 
     /// Return number of geometries.
     /// @property
-    unsigned GetNumGeometries() const { return geometries_.size(); }
+    uint32_t GetNumGeometries() const { return (uint32_t)geometries_.size(); }
 
     /// Return material from the first geometry, assuming all the geometries use the same material.
     /// @property

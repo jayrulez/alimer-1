@@ -23,11 +23,10 @@
 #include "../Precompiled.h"
 
 #include "../Graphics/OctreeQuery.h"
-
+#include "../Graphics/Material.h"
 #include "../DebugNew.h"
 
-namespace Urho3D
-{
+using namespace Urho3D;
 
 Intersection PointOctreeQuery::TestOctant(const BoundingBox& box, bool inside)
 {
@@ -132,6 +131,4 @@ void AllContentOctreeQuery::TestDrawables(Drawable** start, Drawable** end, bool
         if ((drawable->GetDrawableFlags() & drawableFlags_) && (drawable->GetViewMask() & viewMask_))
             result_.Push(drawable);
     }
-}
-
 }

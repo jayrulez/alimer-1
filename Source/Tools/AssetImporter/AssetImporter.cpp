@@ -209,8 +209,10 @@ unsigned GetMeshIndex(aiMesh* mesh);
 unsigned GetBoneIndex(OutModel& model, const String& boneName);
 aiBone* GetMeshBone(OutModel& model, const String& boneName);
 Matrix3x4 GetOffsetMatrix(OutModel& model, const String& boneName);
-void GetBlendData(OutModel& model, aiMesh* mesh, aiNode* meshNode, PODVector<unsigned>& boneMappings, Vector<PODVector<unsigned char> >&
-    blendIndices, Vector<PODVector<float> >& blendWeights);
+void GetBlendData(OutModel& model, aiMesh* mesh, aiNode* meshNode,
+    std::vector<u32>& boneMappings,
+    Vector<std::vector<u8>>& blendIndices,
+    Vector<PODVector<float> >& blendWeights);
 String GetMeshMaterialName(aiMesh* mesh);
 String GetMaterialTextureName(const String& nameIn);
 String GenerateMaterialName(aiMaterial* material);
@@ -220,7 +222,7 @@ unsigned GetNumValidFaces(aiMesh* mesh);
 void WriteShortIndices(unsigned short*& dest, aiMesh* mesh, unsigned index, unsigned offset);
 void WriteLargeIndices(unsigned*& dest, aiMesh* mesh, unsigned index, unsigned offset);
 void WriteVertex(float*& dest, aiMesh* mesh, unsigned index, bool isSkinned, BoundingBox& box,
-    const Matrix3x4& vertexTransform, const Matrix3& normalTransform, Vector<PODVector<unsigned char> >& blendIndices,
+    const Matrix3x4& vertexTransform, const Matrix3& normalTransform, Vector<std::vector<u8>>& blendIndices,
     Vector<PODVector<float> >& blendWeights);
 PODVector<VertexElement> GetVertexElements(aiMesh* mesh, bool isSkinned);
 
@@ -1001,10 +1003,10 @@ void BuildAndSaveModel(OutModel& model)
     PrintLine("Writing model " + rootNodeName);
 
     SharedPtr<Model> outModel(new Model(context_));
-    std::vector<PODVector<unsigned> > allBoneMappings;
+    std::vector<std::vector<u32> > allBoneMappings;
     BoundingBox box;
 
-    unsigned numValidGeometries = 0;
+    u32 numValidGeometries = 0;
 
     bool combineBuffers = true;
     // Check if buffers can be combined (same vertex elements, under 65535 vertices)
@@ -1119,15 +1121,19 @@ void BuildAndSaveModel(OutModel& model)
 
         // Build the vertex data
         // If there are bones, get blend data
-        Vector<PODVector<unsigned char> > blendIndices;
+        Vector<std::vector<u8>> blendIndices;
         Vector<PODVector<float> > blendWeights;
-        PODVector<unsigned> boneMappings;
+        std::vector<u32> boneMappings;
         if (model.bones_.Size())
+        {
             GetBlendData(model, mesh, model.meshNodes_[i], boneMappings, blendIndices, blendWeights);
+        }
 
-        auto* dest = (float*)((unsigned char*)vertexData + startVertexOffset * vb->GetVertexSize());
-        for (unsigned j = 0; j < mesh->mNumVertices; ++j)
+        auto* dest = (float*)((u8*)vertexData + startVertexOffset * vb->GetVertexSize());
+        for (u32 j = 0; j < mesh->mNumVertices; ++j)
+        {
             WriteVertex(dest, mesh, j, isSkinned, box, vertexTransform, normalTransform, blendIndices, blendWeights);
+        }
 
         // Calculate the geometry center
         Vector3 center = Vector3::ZERO;
@@ -1208,7 +1214,7 @@ void BuildAndSaveModel(OutModel& model)
             {
                 if (bones[j].name_ == parentName)
                 {
-                    bones[i].parentIndex_ = j;
+                    bones[i].parentIndex_ = (u32)j;
                     break;
                 }
             }
@@ -2216,12 +2222,14 @@ Matrix3x4 GetOffsetMatrix(OutModel& model, const String& boneName)
     return Matrix3x4::IDENTITY;
 }
 
-void GetBlendData(OutModel& model, aiMesh* mesh, aiNode* meshNode, PODVector<unsigned>& boneMappings, Vector<PODVector<unsigned char> >&
-    blendIndices, Vector<PODVector<float> >& blendWeights)
+void GetBlendData(OutModel& model, aiMesh* mesh, aiNode* meshNode,
+    std::vector<u32>& boneMappings,
+    Vector<std::vector<u8>>& blendIndices,
+    Vector<PODVector<float> >& blendWeights)
 {
     blendIndices.Resize(mesh->mNumVertices);
     blendWeights.Resize(mesh->mNumVertices);
-    boneMappings.Clear();
+    boneMappings.clear();
 
     // If model has more bones than can fit vertex shader parameters, write the per-geometry mappings
     if (model.bones_.Size() > maxBones_)
@@ -2235,8 +2243,8 @@ void GetBlendData(OutModel& model, aiMesh* mesh, aiNode* meshNode, PODVector<uns
         }
         if (mesh->mNumBones > 0)
         {
-            boneMappings.Resize(mesh->mNumBones);
-            for (unsigned i = 0; i < mesh->mNumBones; ++i)
+            boneMappings.resize(mesh->mNumBones);
+            for (u32 i = 0; i < mesh->mNumBones; ++i)
             {
                 aiBone* bone = mesh->mBones[i];
                 String boneName = FromAIString(bone->mName);
@@ -2247,7 +2255,7 @@ void GetBlendData(OutModel& model, aiMesh* mesh, aiNode* meshNode, PODVector<uns
                 for (unsigned j = 0; j < bone->mNumWeights; ++j)
                 {
                     unsigned vertex = bone->mWeights[j].mVertexId;
-                    blendIndices[vertex].Push(i);
+                    blendIndices[vertex].push_back(i);
                     blendWeights[vertex].Push(bone->mWeights[j].mWeight);
                 }
             }
@@ -2261,10 +2269,10 @@ void GetBlendData(OutModel& model, aiMesh* mesh, aiNode* meshNode, PODVector<uns
                 PrintLine("Warning: bone " + boneName + " not found, skipping rigid skinning");
             else
             {
-                boneMappings.Push(globalIndex);
-                for (unsigned i = 0; i < mesh->mNumVertices; ++i)
+                boneMappings.push_back(globalIndex);
+                for (u32 i = 0; i < mesh->mNumVertices; ++i)
                 {
-                    blendIndices[i].Push(0);
+                    blendIndices[i].push_back(0);
                     blendWeights[i].Push(1.0f);
                 }
             }
@@ -2283,8 +2291,8 @@ void GetBlendData(OutModel& model, aiMesh* mesh, aiNode* meshNode, PODVector<uns
                     ErrorExit("Bone " + boneName + " not found");
                 for (unsigned j = 0; j < bone->mNumWeights; ++j)
                 {
-                    unsigned vertex = bone->mWeights[j].mVertexId;
-                    blendIndices[vertex].Push(globalIndex);
+                    u32 vertex = bone->mWeights[j].mVertexId;
+                    blendIndices[vertex].push_back(globalIndex);
                     blendWeights[vertex].Push(bone->mWeights[j].mWeight);
                 }
             }
@@ -2297,9 +2305,9 @@ void GetBlendData(OutModel& model, aiMesh* mesh, aiNode* meshNode, PODVector<uns
                 PrintLine("Warning: bone " + boneName + " not found, skipping rigid skinning");
             else
             {
-                for (unsigned i = 0; i < mesh->mNumVertices; ++i)
+                for (u32 i = 0; i < mesh->mNumVertices; ++i)
                 {
-                    blendIndices[i].Push(globalIndex);
+                    blendIndices[i].push_back(globalIndex);
                     blendWeights[i].Push(1.0f);
                 }
             }
@@ -2326,7 +2334,7 @@ void GetBlendData(OutModel& model, aiMesh* mesh, aiNode* meshNode, PODVector<uns
                     }
                 }
                 blendWeights[i].Erase(lowestIndex);
-                blendIndices[i].Erase(lowestIndex);
+                blendIndices[i].erase(blendIndices[i].begin() + lowestIndex);
             }
         }
 
@@ -2424,7 +2432,7 @@ void WriteLargeIndices(unsigned*& dest, aiMesh* mesh, unsigned index, unsigned o
 }
 
 void WriteVertex(float*& dest, aiMesh* mesh, unsigned index, bool isSkinned, BoundingBox& box,
-    const Matrix3x4& vertexTransform, const Matrix3& normalTransform, Vector<PODVector<unsigned char> >& blendIndices,
+    const Matrix3x4& vertexTransform, const Matrix3& normalTransform, Vector<std::vector<u8>>& blendIndices,
     Vector<PODVector<float> >& blendWeights)
 {
     Vector3 vertex = vertexTransform * ToVector3(mesh->mVertices[index]);
@@ -2473,7 +2481,7 @@ void WriteVertex(float*& dest, aiMesh* mesh, unsigned index, bool isSkinned, Bou
 
     if (isSkinned)
     {
-        for (unsigned i = 0; i < 4; ++i)
+        for (u32 i = 0; i < 4; ++i)
         {
             if (i < blendWeights[index].Size())
                 *dest++ = blendWeights[index][i];
@@ -2481,11 +2489,11 @@ void WriteVertex(float*& dest, aiMesh* mesh, unsigned index, bool isSkinned, Bou
                 *dest++ = 0.0f;
         }
 
-        auto* destBytes = (unsigned char*)dest;
+        auto* destBytes = (u8*)dest;
         ++dest;
-        for (unsigned i = 0; i < 4; ++i)
+        for (u32 i = 0; i < 4u; ++i)
         {
-            if (i < blendIndices[index].Size())
+            if (i < blendIndices[index].size())
                 *destBytes++ = blendIndices[index][i];
             else
                 *destBytes++ = 0;

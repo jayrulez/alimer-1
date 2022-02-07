@@ -28,6 +28,7 @@
 #include "../Core/Thread.h"
 #include "../Core/WorkQueue.h"
 #include "../Graphics/DebugRenderer.h"
+#include "../Graphics/Material.h"
 #include "../Graphics/Graphics.h"
 #include "../Graphics/Octree.h"
 #include "../IO/Log.h"

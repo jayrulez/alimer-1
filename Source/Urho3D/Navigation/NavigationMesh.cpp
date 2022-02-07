@@ -31,6 +31,7 @@
 #include "../Graphics/StaticModel.h"
 #include "../Graphics/TerrainPatch.h"
 #include "../Graphics/VertexBuffer.h"
+#include "../Graphics/Material.h"
 #include "../IO/Log.h"
 #include "../IO/MemoryBuffer.h"
 #include "../Navigation/CrowdAgent.h"

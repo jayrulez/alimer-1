@@ -42,7 +42,6 @@ namespace Urho3D
     extern const char* verticalAlignments[];
     extern const char* textEffects[];
     extern const char* faceCameraModeNames[];
-    extern const char* GEOMETRY_CATEGORY;
 
     static const float TEXT_SCALING = 1.0f / 128.0f;
     static const float DEFAULT_EFFECT_DEPTH_BIAS = 0.1f;

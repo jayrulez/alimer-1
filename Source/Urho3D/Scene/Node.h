@@ -584,7 +584,7 @@ namespace Urho3D
 
         /// Return number of components.
         /// @property
-        unsigned GetNumComponents() const { return components_.size(); }
+        uint32_t GetNumComponents() const { return (uint32_t)components_.size(); }
 
         /// Return number of non-local components.
         unsigned GetNumNetworkComponents() const;

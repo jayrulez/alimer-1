@@ -55,7 +55,7 @@ namespace Urho3D
         return Write(&value, sizeof value) == sizeof value;
     }
 
-    bool Serializer::WriteUInt(uint32_t value)
+    bool Serializer::WriteUInt(u32 value)
     {
         return Write(&value, sizeof value) == sizeof value;
     }
@@ -224,7 +224,7 @@ namespace Urho3D
         bool success = true;
 
         success &= WriteStringHash(value.type_);
-        success &= WriteVLE(value.names_.size());
+        success &= WriteVLE((uint32_t)value.names_.size());
         for (unsigned i = 0; i < value.names_.size(); ++i)
             success &= WriteString(value.names_[i]);
 

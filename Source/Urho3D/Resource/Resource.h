@@ -79,7 +79,7 @@ namespace Urho3D
         /// @property
         void SetName(const String& name);
         /// Set memory use in bytes, possibly approximate.
-        void SetMemoryUse(unsigned size);
+        void SetMemoryUse(size_t size);
         /// Reset last used timer.
         void ResetUseTimer();
         /// Set the asynchronous loading state. Called by ResourceCache. Resources in the middle of asynchronous loading are not normally returned to user.
@@ -94,7 +94,7 @@ namespace Urho3D
 
         /// Return memory use in bytes, possibly approximate.
         /// @property
-        unsigned GetMemoryUse() const { return memoryUse_; }
+        size_t GetMemoryUse() const { return memoryUse_; }
 
         /// Return time since last use in milliseconds. If referred to elsewhere than in the resource cache, returns always zero.
         /// @property
@@ -111,9 +111,9 @@ namespace Urho3D
         /// Last used timer.
         Timer useTimer_;
         /// Memory use in bytes.
-        unsigned memoryUse_;
+        size_t memoryUse_{ 0 };
         /// Asynchronous loading state.
-        AsyncLoadState asyncLoadState_;
+        AsyncLoadState asyncLoadState_{ ASYNC_DONE };
     };
 
     /// Base class for resources that support arbitrary metadata stored. Metadata serialization shall be implemented in derived classes.

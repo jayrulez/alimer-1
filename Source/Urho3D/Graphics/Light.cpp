@@ -31,6 +31,7 @@
 #include "../Graphics/OctreeQuery.h"
 #include "../Graphics/Texture2D.h"
 #include "../Graphics/TextureCube.h"
+#include "../Graphics/Material.h"
 #include "../IO/Log.h"
 #include "../Resource/ResourceCache.h"
 #include "../Scene/Node.h"

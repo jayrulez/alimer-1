@@ -78,7 +78,7 @@ public:
     /// Read a 64-bit unsigned integer.
     unsigned long long ReadUInt64();
     /// Read a 32-bit unsigned integer.
-    unsigned ReadUInt();
+    u32 ReadUInt();
     /// Read a 16-bit unsigned integer.
     unsigned short ReadUShort();
     /// Read an 8-bit unsigned integer.

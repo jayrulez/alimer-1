@@ -66,8 +66,6 @@ namespace Urho3D
     public:
         /// Construct.
         explicit BillboardSet(Context* context);
-        /// Destruct.
-        ~BillboardSet() override;
         /// Register object factory.
         /// @nobind
         static void RegisterObject(Context* context);

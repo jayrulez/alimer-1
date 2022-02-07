@@ -24,9 +24,11 @@
 
 #include "../Core/Context.h"
 #include "../Core/Profiler.h"
+#include "../Graphics/Geometry.h"
 #include "../Graphics/DrawableEvents.h"
 #include "../Graphics/ParticleEffect.h"
 #include "../Graphics/ParticleEmitter.h"
+#include "../Graphics/Material.h"
 #include "../Resource/ResourceCache.h"
 #include "../Resource/ResourceEvents.h"
 #include "../Scene/Scene.h"
@@ -38,9 +40,8 @@ using namespace Urho3D;
 
 namespace Urho3D
 {
-    extern const char* GEOMETRY_CATEGORY;
     extern const char* faceCameraModeNames[];
-    static const unsigned MAX_PARTICLES_IN_FRAME = 100;
+    static constexpr u32 MAX_PARTICLES_IN_FRAME = 100;
 }
 
 ParticleEmitter::ParticleEmitter(Context* context)

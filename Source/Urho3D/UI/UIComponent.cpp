@@ -33,6 +33,8 @@
 #include "../Graphics/Renderer.h"
 #include "../Graphics/Camera.h"
 #include "../Graphics/VertexBuffer.h"
+#include "../Graphics/IndexBuffer.h"
+#include "../Graphics/Geometry.h"
 #include "../Scene/Scene.h"
 #include "../Scene/SceneEvents.h"
 #include "../Resource/ResourceCache.h"

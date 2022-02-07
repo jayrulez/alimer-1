@@ -112,7 +112,7 @@ namespace Urho3D
 
         /// Return number of animation states.
         /// @property
-        unsigned GetNumAnimationStates() const { return animationStates_.size(); }
+        uint32_t GetNumAnimationStates() const { return (uint32_t)animationStates_.size(); }
 
         /// Return animation state by animation pointer.
         AnimationState* GetAnimationState(Animation* animation) const;
@@ -140,7 +140,7 @@ namespace Urho3D
 
         /// Return number of vertex morphs.
         /// @property
-        unsigned GetNumMorphs() const { return morphs_.size(); }
+        uint32_t GetNumMorphs() const { return (uint32_t)morphs_.size(); }
 
         /// Return vertex morph weight by index.
         float GetMorphWeight(unsigned index) const;
@@ -168,13 +168,13 @@ namespace Urho3D
         /// Return animation states attribute.
         VariantVector GetAnimationStatesAttr() const;
         /// Return morphs attribute.
-        const PODVector<unsigned char>& GetMorphsAttr() const;
+        const PODVector<u8>& GetMorphsAttr() const;
 
         /// Return per-geometry bone mappings.
-        const std::vector<PODVector<unsigned> >& GetGeometryBoneMappings() const { return geometryBoneMappings_; }
+        const std::vector<std::vector<uint32_t> >& GetGeometryBoneMappings() const { return geometryBoneMappings_; }
 
         /// Return per-geometry skin matrices. If empty, uses global skinning.
-        const std::vector<PODVector<Matrix3x4> >& GetGeometrySkinMatrices() const { return geometrySkinMatrices_; }
+        const std::vector<std::vector<Matrix3x4> >& GetGeometrySkinMatrices() const { return geometrySkinMatrices_; }
 
         /// Recalculate the bone bounding box. Normally called internally, but can also be manually called if up-to-date information before rendering is necessary.
         void UpdateBoneBoundingBox();
@@ -229,19 +229,19 @@ namespace Urho3D
         /// Animation states.
         std::vector<SharedPtr<AnimationState> > animationStates_;
         /// Skinning matrices.
-        PODVector<Matrix3x4> skinMatrices_;
+        std::vector<Matrix3x4> skinMatrices_;
         /// Mapping of subgeometry bone indices, used if more bones than skinning shader can manage.
-        std::vector<PODVector<uint32_t> > geometryBoneMappings_;
+        std::vector<std::vector<uint32_t> > geometryBoneMappings_;
         /// Subgeometry skinning matrices, used if more bones than skinning shader can manage.
-        std::vector<PODVector<Matrix3x4> > geometrySkinMatrices_;
+        std::vector<std::vector<Matrix3x4> > geometrySkinMatrices_;
         /// Subgeometry skinning matrix pointers, if more bones than skinning shader can manage.
-        std::vector<PODVector<Matrix3x4*> > geometrySkinMatrixPtrs_;
+        std::vector<std::vector<Matrix3x4*> > geometrySkinMatrixPtrs_;
         /// Bounding box calculated from bones.
         BoundingBox boneBoundingBox_;
         /// Attribute buffer.
         mutable VectorBuffer attrBuffer_;
         /// The frame number animation LOD distance was last calculated on.
-        unsigned animationLodFrameNumber_;
+        uint32_t animationLodFrameNumber_;
         /// Morph vertex element mask.
         VertexMaskFlags morphElementMask_;
         /// Animation LOD bias.
@@ -271,5 +271,4 @@ namespace Urho3D
         /// Force animation update after becoming visible flag.
         bool forceAnimationUpdate_;
     };
-
 }

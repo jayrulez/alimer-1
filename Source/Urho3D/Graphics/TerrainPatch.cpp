@@ -40,19 +40,15 @@
 
 namespace Urho3D
 {
-
     static const float LOD_CONSTANT = 1.0f / 150.0f;
 
-    extern const char* GEOMETRY_CATEGORY;
-
-    TerrainPatch::TerrainPatch(Context* context) :
-        Drawable(context, DRAWABLE_GEOMETRY),
-        geometry_(new Geometry(context)),
-        maxLodGeometry_(new Geometry(context)),
-        occlusionGeometry_(new Geometry(context)),
-        vertexBuffer_(new VertexBuffer(context)),
-        coordinates_(IntVector2::ZERO),
-        lodLevel_(0)
+    TerrainPatch::TerrainPatch(Context* context)
+        : Drawable(context, DRAWABLE_GEOMETRY)
+        , geometry_(new Geometry(context))
+        , maxLodGeometry_(new Geometry(context))
+        , occlusionGeometry_(new Geometry(context))
+        , vertexBuffer_(new VertexBuffer(context))
+        , coordinates_(IntVector2::ZERO)
     {
         geometry_->SetVertexBuffer(0, vertexBuffer_);
         maxLodGeometry_->SetVertexBuffer(0, vertexBuffer_);
@@ -62,8 +58,6 @@ namespace Urho3D
         batches_[0].geometry_ = geometry_;
         batches_[0].geometryType_ = GEOM_STATIC_NOINSTANCING;
     }
-
-    TerrainPatch::~TerrainPatch() = default;
 
     void TerrainPatch::RegisterObject(Context* context)
     {

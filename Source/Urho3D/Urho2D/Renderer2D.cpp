@@ -447,10 +447,10 @@ namespace Urho3D
 
         viewBatchInfo.batchCount_ = 0;
         Material* currMaterial = nullptr;
-        unsigned iStart = 0;
-        unsigned iCount = 0;
-        unsigned vStart = 0;
-        unsigned vCount = 0;
+        uint32_t iStart = 0;
+        uint32_t iCount = 0;
+        uint32_t vStart = 0;
+        uint32_t vCount = 0;
         float distance = M_INFINITY;
 
         for (unsigned b = 0; b < sourceBatches.Size(); ++b)
@@ -475,8 +475,8 @@ namespace Urho3D
                 currMaterial = material;
             }
 
-            iCount += vertices.size() * 6 / 4;
-            vCount += vertices.size();
+            iCount += (uint32_t)vertices.size() * 6 / 4;
+            vCount += (uint32_t)vertices.size();
         }
 
         // Add the final batch if necessary

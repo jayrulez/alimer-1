@@ -28,6 +28,7 @@
 #include "../Resource/ResourceCache.h"
 #include "../Scene/Scene.h"
 #include "../Scene/SceneEvents.h"
+#include "../Graphics/Material.h"
 #include "../Urho2D/AnimatedSprite2D.h"
 #include "../Urho2D/AnimationSet2D.h"
 #include "../Urho2D/Sprite2D.h"

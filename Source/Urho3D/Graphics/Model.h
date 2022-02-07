@@ -147,7 +147,7 @@ public:
     /// Set skeleton.
     void SetSkeleton(const Skeleton& skeleton);
     /// Set bone mappings when model has more bones than the skinning shader can handle.
-    void SetGeometryBoneMappings(const std::vector<PODVector<unsigned> >& geometryBoneMappings);
+    void SetGeometryBoneMappings(const std::vector<std::vector<u32> >& geometryBoneMappings);
     /// Set vertex morphs.
     void SetMorphs(const std::vector<ModelMorph>& morphs);
     /// Clone the model. The geometry data is deep-copied and can be modified in the clone without affecting the original.
@@ -169,7 +169,7 @@ public:
 
     /// Return number of geometries.
     /// @property
-    unsigned GetNumGeometries() const { return geometries_.size(); }
+    uint32_t GetNumGeometries() const { return (uint32_t)geometries_.size(); }
 
     /// Return number of LOD levels in geometry.
     /// @property
@@ -192,17 +192,17 @@ public:
     }
 
     /// Return geometery bone mappings.
-    const std::vector<PODVector<unsigned> >& GetGeometryBoneMappings() const { return geometryBoneMappings_; }
+    const std::vector<std::vector<u32> >& GetGeometryBoneMappings() const { return geometryBoneMappings_; }
 
     /// Return vertex morphs.
     const std::vector<ModelMorph>& GetMorphs() const { return morphs_; }
 
     /// Return number of vertex morphs.
     /// @property
-    unsigned GetNumMorphs() const { return morphs_.size(); }
+    uint32_t GetNumMorphs() const { return (uint32_t)morphs_.size(); }
 
     /// Return vertex morph by index.
-    const ModelMorph* GetMorph(unsigned index) const;
+    const ModelMorph* GetMorph(uint32_t index) const;
     /// Return vertex morph by name.
     const ModelMorph* GetMorph(const String& name) const;
     /// Return vertex morph by name hash.
@@ -224,7 +224,7 @@ private:
     /// Geometries.
     std::vector<std::vector<SharedPtr<Geometry> > > geometries_;
     /// Geometry bone mappings.
-    std::vector<PODVector<unsigned> > geometryBoneMappings_;
+    std::vector<std::vector<u32> > geometryBoneMappings_;
     /// Geometry centers.
     PODVector<Vector3> geometryCenters_;
     /// Vertex morphs.

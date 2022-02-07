@@ -24,6 +24,7 @@
 
 #include "../Core/Context.h"
 #include "../Graphics/Texture2D.h"
+#include "../Graphics/Material.h"
 #include "../IO/Deserializer.h"
 #include "../Resource/PListFile.h"
 #include "../Resource/ResourceCache.h"

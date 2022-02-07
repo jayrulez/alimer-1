@@ -24,14 +24,13 @@
 
 #include "../Container/ArrayPtr.h"
 #include "../Core/Object.h"
-#include "../Graphics/GraphicsDefs.h"
+#include "../Graphics/VertexBuffer.h"
+#include "../Graphics/IndexBuffer.h"
 
 namespace Urho3D
 {
-    class IndexBuffer;
     class Ray;
     class Graphics;
-    class VertexBuffer;
 
     /// Defines one or more vertex buffers, an index buffer and a draw range.
     class URHO3D_API Geometry : public Object

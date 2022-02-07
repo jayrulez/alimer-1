@@ -46,11 +46,10 @@
 #pragma warning(disable:6293)
 #endif
 
+using namespace std;
+
 namespace Urho3D
 {
-
-    extern const char* GEOMETRY_CATEGORY;
-
     static const unsigned MIN_VERTICES = 4;
     static const unsigned MIN_INDICES = 6;
     static const unsigned MAX_VERTICES = 65536;
@@ -604,7 +603,7 @@ namespace Urho3D
         VectorBuffer ret;
 
         ret.WriteBool(skinned_);
-        ret.WriteVLE(decals_.size());
+        ret.WriteVLE((uint32_t)decals_.size());
 
         for (std::list<Decal>::const_iterator i = decals_.begin(); i != decals_.end(); ++i)
         {
@@ -889,18 +888,22 @@ namespace Urho3D
             return false;
 
         // Check whether target is using global or per-geometry skinning
-        const std::vector<PODVector<Matrix3x4> >& geometrySkinMatrices = animatedModel->GetGeometrySkinMatrices();
-        const std::vector<PODVector<unsigned> >& geometryBoneMappings = animatedModel->GetGeometryBoneMappings();
+        const vector<vector<Matrix3x4>>& geometrySkinMatrices = animatedModel->GetGeometrySkinMatrices();
+        const vector<vector<u32> >& geometryBoneMappings = animatedModel->GetGeometryBoneMappings();
 
-        for (unsigned i = 0; i < 4; ++i)
+        for (u32 i = 0; i < 4; ++i)
         {
             if (blendWeights[i] > 0.0f)
             {
                 Bone* bone = nullptr;
                 if (geometrySkinMatrices.empty())
+                {
                     bone = animatedModel->GetSkeleton().GetBone(blendIndices[i]);
-                else if (blendIndices[i] < geometryBoneMappings[batchIndex].Size())
+                }
+                else if (blendIndices[i] < geometryBoneMappings[batchIndex].size())
+                {
                     bone = animatedModel->GetSkeleton().GetBone(geometryBoneMappings[batchIndex][blendIndices[i]]);
+                }
 
                 if (!bone)
                 {

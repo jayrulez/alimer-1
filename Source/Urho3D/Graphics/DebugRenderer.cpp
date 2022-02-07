@@ -32,6 +32,7 @@
 #include "../Graphics/Light.h"
 #include "../Graphics/ShaderVariation.h"
 #include "../Graphics/VertexBuffer.h"
+#include "../Graphics/Material.h"
 #include "../Math/Polyhedron.h"
 #include "../Resource/ResourceCache.h"
 
@@ -39,7 +40,6 @@
 
 namespace Urho3D
 {
-
     extern const char* SUBSYSTEM_CATEGORY;
 
     // Cap the amount of lines to prevent crash when eg. debug rendering large heightfields
@@ -670,5 +670,4 @@ namespace Urho3D
         if (noDepthTriangles_.Capacity() > noDepthTrianglesSize * 2)
             noDepthTriangles_.Reserve(noDepthTrianglesSize);
     }
-
 }

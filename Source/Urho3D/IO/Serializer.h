@@ -61,7 +61,7 @@ namespace Urho3D
         /// Write a 64-bit unsigned integer.
         bool WriteUInt64(uint64_t value);
         /// Write a 32-bit unsigned integer.
-        bool WriteUInt(uint32_t value);
+        bool WriteUInt(u32 value);
         /// Write a 16-bit unsigned integer.
         bool WriteUShort(uint16_t value);
         /// Write an 8-bit unsigned integer.

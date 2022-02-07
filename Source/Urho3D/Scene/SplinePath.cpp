@@ -326,12 +326,12 @@ namespace Urho3D
 
     void SplinePath::UpdateNodeIds()
     {
-        unsigned numInstances = controlPoints_.size();
+        size_t numInstances = controlPoints_.size();
 
         controlPointIdsAttr_.clear();
         controlPointIdsAttr_.push_back(numInstances);
 
-        for (unsigned i = 0; i < numInstances; ++i)
+        for (size_t i = 0; i < numInstances; ++i)
         {
             Node* node = controlPoints_[i];
             controlPointIdsAttr_.push_back(node ? node->GetID() : 0);

@@ -40,9 +40,6 @@
 
 namespace Urho3D
 {
-
-    extern const char* GEOMETRY_CATEGORY;
-
     static const float INV_SQRT_TWO = 1.0f / sqrtf(2.0f);
 
     const char* faceCameraModeNames[] =
@@ -104,8 +101,6 @@ namespace Urho3D
         batches_[0].geometryType_ = GEOM_BILLBOARD;
         batches_[0].worldTransform_ = &transforms_[0];
     }
-
-    BillboardSet::~BillboardSet() = default;
 
     void BillboardSet::RegisterObject(Context* context)
     {

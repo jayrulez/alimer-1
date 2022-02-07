@@ -23,6 +23,7 @@
 
 #include "../Core/Context.h"
 #include "../Graphics/Texture2D.h"
+#include "../Graphics/Material.h"
 #include "../Resource/PListFile.h"
 #include "../Resource/XMLFile.h"
 #include "../Resource/JSONFile.h"
