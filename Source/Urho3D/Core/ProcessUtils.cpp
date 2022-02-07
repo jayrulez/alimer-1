@@ -639,7 +639,7 @@ namespace Urho3D
 
         if (sysctlbyname("kern.osrelease", &kernel_r, &size, NULL, 0) != -1)
         {
-            Vector<String> kernel_version = String(kernel_r).Split('.');
+            std::vector<String> kernel_version = String(kernel_r).Split('.');
             String version = "macOS/Mac OS X ";
             int major = ToInt(kernel_version[0]);
             int minor = ToInt(kernel_version[1]);

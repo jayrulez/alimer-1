@@ -22,13 +22,15 @@
 
 #pragma once
 
+#include "../Base/Iter.h"
 #include "../Core/Types.h"
-#include "../Container/Vector.h"
 
+#include <cassert>
 #include <cstdarg>
 #include <cctype>
 #include <string>
 #include <string_view>
+#include <vector>
 #include <unordered_map>
 
 namespace Urho3D

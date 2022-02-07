@@ -43,11 +43,12 @@
 
 #include "../DebugNew.h"
 
+using namespace std;
+
 namespace Urho3D
 {
-
-    static const int DEFAULT_CONSOLE_ROWS = 16;
-    static const int DEFAULT_HISTORY_SIZE = 16;
+    static constexpr int DEFAULT_CONSOLE_ROWS = 16;
+    static constexpr int DEFAULT_HISTORY_SIZE = 16;
 
     const char* logStyles[] =
     {
@@ -319,17 +320,19 @@ namespace Urho3D
         if (!group || group->receivers.empty())
             return false;
 
-        Vector<String> names;
-        for (unsigned i = 0; i < group->receivers.size(); ++i)
+        vector<String> names;
+        for (size_t i = 0; i < group->receivers.size(); ++i)
         {
             Object* receiver = group->receivers[i];
             if (receiver)
-                names.Push(receiver->GetTypeName());
+            {
+                names.push_back(receiver->GetTypeName());
+            }
         }
-        Sort(names.Begin(), names.End());
+        std::sort(names.begin(), names.end());
 
         unsigned selection = M_MAX_UNSIGNED;
-        for (unsigned i = 0; i < names.Size(); ++i)
+        for (size_t i = 0; i < names.size(); ++i)
         {
             const String& name = names[i];
             if (name == commandInterpreter_)

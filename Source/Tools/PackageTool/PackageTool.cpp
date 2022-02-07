@@ -142,7 +142,7 @@ void Run(const std::vector<String>& arguments)
             ErrorExit("No files found");
 
         // Check for extensions to ignore
-        for (unsigned i = fileNames.size() - 1; i < fileNames.size(); --i)
+        for (size_t i = fileNames.size() - 1; i < fileNames.size(); --i)
         {
             String extension = GetExtension(fileNames[i]);
             for (unsigned j = 0; ignoreExtensions_[j].Length(); ++j)
